@@ -9,7 +9,7 @@ const LOCKS = [
 	{ name: 'Замок 5', price: '+2 100 ₽' },
 ];
 
-const THICKNESS = ['500', '600', '700'];
+const THICKNESS = ['0.5', '0.6', '0.7'];
 
 export default function Parameters() {
 	const [series, setSeries] = useState('');
@@ -18,7 +18,7 @@ export default function Parameters() {
 	const [width, setWidth] = useState('450');
 	const [height, setHeight] = useState('1850');
 	const [lockIndex, setLockIndex] = useState(0);
-	const [ventilation, setVentilation] = useState(true);
+	const [ventilation, setVentilation] = useState(false);
 	const [bodyColor, setBodyColor] = useState(null);
 	const [doorColor, setDoorColor] = useState(null);
 
@@ -64,7 +64,7 @@ export default function Parameters() {
 
 			{/* Толщина металла */}
 			<div className='param-group'>
-				<span className='param-group__label'>Толщина металла (мм)</span>
+				<span className='param-group__label'>изменения толщины металла (мм)</span>
 				<div className='toggle-group'>
 					{THICKNESS.map(t => (
 						<button
@@ -79,36 +79,39 @@ export default function Parameters() {
 			</div>
 
 			{/* Размеры */}
-			<div className='dim-fields'>
-				<div className='param-group'>
-					<label className='param-group__label param-group__label--sm' htmlFor='width'>
-						Ширина (мм)
-					</label>
-					<input
-						className='param-group__input'
-						type='number'
-						id='width'
-						value={width}
-						onChange={e => setWidth(e.target.value)}
-					/>
-				</div>
-				<div className='param-group'>
-					<label className='param-group__label param-group__label--sm' htmlFor='height'>
-						Высота (мм)
-					</label>
-					<input
-						className='param-group__input'
-						type='number'
-						id='height'
-						value={height}
-						onChange={e => setHeight(e.target.value)}
-					/>
+			<div className='param-group'>
+				<span className='param-group__label'>Изменение габаритов</span>
+				<div className='dim-fields'>
+					<div className='param-group'>
+						<label className='param-group__label param-group__label--sm' htmlFor='width'>
+							Ширина (мм)
+						</label>
+						<input
+							className='param-group__input'
+							type='number'
+							id='width'
+							value={width}
+							onChange={e => setWidth(e.target.value)}
+						/>
+					</div>
+					<div className='param-group'>
+						<label className='param-group__label param-group__label--sm' htmlFor='height'>
+							Высота (мм)
+						</label>
+						<input
+							className='param-group__input'
+							type='number'
+							id='height'
+							value={height}
+							onChange={e => setHeight(e.target.value)}
+						/>
+					</div>
 				</div>
 			</div>
 
 			{/* Замки */}
 			<div className='param-group'>
-				<span className='param-group__label'>Замки</span>
+				<span className='param-group__label'>Выбор замка</span>
 				<ul className='lock-list'>
 					{LOCKS.map((lock, i) => (
 						<li key={lock.name}>
@@ -126,7 +129,7 @@ export default function Parameters() {
 
 			{/* Вентиляция */}
 			<div className='param-group'>
-				<span className='param-group__label'>Вентиляция в шкаф</span>
+				<span className='param-group__label'>Дополнительная вентиляция шкафа</span>
 				<div className='vent-toggle'>
 					<button
 						className={`vent-toggle__btn${ventilation ? ' vent-toggle__btn--active' : ''}`}
@@ -145,13 +148,13 @@ export default function Parameters() {
 
 			{/* Цвет корпуса */}
 			<div className='param-group'>
-				<span className='param-group__label'>Цвет корпуса</span>
+				<span className='param-group__label'>изменение цвета корпуса</span>
 				<ColorPicker placeholder='Выберите цвет корпуса' selected={bodyColor} onSelect={setBodyColor} />
 			</div>
 
 			{/* Цвет двери */}
 			<div className='param-group'>
-				<span className='param-group__label'>Цвет двери</span>
+				<span className='param-group__label'>Изменение цвета двери</span>
 				<ColorPicker placeholder='Выберите цвет двери' selected={doorColor} onSelect={setDoorColor} />
 			</div>
 		</aside>
