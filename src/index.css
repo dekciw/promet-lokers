@@ -545,7 +545,7 @@ body {
 /* Новое значение характеристики */
 .diff-list__value {
 	font-size: 12px;
-	font-weight: 700;
+	font-weight: 500;
 	color: var(--card-changed-text);
 	line-height: 16px;
 }
@@ -591,7 +591,7 @@ body {
 /* Значение итогового параметра */
 .final-spec__value {
 	font-size: 12px;
-	font-weight: 700;
+	font-weight: 500;
 	color: var(--card-final-text);
 	line-height: 16px;
 }
@@ -652,7 +652,6 @@ body {
 
 .btn--primary:hover {
 	background: var(--c-orange-hover);
-	box-shadow: 0 8px 20px rgba(245, 130, 20, 0.45);
 }
 
 .btn--primary:active {
@@ -674,7 +673,7 @@ body {
 
 .btn--secondary:active {
 	background: rgba(255, 255, 255, 0.28);
-	transform: scale(0.98);
+	transform: none;
 }
 
 /* Правая панель с параметрами настройки */
