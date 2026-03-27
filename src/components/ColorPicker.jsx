@@ -53,12 +53,12 @@ export default function ColorPicker({ placeholder, selected, onSelect }) {
 		setOpen(false);
 	}
 
-	const swatchStyle = selected
-		? {
-				background: selected.color,
-				border: selected.color === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
-			}
-		: {};
+	function getSwatchStyle(colorHex) {
+		const border = colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)';
+		return { background: colorHex, border };
+	}
+
+	const swatchStyle = selected ? getSwatchStyle(selected.color) : {};
 
 	return (
 		<div className={`color-picker${open ? ' color-picker--open' : ''}`} ref={ref}>

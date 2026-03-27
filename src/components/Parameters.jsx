@@ -1,7 +1,17 @@
 import { useState } from 'react';
 import ColorPicker from './ColorPicker';
 
-const LOCKS = [
+const SERIES_OPTIONS = ['Серия «ML»', 'Серия «SL»', 'Серия «Pro»'];
+
+const MODEL_OPTIONS = [
+	'Шкаф металлический усиленный',
+	'Шкаф металлический стандартный',
+	'Шкаф металлический lite',
+];
+
+const THICKNESS_OPTIONS = ['0.5', '0.6', '0.7'];
+
+const LOCK_OPTIONS = [
 	{ name: 'Ключевой (Базовый)', price: null },
 	{ name: 'Замок 2', price: '+800 ₽' },
 	{ name: 'Замок 3', price: '+1 200 ₽' },
@@ -9,12 +19,10 @@ const LOCKS = [
 	{ name: 'Замок 5', price: '+2 100 ₽' },
 ];
 
-const THICKNESS = ['0.5', '0.6', '0.7'];
-
 export default function Parameters() {
 	const [series, setSeries] = useState('');
 	const [model, setModel] = useState('');
-	const [thickness, setThickness] = useState('500');
+	const [thickness, setThickness] = useState('0.5');
 	const [width, setWidth] = useState('450');
 	const [height, setHeight] = useState('1850');
 	const [lockIndex, setLockIndex] = useState(0);
@@ -26,47 +34,40 @@ export default function Parameters() {
 		<aside className='parameters'>
 			<h2 className='parameters__title'>Параметры</h2>
 
-			{/* Серия шкафа */}
 			<div className='param-group'>
 				<label className='param-group__label' htmlFor='series'>
 					Серия шкафа
 				</label>
 				<div className='select-wrap'>
 					<select className='select-wrap__select' id='series' value={series} onChange={e => setSeries(e.target.value)}>
-						<option value='' disabled>
-							Выберите серию
-						</option>
-						<option>Серия «ML»</option>
-						<option>Серия «SL»</option>
-						<option>Серия «Pro»</option>
+						<option value='' disabled>Выберите серию</option>
+						{SERIES_OPTIONS.map(option => (
+							<option key={option}>{option}</option>
+						))}
 					</select>
 					<img className='select-wrap__arrow' src='/img/arrow-down.svg' alt='' />
 				</div>
 			</div>
 
-			{/* Модель шкафа */}
 			<div className='param-group'>
 				<label className='param-group__label' htmlFor='model'>
 					Модель шкафа
 				</label>
 				<div className='select-wrap'>
 					<select className='select-wrap__select' id='model' value={model} onChange={e => setModel(e.target.value)}>
-						<option value='' disabled>
-							Выберите модель шкафа
-						</option>
-						<option>Шкаф металлический усиленный</option>
-						<option>Шкаф металлический стандартный</option>
-						<option>Шкаф металлический lite</option>
+						<option value='' disabled>Выберите модель шкафа</option>
+						{MODEL_OPTIONS.map(option => (
+							<option key={option}>{option}</option>
+						))}
 					</select>
 					<img className='select-wrap__arrow' src='/img/arrow-down.svg' alt='' />
 				</div>
 			</div>
 
-			{/* Толщина металла */}
 			<div className='param-group'>
-				<span className='param-group__label'>изменения толщины металла (мм)</span>
+				<span className='param-group__label'>Изменение толщины металла (мм)</span>
 				<div className='toggle-group'>
-					{THICKNESS.map(t => (
+					{THICKNESS_OPTIONS.map(t => (
 						<button
 							key={t}
 							className={`toggle-group__btn${thickness === t ? ' toggle-group__btn--active' : ''}`}
@@ -78,7 +79,6 @@ export default function Parameters() {
 				</div>
 			</div>
 
-			{/* Размеры */}
 			<div className='param-group'>
 				<span className='param-group__label'>Изменение габаритов</span>
 				<div className='dim-fields'>
@@ -109,11 +109,10 @@ export default function Parameters() {
 				</div>
 			</div>
 
-			{/* Замки */}
 			<div className='param-group'>
 				<span className='param-group__label'>Выбор замка</span>
 				<ul className='lock-list'>
-					{LOCKS.map((lock, i) => (
+					{LOCK_OPTIONS.map((lock, i) => (
 						<li key={lock.name}>
 							<button
 								className={`lock-list__item${lockIndex === i ? ' lock-list__item--active' : ''}`}
@@ -127,7 +126,6 @@ export default function Parameters() {
 				</ul>
 			</div>
 
-			{/* Вентиляция */}
 			<div className='param-group'>
 				<span className='param-group__label'>Дополнительная вентиляция шкафа</span>
 				<div className='vent-toggle'>
@@ -146,13 +144,11 @@ export default function Parameters() {
 				</div>
 			</div>
 
-			{/* Цвет корпуса */}
 			<div className='param-group'>
-				<span className='param-group__label'>изменение цвета корпуса</span>
+				<span className='param-group__label'>Изменение цвета корпуса</span>
 				<ColorPicker placeholder='Выберите цвет корпуса' selected={bodyColor} onSelect={setBodyColor} />
 			</div>
 
-			{/* Цвет двери */}
 			<div className='param-group'>
 				<span className='param-group__label'>Изменение цвета двери</span>
 				<ColorPicker placeholder='Выберите цвет двери' selected={doorColor} onSelect={setDoorColor} />
