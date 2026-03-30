@@ -110,10 +110,7 @@ export default function Configurator() {
 							</span>
 							<ul className='final-spec'>
 								{FINAL_SPECS.map(({ label, value, modifier }) => (
-									<li
-										key={label}
-										className={`final-spec__item${modifier ? ` final-spec__item--${modifier}` : ''}`}
-									>
+									<li key={label} className={`final-spec__item${modifier ? ` final-spec__item--${modifier}` : ''}`}>
 										<span className='final-spec__label'>{label}</span>
 										<span className='final-spec__value'>{value}</span>
 									</li>

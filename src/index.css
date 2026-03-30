@@ -939,13 +939,14 @@ body {
 	color: var(--c-text-dark);
 	text-align: left;
 	transition: border-color 0.15s;
+	outline: none;
 }
 
 /* Триггер в открытом состоянии */
 .color-picker--open .color-picker__trigger {
-	border-color: var(--c-primary);
-	border-bottom-left-radius: 0;
-	border-bottom-right-radius: 0;
+	border-color: var(--c-border);
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
 }
 
 /* Цветной квадратик выбранного цвета в триггере */
@@ -983,19 +984,25 @@ body {
 .color-picker__dropdown {
 	display: none;
 	position: absolute;
-	top: 100%;
+	bottom: 100%;
+	top: auto;
 	left: 0;
 	right: 0;
 	background: var(--c-white);
-	border: 1px solid var(--c-primary);
-	border-top: none;
-	border-bottom-left-radius: var(--r-sm);
-	border-bottom-right-radius: var(--r-sm);
+	border: 1px solid var(--c-border);
+	border-bottom: none;
+	border-top-left-radius: var(--r-sm);
+	border-top-right-radius: var(--r-sm);
 	list-style: none;
 	max-height: 260px;
 	overflow-y: auto;
+	scrollbar-width: none;
 	z-index: 200;
 	box-shadow: var(--s-md);
+}
+
+.color-picker__dropdown::-webkit-scrollbar {
+	display: none;
 }
 
 /* Список виден когда color-picker открыт */

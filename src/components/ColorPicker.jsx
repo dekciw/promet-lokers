@@ -29,10 +29,12 @@ const COLORS = [
 	},
 ];
 
+/* Выпадающий список выбора цвета показывает цветовые группы, запоминает выбранный цвет и закрывается при клике вне компонента. */
 export default function ColorPicker({ placeholder, selected, onSelect }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 
+	/* Закрывает дропдаун, если пользователь кликнул за пределами компонента. */
 	useEffect(() => {
 		function handleClickOutside(e) {
 			if (ref.current && !ref.current.contains(e.target)) {
@@ -43,16 +45,21 @@ export default function ColorPicker({ placeholder, selected, onSelect }) {
 		return () => document.removeEventListener('click', handleClickOutside);
 	}, []);
 
+	/* Переключает открытие/закрытие дропдауна по клику на кнопку-триггер.
+	   stopPropagation нужен, чтобы клик не попал в handleClickOutside и сразу не закрыл список */
 	function handleTriggerClick(e) {
 		e.stopPropagation();
 		setOpen(prev => !prev);
 	}
 
+	/* Передаёт выбранный цвет в родительский компонент через onSelect и закрывает дропдаун */
 	function handleSelect(item) {
 		onSelect(item);
 		setOpen(false);
 	}
 
+	/* Возвращает inline-стили для цветового квадратика (swatch):
+	   белый цвет получает видимую рамку, остальные — полупрозрачную тёмную */
 	function getSwatchStyle(colorHex) {
 		const border = colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)';
 		return { background: colorHex, border };
