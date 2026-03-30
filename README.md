@@ -1,16 +1,136 @@
-# React + Vite
+# Промет — Конфигуратор металлических шкафов
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Веб-приложение для конфигурации и расчёта стоимости металлических шкафов-локеров серий ML, SL и Pro. Позволяет подобрать параметры под нестандартные требования и сформировать коммерческое предложение для клиента.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Возможности
 
-## React Compiler
+- Выбор серии и модели шкафа из каталога
+- Настройка толщины металла (0.5 / 0.6 / 0.7 мм)
+- Изменение габаритов (ширина и высота в мм)
+- Выбор типа замка с учётом доплаты
+- Включение / отключение вентиляции
+- Выбор цвета корпуса и двери из каталога RAL
+- Отображение изменений относительно стандартной конфигурации
+- Итоговая конфигурация с расчётом стоимости
+- Выгрузка КП для клиента и бланка наряд-заказа
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## Стек технологий
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+| Инструмент | Версия | Назначение |
+|---|---|---|
+| React | 19 | UI-фреймворк |
+| Vite | 8 | Сборщик, dev-сервер |
+| ESLint | 9 | Линтер кода |
+| CSS Custom Properties | — | Дизайн-система |
+
+Сторонних UI-библиотек нет — все компоненты написаны с нуля.
+
+---
+
+## Структура проекта
+
+```
+promet/
+├── public/
+│   ├── fonts/            # Веб-шрифты (WOFF2): Roboto, Oswald, Inter
+│   └── img/              # SVG-иконки и логотип
+├── src/
+│   ├── components/
+│   │   ├── Header.jsx        # Шапка: логотип, навигация
+│   │   ├── Configurator.jsx  # Три колонки конфигурации
+│   │   ├── Parameters.jsx    # Правая панель управления параметрами
+│   │   ├── ColorPicker.jsx   # Кастомный выпадающий список цветов
+│   │   └── Footer.jsx        # Подвал с копирайтом
+│   ├── App.jsx           # Корневой компонент, общий layout
+│   ├── index.css         # CSS-переменные и глобальные стили
+│   └── main.jsx          # Точка входа
+├── index.html
+├── vite.config.js
+└── eslint.config.js
+```
+
+---
+
+## Архитектура
+
+Приложение построено по компонентной модели без внешних менеджеров состояния.
+
+```
+App
+├── Header
+├── layout
+│   ├── Configurator        ← отображение конфигурации (presentational)
+│   └── Parameters          ← управление состоянием (stateful)
+│       └── ColorPicker     ← переиспользуемый компонент выбора цвета
+└── Footer
+```
+
+**Поток данных:**
+
+- Состояние конфигурации (серия, толщина, габариты, замок, цвет и т.д.) хранится в `Parameters` через `useState`
+- `Configurator` получает данные через пропсы и отвечает только за отображение трёх колонок: стандарт / изменения / итог
+- `ColorPicker` — независимый компонент с собственным состоянием открытия/закрытия, управляет кликом вне области через `useRef` и `useEffect`
+
+**Дизайн-система:**
+
+Все визуальные константы вынесены в CSS Custom Properties в `index.css`:
+
+- Цветовая палитра (`--c-brand`, `--c-primary`, `--c-orange` и др.)
+- Шрифтовая система (`--f-main: Roboto`, `--f-display: Oswald`, `--f-mono: Liberation Mono`)
+- Радиусы скругления (`--r-sm` / `--r-md` / `--r-lg` / `--r-full`)
+- Тени (`--s-xs` … `--s-xl`, `--s-primary`)
+- Цветовые схемы карточек (default / changed / final)
+
+---
+
+## Запуск локально
+
+```bash
+# Установить зависимости
+npm install
+
+# Запустить dev-сервер
+npm run dev
+
+# Собрать для production
+npm run build
+
+# Проверить собранную версию
+npm run preview
+
+# Запустить линтер
+npm run lint
+```
+
+Приложение откроется на `http://localhost:5173`
+
+---
+
+## Скриншот
+
+> Конфигуратор открывается в браузере, правая панель — параметры, левая — три колонки с конфигурацией (стандарт / изменения / итог).
+
+---
+
+## Статус разработки
+
+Проект находится в стадии активной разработки. Интерфейс реализован полностью, серверная часть и интеграция с 1С в работе.
+
+- [x] Вёрстка и компоненты
+- [x] Выбор параметров шкафа
+- [x] Отображение изменений и итоговой конфигурации
+- [x] Выбор цвета из каталога RAL
+- [ ] Интеграция с backend / 1С
+- [ ] Генерация PDF (КП и бланк НЗ)
+- [ ] 3D-предпросмотр модели
+- [ ] Авторизация (личный кабинет)
+
+---
+
+## Лицензия
+
+© 1991–2026 ООО «НПО Промет». Внутренняя разработка, не предназначена для публичного распространения.
