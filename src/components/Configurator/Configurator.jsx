@@ -1,14 +1,11 @@
 import { calcDiff } from '../../utils/calcDiff';
 import './Configurator.css';
 
-export default function Configurator({ config, price, catalog }) {
-	const model = config.modelId ? catalog.models[config.modelId] : null;
-	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
-	const lock = catalog.locks[config.lockId];
+// Чистые функции вынесены из компонента для читаемости и тестируемости
 
-	// Человекочитаемый объект для calcDiff
-	// width/height приводим к Number, чтобы избежать ложных дифов '400' !== 400
-	const currentForDiff = {
+function buildCurrentForDiff(config, lock) {
+	// width/height → Number, чтобы '400' !== 400 не давало ложный диф
+	return {
 		width: config.width !== '' ? Number(config.width) : undefined,
 		height: config.height !== '' ? Number(config.height) : undefined,
 		thickness: config.thickness,
@@ -17,41 +14,48 @@ export default function Configurator({ config, price, catalog }) {
 		bodyColorName: config.bodyColor?.name ?? undefined,
 		doorColorName: config.doorColor?.name ?? undefined,
 	};
+}
 
+function buildDefaultSpecsList(defaults, catalog) {
+	if (!defaults) return [];
+	return [
+		{ label: 'Ширина:', value: `${defaults.width} мм` },
+		{ label: 'Высота:', value: `${defaults.height} мм` },
+		{ label: 'Толщина:', value: `${defaults.thickness} мм` },
+		{ label: 'Замок:', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
+		{ label: 'Вентиляция:', value: defaults.ventilation ? 'Да' : 'Нет' },
+		{ label: 'Цвет корпуса:', value: defaults.bodyColorName },
+		{ label: 'Цвет двери:', value: defaults.doorColorName },
+	];
+}
+
+function buildFinalSpecsList(config, defaults, lock) {
+	if (!defaults) return [];
+	return [
+		{
+			label: 'Габариты:',
+			value: `${config.width || defaults.width} × ${config.height || defaults.height} мм`,
+		},
+		{ label: 'Толщина:', value: `${config.thickness} мм` },
+		{ label: 'Замок:', value: lock?.name ?? config.lockId },
+		{ label: 'Вентиляция:', value: config.ventilation ? 'Да' : 'Нет' },
+		...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name }] : []),
+		...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name }] : []),
+	];
+}
+
+export default function Configurator({ config, price, catalog }) {
+	const model = config.modelId ? catalog.models[config.modelId] : null;
+	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
+	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
-	const changedSpecs = calcDiff(currentForDiff, defaults);
 
-	// Левая колонка: стандартные характеристики модели
-	const defaultSpecsList = defaults
-		? [
-				{ label: 'Ширина:', value: `${defaults.width} мм` },
-				{ label: 'Высота:', value: `${defaults.height} мм` },
-				{ label: 'Толщина:', value: `${defaults.thickness} мм` },
-				{ label: 'Замок:', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
-				{ label: 'Вентиляция:', value: defaults.ventilation ? 'Да' : 'Нет' },
-				{ label: 'Цвет корпуса:', value: defaults.bodyColorName },
-				{ label: 'Цвет двери:', value: defaults.doorColorName },
-			]
-		: [];
-
-	// Правая колонка: текущая конфигурация пользователя
-	const finalSpecsList = model
-		? [
-				{
-					label: 'Габариты:',
-					value: `${config.width || defaults.width} × ${config.height || defaults.height} мм`,
-				},
-				{ label: 'Толщина:', value: `${config.thickness} мм` },
-				{ label: 'Замок:', value: lock?.name ?? config.lockId },
-				{ label: 'Вентиляция:', value: config.ventilation ? 'Да' : 'Нет' },
-				...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name }] : []),
-				...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name }] : []),
-			]
-		: [];
+	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaults);
+	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
+	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
 
 	const priceDisplay = price !== null ? `${price.toLocaleString('ru-RU')} ₽` : '—';
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : 'Модель не выбрана';
-	const articleDisplay = model?.article ?? '—';
 
 	return (
 		<main className='layout__content'>
@@ -67,18 +71,13 @@ export default function Configurator({ config, price, catalog }) {
 
 					<div className='article-badge'>
 						<span className='badge-label'>Артикул</span>
-						<span className='badge-code'>{articleDisplay}</span>
+						<span className='badge-code'>{model?.article ?? '—'}</span>
 					</div>
 				</div>
 
-				{/* 3D Предпросмотр модели — скрыт до реализации 3D
-				<div className='preview'>
-					...
-				</div>
-				*/}
+				{/* 3D Предпросмотр — скрыт до реализации (Фаза 3) */}
 
 				<div className='config-grid'>
-					{/* Левая: стандартное исполнение */}
 					<div className='config-col config-col--default'>
 						<span className='col-title'>
 							Стандартное
@@ -99,7 +98,6 @@ export default function Configurator({ config, price, catalog }) {
 						)}
 					</div>
 
-					{/* Средняя: только изменённые параметры */}
 					<div className='config-col config-col--changed'>
 						<span className='col-title'>
 							Нестандартное
@@ -120,7 +118,6 @@ export default function Configurator({ config, price, catalog }) {
 						)}
 					</div>
 
-					{/* Правая: итоговая конфигурация + цена + кнопки */}
 					<div className='config-col config-col--final'>
 						<div className='col-top'>
 							<span className='col-title'>
