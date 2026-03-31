@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
+import './ColorPicker.css';
 
 const COLORS = [
 	{
@@ -69,26 +70,26 @@ export default function ColorPicker({ placeholder, selected, onSelect }) {
 
 	return (
 		<div className={`color-picker${open ? ' color-picker--open' : ''}`} ref={ref}>
-			<button type='button' className='color-picker__trigger' aria-expanded={open} onClick={handleTriggerClick}>
-				<span className='color-picker__trigger-swatch' style={swatchStyle} />
-				<span className='color-picker__trigger-text' style={selected ? { color: 'var(--c-text-dark)' } : {}}>
+			<button type='button' className='trigger' aria-expanded={open} onClick={handleTriggerClick}>
+				<span className='trigger-swatch' style={swatchStyle} />
+				<span className='trigger-text' style={selected ? { color: 'var(--c-text-dark)' } : {}}>
 					{selected ? selected.name : placeholder}
 				</span>
-				<img className='color-picker__trigger-arrow' src='/img/arrow-down.svg' alt='' />
+				<img className='trigger-arrow' src='/img/arrow-down.svg' alt='' />
 			</button>
 
-			<ul className='color-picker__dropdown'>
+			<ul className='dropdown'>
 				{COLORS.map(group => (
 					<Fragment key={group.group}>
-						<li className='color-picker__group'>{group.group}</li>
+						<li className='group'>{group.group}</li>
 						{group.items.map(item => (
 							<li
 								key={item.name}
-								className={`color-picker__item${selected?.name === item.name ? ' color-picker__item--active' : ''}`}
+								className={`item${selected?.name === item.name ? ' item--active' : ''}`}
 								onClick={() => handleSelect(item)}
 							>
-								<span className='color-picker__item-swatch' style={{ background: item.color }} />
-								<span className='color-picker__item-name'>{item.name}</span>
+								<span className='item-swatch' style={{ background: item.color }} />
+								<span className='item-name'>{item.name}</span>
 							</li>
 						))}
 					</Fragment>

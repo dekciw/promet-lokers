@@ -1,0 +1,210 @@
+/* Правая панель параметров */
+.parameters {
+	width: 384px;
+	flex-shrink: 0;
+	background: var(--c-white);
+	border-left: 1px solid var(--c-border);
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
+}
+
+.title {
+	font-size: 20px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	line-height: 28px;
+}
+
+/* Группа параметра */
+.param-group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.group-label {
+	display: block;
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-muted);
+	letter-spacing: 0.7px;
+	text-transform: uppercase;
+	line-height: 20px;
+}
+
+.group-label--sm {
+	font-size: 10px;
+	letter-spacing: 0.5px;
+	line-height: 15px;
+}
+
+.group-input {
+	background: var(--c-white);
+	border: 1px solid var(--c-border);
+	border-radius: var(--r-sm);
+	padding: 11px 17px;
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	width: 100%;
+	outline: none;
+	transition:
+		border-color 0.15s,
+		box-shadow 0.15s;
+}
+
+.group-input:focus {
+	border-color: var(--c-primary);
+	box-shadow: 0 0 0 2px var(--c-primary-border);
+}
+
+/* Select */
+.select-wrap {
+	position: relative;
+	height: 42px;
+	background: var(--c-white);
+	border: 1px solid var(--c-border);
+	border-radius: var(--r-sm);
+}
+
+.select {
+	appearance: none;
+	width: 100%;
+	height: 100%;
+	border: none;
+	background: transparent;
+	padding: 0 40px 0 16px;
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	cursor: pointer;
+	outline: none;
+}
+
+.arrow {
+	position: absolute;
+	right: 9px;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 21px;
+	height: 21px;
+	pointer-events: none;
+}
+
+/* Толщина металла */
+.toggle-group {
+	display: flex;
+	gap: 8px;
+}
+
+.toggle-btn {
+	padding: 9px 17px;
+	border-radius: var(--r-sm);
+	border: 1px solid var(--c-border-subtle);
+	background: var(--c-white);
+	font-family: var(--f-main);
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	cursor: pointer;
+	line-height: 16px;
+	transition:
+		border-color 0.15s,
+		color 0.15s;
+}
+
+.toggle-btn--active {
+	background: var(--c-white);
+	border-color: var(--c-orange);
+	color: var(--c-orange);
+}
+
+/* Поля габаритов */
+.dim-fields {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+/* Список замков */
+.lock-list {
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.lock-item {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 13px 17px;
+	border-radius: var(--r-md);
+	border: 1px solid var(--c-border-subtle);
+	background: var(--c-white);
+	cursor: pointer;
+	width: 100%;
+	font-family: var(--f-main);
+	transition: border-color 0.15s;
+	text-align: left;
+}
+
+.lock-item--active {
+	border-color: var(--c-orange);
+}
+
+.lock-name {
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	line-height: 20px;
+}
+
+.lock-item--active .lock-name {
+	color: var(--c-orange);
+}
+
+.lock-price {
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--c-text-faint);
+	line-height: 16px;
+}
+
+.lock-check {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+}
+
+/* Вентиляция */
+.vent-toggle {
+	display: flex;
+	gap: 8px;
+}
+
+.vent-btn {
+	flex: 1;
+	padding: 9px 4px;
+	border-radius: var(--r-sm);
+	border: 1px solid var(--c-border-subtle);
+	background: var(--c-white);
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	cursor: pointer;
+	text-align: center;
+	transition:
+		border-color 0.15s,
+		color 0.15s;
+}
+
+.vent-btn--active {
+	border-color: var(--c-orange);
+	color: var(--c-orange);
+}

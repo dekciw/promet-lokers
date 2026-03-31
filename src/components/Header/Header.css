@@ -1,0 +1,70 @@
+.header {
+	background: var(--c-white);
+	border-bottom: 1px solid var(--c-border);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 11px 24px 13px;
+	height: 70px;
+}
+
+/* Левая часть: логотип + текст */
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.logo {
+	display: block;
+	height: 40px;
+	width: auto;
+	flex-shrink: 0;
+}
+
+.info {
+	display: flex;
+	flex-direction: column;
+}
+
+.site-name {
+	font-family: var(--f-display);
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--c-brand);
+	letter-spacing: -0.45px;
+	line-height: 22.5px;
+}
+
+.tagline {
+	font-family: var(--f-display);
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--c-text-muted);
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
+	line-height: 16px;
+	white-space: nowrap;
+}
+
+/* Правая часть: личный кабинет */
+.account {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-left: 1px solid var(--c-border);
+	padding-left: 25px;
+}
+
+.account-icon {
+	width: 17px;
+	height: 17px;
+	object-fit: contain;
+}
+
+.account-text {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--c-text-dark);
+	white-space: nowrap;
+}
