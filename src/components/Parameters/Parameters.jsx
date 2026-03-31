@@ -1,159 +1,177 @@
-import { useState } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import './Parameters.css';
 
-const SERIES_OPTIONS = ['Серия «ML»', 'Серия «SL»', 'Серия «Pro»'];
-
-const MODEL_OPTIONS = [
-	'Шкаф металлический усиленный',
-	'Шкаф металлический стандартный',
-	'Шкаф металлический lite',
-];
-
 const THICKNESS_OPTIONS = ['0.5', '0.6', '0.7'];
 
-const LOCK_OPTIONS = [
-	{ name: 'Ключевой (Базовый)', price: null },
-	{ name: 'Замок 2', price: '+800 ₽' },
-	{ name: 'Замок 3', price: '+1 200 ₽' },
-	{ name: 'Замок 4', price: '+1 500 ₽' },
-	{ name: 'Замок 5', price: '+2 100 ₽' },
-];
+export default function Parameters({
+  config,
+  catalog,
+  setSeriesId,
+  onModelChange,
+  setThickness,
+  setWidth,
+  setHeight,
+  setLockId,
+  setVentilation,
+  setBodyColor,
+  setDoorColor,
+}) {
+  const { seriesId, modelId, thickness, width, height, lockId, ventilation, bodyColor, doorColor } =
+    config;
 
-export default function Parameters() {
-	const [series, setSeries] = useState('');
-	const [model, setModel] = useState('');
-	const [thickness, setThickness] = useState('0.5');
-	const [width, setWidth] = useState('450');
-	const [height, setHeight] = useState('1850');
-	const [lockIndex, setLockIndex] = useState(0);
-	const [ventilation, setVentilation] = useState(false);
-	const [bodyColor, setBodyColor] = useState(null);
-	const [doorColor, setDoorColor] = useState(null);
+  const modelEntries = Object.entries(catalog.models).filter(
+    ([, m]) => !seriesId || m.seriesId === seriesId
+  );
 
-	return (
-		<aside className='parameters'>
-			<h2 className='title'>Параметры</h2>
+  const lockEntries = Object.entries(catalog.locks);
 
-			<div className='param-group'>
-				<label className='group-label' htmlFor='series'>
-					Серия шкафа
-				</label>
-				<div className='select-wrap'>
-					<select className='select' id='series' value={series} onChange={e => setSeries(e.target.value)}>
-						<option value='' disabled>Выберите серию</option>
-						{SERIES_OPTIONS.map(option => (
-							<option key={option}>{option}</option>
-						))}
-					</select>
-					<img className='arrow' src='/img/arrow-down.svg' alt='' />
-				</div>
-			</div>
+  return (
+    <aside className='parameters'>
+      <h2 className='title'>Параметры</h2>
 
-			<div className='param-group'>
-				<label className='group-label' htmlFor='model'>
-					Модель шкафа
-				</label>
-				<div className='select-wrap'>
-					<select className='select' id='model' value={model} onChange={e => setModel(e.target.value)}>
-						<option value='' disabled>Выберите модель шкафа</option>
-						{MODEL_OPTIONS.map(option => (
-							<option key={option}>{option}</option>
-						))}
-					</select>
-					<img className='arrow' src='/img/arrow-down.svg' alt='' />
-				</div>
-			</div>
+      <div className='param-group'>
+        <label className='group-label' htmlFor='series'>
+          Серия шкафа
+        </label>
+        <div className='select-wrap'>
+          <select
+            className='select'
+            id='series'
+            value={seriesId}
+            onChange={e => setSeriesId(e.target.value)}
+          >
+            <option value=''>Выберите серию</option>
+            {catalog.series.map(s => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <img className='arrow' src='/img/arrow-down.svg' alt='' />
+        </div>
+      </div>
 
-			<div className='param-group'>
-				<span className='group-label'>Изменение толщины металла (мм)</span>
-				<div className='toggle-group'>
-					{THICKNESS_OPTIONS.map(t => (
-						<button
-							key={t}
-							className={`toggle-btn${thickness === t ? ' toggle-btn--active' : ''}`}
-							onClick={() => setThickness(t)}
-						>
-							{t}
-						</button>
-					))}
-				</div>
-			</div>
+      <div className='param-group'>
+        <label className='group-label' htmlFor='model'>
+          Модель шкафа
+        </label>
+        <div className='select-wrap'>
+          <select
+            className='select'
+            id='model'
+            value={modelId}
+            onChange={e => onModelChange(e.target.value)}
+          >
+            <option value=''>Выберите модель шкафа</option>
+            {modelEntries.map(([id, m]) => (
+              <option key={id} value={id}>
+                {m.name}
+              </option>
+            ))}
+          </select>
+          <img className='arrow' src='/img/arrow-down.svg' alt='' />
+        </div>
+      </div>
 
-			<div className='param-group'>
-				<span className='group-label'>Изменение габаритов</span>
-				<div className='dim-fields'>
-					<div className='param-group'>
-						<label className='group-label group-label--sm' htmlFor='width'>
-							Ширина (мм)
-						</label>
-						<input
-							className='group-input'
-							type='number'
-							id='width'
-							value={width}
-							onChange={e => setWidth(e.target.value)}
-						/>
-					</div>
-					<div className='param-group'>
-						<label className='group-label group-label--sm' htmlFor='height'>
-							Высота (мм)
-						</label>
-						<input
-							className='group-input'
-							type='number'
-							id='height'
-							value={height}
-							onChange={e => setHeight(e.target.value)}
-						/>
-					</div>
-				</div>
-			</div>
+      <div className='param-group'>
+        <span className='group-label'>Изменение толщины металла (мм)</span>
+        <div className='toggle-group'>
+          {THICKNESS_OPTIONS.map(t => (
+            <button
+              key={t}
+              className={`toggle-btn${thickness === t ? ' toggle-btn--active' : ''}`}
+              onClick={() => setThickness(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
 
-			<div className='param-group'>
-				<span className='group-label'>Выбор замка</span>
-				<ul className='lock-list'>
-					{LOCK_OPTIONS.map((lock, i) => (
-						<li key={lock.name}>
-							<button
-								className={`lock-item${lockIndex === i ? ' lock-item--active' : ''}`}
-								onClick={() => setLockIndex(i)}
-							>
-								<span className='lock-name'>{lock.name}</span>
-								{lock.price && <span className='lock-price'>{lock.price}</span>}
-							</button>
-						</li>
-					))}
-				</ul>
-			</div>
+      <div className='param-group'>
+        <span className='group-label'>Изменение габаритов</span>
+        <div className='dim-fields'>
+          <div className='param-group'>
+            <label className='group-label group-label--sm' htmlFor='width'>
+              Ширина (мм)
+            </label>
+            <input
+              className='group-input'
+              type='number'
+              id='width'
+              value={width}
+              onChange={e => setWidth(e.target.value)}
+            />
+          </div>
+          <div className='param-group'>
+            <label className='group-label group-label--sm' htmlFor='height'>
+              Высота (мм)
+            </label>
+            <input
+              className='group-input'
+              type='number'
+              id='height'
+              value={height}
+              onChange={e => setHeight(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
 
-			<div className='param-group'>
-				<span className='group-label'>Дополнительная вентиляция шкафа</span>
-				<div className='vent-toggle'>
-					<button
-						className={`vent-btn${ventilation ? ' vent-btn--active' : ''}`}
-						onClick={() => setVentilation(true)}
-					>
-						Да
-					</button>
-					<button
-						className={`vent-btn${!ventilation ? ' vent-btn--active' : ''}`}
-						onClick={() => setVentilation(false)}
-					>
-						Нет
-					</button>
-				</div>
-			</div>
+      <div className='param-group'>
+        <span className='group-label'>Выбор замка</span>
+        <ul className='lock-list'>
+          {lockEntries.map(([id, lock]) => (
+            <li key={id}>
+              <button
+                className={`lock-item${lockId === id ? ' lock-item--active' : ''}`}
+                onClick={() => setLockId(id)}
+              >
+                <span className='lock-name'>{lock.name}</span>
+                {lock.surcharge > 0 && (
+                  <span className='lock-price'>+{lock.surcharge.toLocaleString('ru-RU')} ₽</span>
+                )}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
 
-			<div className='param-group'>
-				<span className='group-label'>Изменение цвета корпуса</span>
-				<ColorPicker placeholder='Выберите цвет корпуса' selected={bodyColor} onSelect={setBodyColor} />
-			</div>
+      <div className='param-group'>
+        <span className='group-label'>Дополнительная вентиляция шкафа</span>
+        <div className='vent-toggle'>
+          <button
+            className={`vent-btn${ventilation ? ' vent-btn--active' : ''}`}
+            onClick={() => setVentilation(true)}
+          >
+            Да
+          </button>
+          <button
+            className={`vent-btn${!ventilation ? ' vent-btn--active' : ''}`}
+            onClick={() => setVentilation(false)}
+          >
+            Нет
+          </button>
+        </div>
+      </div>
 
-			<div className='param-group'>
-				<span className='group-label'>Изменение цвета двери</span>
-				<ColorPicker placeholder='Выберите цвет двери' selected={doorColor} onSelect={setDoorColor} />
-			</div>
-		</aside>
-	);
+      <div className='param-group'>
+        <span className='group-label'>Изменение цвета корпуса</span>
+        <ColorPicker
+          placeholder='Выберите цвет корпуса'
+          selected={bodyColor}
+          onSelect={setBodyColor}
+        />
+      </div>
+
+      <div className='param-group'>
+        <span className='group-label'>Изменение цвета двери</span>
+        <ColorPicker
+          placeholder='Выберите цвет двери'
+          selected={doorColor}
+          onSelect={setDoorColor}
+        />
+      </div>
+    </aside>
+  );
 }
