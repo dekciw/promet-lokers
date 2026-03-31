@@ -184,6 +184,15 @@
 	line-height: 16px;
 }
 
+/* Плейсхолдер при отсутствии данных / изменений */
+.no-changes {
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--c-text-faint);
+	font-style: italic;
+	margin: 0;
+}
+
 /* Список нестандартного исполнения */
 .diff-list {
 	list-style: none;
