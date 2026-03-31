@@ -15,6 +15,10 @@ dist-ssr
 # Claude Code
 .claude/
 
+# Локальное планирование (только для разработки)
+.planning/
+prd.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
