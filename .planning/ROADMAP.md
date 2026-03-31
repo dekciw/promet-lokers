@@ -4,15 +4,11 @@ _Конфигуратор шкафов-локеров «Промет» — MVP =
 
 ---
 
-## Phase 1 — Frontend MVP (React only, без Firebase)
+## Phase 1: Frontend MVP
 
-**Цель:** Рабочий конфигуратор с динамической ценой и diff-логикой на временных заглушках. Готов к показу менеджеру.
+**Goal:** Рабочий конфигуратор с динамической ценой и diff-логикой на временных заглушках. Готов к показу менеджеру.
 
-**Реквизиты:**
-- CONF-01 · Поднять состояние в App (поднять useState, Props drilling)
-- CONF-02 · Динамический расчёт цены (STUB_CATALOG + calcPrice)
-- CONF-03 · Логика «Нестандартное исполнение» (calcDiff + defaultSpecs)
-- CONF-04 · Автозаполнение габаритов при выборе модели
+**Requirements:** CONF-01, CONF-02, CONF-03, CONF-04
 
 **Milestones:**
 1. `App.jsx` — переносит state, передаёт config/price в Configurator и Parameters
@@ -20,25 +16,20 @@ _Конфигуратор шкафов-локеров «Промет» — MVP =
 3. `src/data/stubCatalog.js` — временный каталог (2 серии, 3 модели, 5 замков)
 4. Configurator рендерит динамические данные (не хардкод)
 
-**Definition of Done:**
-- [ ] Все три колонки конфигуратора обновляются при изменении любого параметра в Parameters
-- [ ] Цена пересчитывается в реальном времени
-- [ ] Колонка «Нестандартное» показывает только изменённые параметры
-- [ ] При смене модели стандартные габариты подставляются автоматически
-- [ ] Нет предупреждений ESLint
+**Success Criteria:**
+1. Все три колонки конфигуратора обновляются при изменении любого параметра в Parameters
+2. Цена пересчитывается в реальном времени
+3. Колонка «Нестандартное» показывает только изменённые параметры
+4. При смене модели стандартные габариты подставляются автоматически
+5. Нет предупреждений ESLint
 
 ---
 
-## Phase 2 — Firebase + MobX
+## Phase 2: Firebase + MobX
 
-**Цель:** Заменить заглушки на реальные данные из Firestore. Убрать prop drilling — ввести MobX.
+**Goal:** Заменить заглушки на реальные данные из Firestore. Убрать prop drilling — ввести MobX.
 
-**Реквизиты:**
-- FIRE-01 · Инициализация Firebase (модульный SDK)
-- FIRE-02 · Структура Firestore и начальное наполнение
-- FIRE-03 · CatalogStore (загрузка каталога)
-- FIRE-04 · ConfigStore (конфигурация + totalPrice computed + changedSpecs computed)
-- FIRE-05 · Подключение компонентов к MobX (observer + Context)
+**Requirements:** FIRE-01, FIRE-02, FIRE-03, FIRE-04, FIRE-05
 
 **Milestones:**
 1. Firebase project создан, `.env.local` настроен
@@ -48,26 +39,22 @@ _Конфигуратор шкафов-локеров «Промет» — MVP =
 5. ColorPicker принимает `colors` через prop из `catalogStore.colorGroups`
 6. Security Rules задеплоены
 
-**Definition of Done:**
-- [ ] Серии и модели загружаются из Firestore
-- [ ] Цвета в ColorPicker приходят из Firebase
-- [ ] Замки с наценками приходят из Firebase
-- [ ] Цена считается через `ConfigStore.totalPrice` (MobX computed)
-- [ ] Diff считается через `ConfigStore.changedSpecs`
-- [ ] Состояние загрузки (loading / error / retry) отображается в UI
-- [ ] Нет console.error при двойном маунте в StrictMode
+**Success Criteria:**
+1. Серии и модели загружаются из Firestore
+2. Цвета в ColorPicker приходят из Firebase
+3. Замки с наценками приходят из Firebase
+4. Цена считается через `ConfigStore.totalPrice` (MobX computed)
+5. Diff считается через `ConfigStore.changedSpecs`
+6. Состояние загрузки (loading / error / retry) отображается в UI
+7. Нет console.error при двойном маунте в StrictMode
 
 ---
 
-## Phase 3 — PDF-экспорт
+## Phase 3: PDF Export
 
-**Цель:** Кнопки «КП для клиента» и «Бланк НЗ» скачивают готовые PDF. Готов к фокус-группе.
+**Goal:** Кнопки «КП для клиента» и «Бланк НЗ» скачивают готовые PDF. Готов к фокус-группе.
 
-**Реквизиты:**
-- PDF-01 · @react-pdf/renderer + Roboto + кириллица
-- PDF-02 · ProposalDocument (КП)
-- PDF-03 · OrderDocument (Бланк НЗ)
-- PDF-04 · Кнопки скачивания
+**Requirements:** PDF-01, PDF-02, PDF-03, PDF-04
 
 **Milestones:**
 1. `@react-pdf/renderer` установлен, lazy import настроен
@@ -77,22 +64,20 @@ _Конфигуратор шкафов-локеров «Промет» — MVP =
 5. `src/pdf/OrderDocument.jsx` — Бланк НЗ
 6. Кнопки в Configurator вызывают генерацию и скачивание
 
-**Definition of Done:**
-- [ ] PDF «КП» скачивается с корректной кириллицей
-- [ ] PDF «Бланк НЗ» скачивается с полной спецификацией
-- [ ] Initial bundle не увеличился (lazy import проверен)
-- [ ] Кнопки показывают «Генерация...» во время работы
-- [ ] Имена файлов содержат артикул и дату
+**Success Criteria:**
+1. PDF «КП» скачивается с корректной кириллицей
+2. PDF «Бланк НЗ» скачивается с полной спецификацией
+3. Initial bundle не увеличился (lazy import проверен)
+4. Кнопки показывают «Генерация...» во время работы
+5. Имена файлов содержат артикул и дату
 
 ---
 
-## Phase 4 — Личный кабинет
+## Phase 4: Auth + History
 
-**Цель:** Авторизация сотрудников, история конфигураций. Выполняется после фокус-группы.
+**Goal:** Авторизация сотрудников, история конфигураций. Выполняется после фокус-группы.
 
-**Реквизиты:**
-- AUTH-01 · Firebase Authentication (email/password)
-- AUTH-02 · История конфигураций в Firestore
+**Requirements:** AUTH-01, AUTH-02
 
 **Milestones:**
 1. Firebase Auth подключён
@@ -101,22 +86,22 @@ _Конфигуратор шкафов-локеров «Промет» — MVP =
 4. `Firestore /users/{uid}/configs` — сохранение и загрузка
 5. UI личного кабинета (список конфигураций)
 
-**Definition of Done:**
-- [ ] Неавторизованный пользователь видит только экран входа
-- [ ] После входа — конфигуратор доступен
-- [ ] Конфигурацию можно сохранить и загрузить из истории
-- [ ] Firestore Rules требуют auth != null
+**Success Criteria:**
+1. Неавторизованный пользователь видит только экран входа
+2. После входа — конфигуратор доступен
+3. Конфигурацию можно сохранить и загрузить из истории
+4. Firestore Rules требуют auth != null
 
 ---
 
-## Текущий статус
+## Status
 
-| Phase | Статус | Заметки |
-|-------|--------|---------|
-| Phase 1 | 🔲 Не начат | Следующий шаг → `/gsd:plan-phase 1` |
-| Phase 2 | 🔲 Не начат | Блокирован Phase 1 |
-| Phase 3 | 🔲 Не начат | Выполняется после фокус-группы |
-| Phase 4 | 🔲 Не начат | Выполняется после фокус-группы |
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Phase 1 | ○ Not started | Next: `/gsd:plan-phase 1` |
+| Phase 2 | ○ Not started | Blocked by Phase 1 |
+| Phase 3 | ○ Not started | After focus group |
+| Phase 4 | ○ Not started | After focus group |
 
 ---
 
