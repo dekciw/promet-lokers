@@ -10,10 +10,17 @@ export default function Header() {
 					<span className='tagline'>Калькулятор коррекции цен и передачи локеров</span>
 				</div>
 			</div>
+
+			<div className='deco' aria-hidden='true'>
+				<img className='logo2' src='/img/logo2.svg' alt='' />
+			</div>
+
+			{/* Личный кабинет — временно скрыт (Этап 4)
 			<div className='account'>
 				<img className='account-icon' src='/img/account.svg' alt='' />
 				<span className='account-text'>Личный кабинет</span>
 			</div>
+			*/}
 		</header>
 	);
 }
