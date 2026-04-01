@@ -67,9 +67,10 @@
 .logo2 {
 	height: 90px;
 	width: auto;
-	max-width: 100%;
 	display: block;
 	opacity: 0.6;
+	/* ПРОМЕТ занимает первые ~12% SVG по ширине — обрезаем его */
+	clip-path: inset(0 0 0 13%);
 }
 
 /* Правая часть: личный кабинет */
