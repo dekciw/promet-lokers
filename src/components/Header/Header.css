@@ -61,16 +61,14 @@
 	height: 100%;
 	overflow: hidden;
 	flex-shrink: 0;
-	/* Плавное затухание слева — прозрачная зона закрывает логотип Промет в SVG */
-	mask-image: linear-gradient(to right, transparent 0%, transparent 13%, white 26%);
-	-webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 13%, white 26%);
 }
 
 .logo2 {
 	height: 80px;
 	width: auto;
 	display: block;
-	opacity: 0.28;
+	opacity: 0.5;
+	filter: brightness(0) invert(1);
 }
 
 /* Правая часть: личный кабинет */
