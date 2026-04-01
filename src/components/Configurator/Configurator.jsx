@@ -1,8 +1,6 @@
 import { calcDiff } from '../../utils/calcDiff';
 import './Configurator.css';
 
-// Чистые функции вынесены из компонента для читаемости и тестируемости
-
 function buildCurrentForDiff(config, lock) {
 	// width/height → Number, чтобы '400' !== 400 не давало ложный диф
 	return {
