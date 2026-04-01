@@ -250,7 +250,7 @@
 }
 
 .diff-item--leaving {
-	animation: itemOut 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+	animation: itemOut 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 	pointer-events: none;
 }
 
