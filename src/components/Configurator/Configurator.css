@@ -145,14 +145,16 @@
 	gap: 8px;
 }
 
-/* Анимация появления строк в карточках */
+/* Анимация появления строк в карточках — max-height от 0 чтобы карточка росла плавно */
 @keyframes itemIn {
 	from {
 		opacity: 0;
-		transform: translateY(-6px);
+		max-height: 0;
+		transform: translateY(-4px);
 	}
 	to {
 		opacity: 1;
+		max-height: 80px;
 		transform: translateY(0);
 	}
 }
@@ -171,7 +173,8 @@
 	min-height: 16px;
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(226, 232, 240, 0.8);
-	animation: itemIn 0.25s ease;
+	overflow: hidden;
+	animation: itemIn 0.3s ease forwards;
 }
 
 .spec-item:first-child {
@@ -220,7 +223,8 @@
 	min-height: 16px;
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(120, 53, 15, 0.15);
-	animation: itemIn 0.25s ease;
+	overflow: hidden;
+	animation: itemIn 0.3s ease forwards;
 }
 
 .diff-item:first-child {
@@ -261,6 +265,8 @@
 	padding: 0 0 9px 0;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	min-height: 25px;
+	overflow: hidden;
+	animation: itemIn 0.3s ease forwards;
 }
 
 .final-item + .final-item {
