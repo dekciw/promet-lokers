@@ -48,7 +48,10 @@ export default function Configurator({ config, price, catalog }) {
 	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
 
-	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaults);
+	const defaultsForDiff = defaults
+		? { ...defaults, lockName: catalog.locks[defaults.lockId]?.name }
+		: null;
+	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff);
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
 

@@ -145,6 +145,18 @@
 	gap: 8px;
 }
 
+/* Анимация появления строк в карточках */
+@keyframes itemIn {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 /* Список стандартного исполнения */
 .spec-list {
 	list-style: none;
@@ -159,6 +171,7 @@
 	min-height: 16px;
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+	animation: itemIn 0.25s ease;
 }
 
 .spec-item:first-child {
@@ -207,6 +220,7 @@
 	min-height: 16px;
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(120, 53, 15, 0.15);
+	animation: itemIn 0.25s ease;
 }
 
 .diff-item:first-child {
