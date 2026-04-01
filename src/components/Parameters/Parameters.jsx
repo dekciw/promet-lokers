@@ -128,9 +128,6 @@ export default function Parameters({
                 onClick={() => setLockId(id)}
               >
                 <span className='lock-name'>{lock.name}</span>
-                {lock.surcharge > 0 && (
-                  <span className='lock-price'>+{lock.surcharge.toLocaleString('ru-RU')} ₽</span>
-                )}
               </button>
             </li>
           ))}
