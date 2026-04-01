@@ -1,3 +1,4 @@
+import { useState, useLayoutEffect, useRef } from 'react';
 import { calcDiff } from '../../utils/calcDiff';
 import './Configurator.css';
 
@@ -55,6 +56,37 @@ export default function Configurator({ config, price, catalog }) {
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
 
+	// Отслеживаем элементы которые уходят из нестандартного заказа — держим их в DOM пока анимация не закончится
+	const [leavingItems, setLeavingItems] = useState([]);
+	const prevSpecsRef = useRef([]);
+
+	useLayoutEffect(() => {
+		const prev = prevSpecsRef.current;
+		const removed = prev.filter(p => !changedSpecs.some(c => c.label === p.label));
+		prevSpecsRef.current = changedSpecs;
+
+		if (removed.length === 0) return;
+
+		setLeavingItems(curr => [
+			...curr.filter(c => !removed.some(r => r.label === c.label)),
+			...removed,
+		]);
+
+		const timer = setTimeout(() => {
+			setLeavingItems(curr => curr.filter(c => !removed.some(r => r.label === c.label)));
+		}, 400);
+
+		return () => clearTimeout(timer);
+	}, [changedSpecs]);
+
+	// Для рендера: текущие + уходящие (уходящие помечены флагом)
+	const diffItemsToRender = [
+		...changedSpecs.map(item => ({ ...item, leaving: false })),
+		...leavingItems
+			.filter(l => !changedSpecs.some(c => c.label === l.label))
+			.map(item => ({ ...item, leaving: true })),
+	];
+
 	const priceDisplay = price !== null ? `${price.toLocaleString('ru-RU')} ₽` : '—';
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : 'Модель не выбрана';
 
@@ -105,12 +137,15 @@ export default function Configurator({ config, price, catalog }) {
 							<br />
 							исполнение
 						</span>
-						{changedSpecs.length === 0 ? (
+						{diffItemsToRender.length === 0 ? (
 							<p className='no-changes'>Нет изменений</p>
 						) : (
 							<ul className='diff-list'>
-								{changedSpecs.map(({ label, value }) => (
-									<li key={label} className='diff-item'>
+								{diffItemsToRender.map(({ label, value, leaving }) => (
+									<li
+										key={label}
+										className={`diff-item${leaving ? ' diff-item--leaving' : ''}`}
+									>
 										<span className='diff-label'>{label}</span>
 										<span className='diff-value'>{value}</span>
 									</li>

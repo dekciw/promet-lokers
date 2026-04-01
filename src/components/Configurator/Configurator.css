@@ -145,17 +145,39 @@
 	gap: 8px;
 }
 
-/* Анимация появления строк в карточках — max-height от 0 чтобы карточка росла плавно */
+/* Появление строки: разворачивается сверху вниз */
 @keyframes itemIn {
 	from {
 		opacity: 0;
 		max-height: 0;
-		transform: translateY(-4px);
+		padding-top: 0;
+		padding-bottom: 0;
+		transform: translateY(-6px);
 	}
 	to {
 		opacity: 1;
 		max-height: 80px;
+		padding-top: 8px;
+		padding-bottom: 8px;
 		transform: translateY(0);
+	}
+}
+
+/* Исчезновение строки: сворачивается обратно */
+@keyframes itemOut {
+	from {
+		opacity: 1;
+		max-height: 80px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		transform: translateY(0);
+	}
+	to {
+		opacity: 0;
+		max-height: 0;
+		padding-top: 0;
+		padding-bottom: 0;
+		transform: translateY(-4px);
 	}
 }
 
@@ -174,7 +196,7 @@
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 	overflow: hidden;
-	animation: itemIn 0.3s ease forwards;
+	animation: itemIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
 .spec-item:first-child {
@@ -224,7 +246,12 @@
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(120, 53, 15, 0.15);
 	overflow: hidden;
-	animation: itemIn 0.3s ease forwards;
+	animation: itemIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.diff-item--leaving {
+	animation: itemOut 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+	pointer-events: none;
 }
 
 .diff-item:first-child {
@@ -266,7 +293,7 @@
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	min-height: 25px;
 	overflow: hidden;
-	animation: itemIn 0.3s ease forwards;
+	animation: itemIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
 .final-item + .final-item {
