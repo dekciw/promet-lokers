@@ -5,7 +5,7 @@
 	align-items: center;
 	justify-content: space-between;
 	padding: 0 0 0 24px;
-	height: 70px;
+	height: 90px;
 	overflow: hidden;
 	position: relative;
 }
@@ -67,7 +67,7 @@
 }
 
 .logo2 {
-	height: 62px;
+	height: 80px;
 	width: auto;
 	display: block;
 	opacity: 0.28;
