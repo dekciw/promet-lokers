@@ -3,11 +3,14 @@ import { calcDiff } from '../../utils/calcDiff';
 import './Configurator.css';
 
 function buildCurrentForDiff(config, lock) {
-	// width/height → Number, чтобы '400' !== 400 не давало ложный диф
+	// width/height/depth → Number, чтобы '400' !== 400 не давало ложный диф
 	return {
 		width: config.width !== '' ? Number(config.width) : undefined,
 		height: config.height !== '' ? Number(config.height) : undefined,
+		depth: config.depth !== '' ? Number(config.depth) : undefined,
 		thickness: config.thickness,
+		bodyThickness: config.bodyThickness,
+		doorThickness: config.doorThickness,
 		lockName: lock?.name,
 		ventilation: config.ventilation,
 		bodyColorName: config.bodyColor?.name ?? undefined,
@@ -20,7 +23,10 @@ function buildDefaultSpecsList(defaults, catalog) {
 	return [
 		{ label: 'Ширина:', value: `${defaults.width} мм` },
 		{ label: 'Высота:', value: `${defaults.height} мм` },
+		{ label: 'Глубина:', value: `${defaults.depth} мм` },
 		{ label: 'Толщина:', value: `${defaults.thickness} мм` },
+		{ label: 'Толщина корпуса:', value: `${defaults.bodyThickness} мм` },
+		{ label: 'Толщина двери:', value: `${defaults.doorThickness} мм` },
 		{ label: 'Замок:', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
 		{ label: 'Вентиляция:', value: defaults.ventilation ? 'Да' : 'Нет' },
 		{ label: 'Цвет корпуса:', value: defaults.bodyColorName },
@@ -33,7 +39,7 @@ function buildFinalSpecsList(config, defaults, lock) {
 	return [
 		{
 			label: 'Габариты:',
-			value: `${config.width || defaults.width} × ${config.height || defaults.height} мм`,
+			value: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
 		},
 		{ label: 'Толщина:', value: `${config.thickness} мм` },
 		{ label: 'Замок:', value: lock?.name ?? config.lockId },

@@ -1,22 +1,29 @@
 import ColorPicker from '../ColorPicker/ColorPicker';
 import './Parameters.css';
 
-const THICKNESS_OPTIONS = ['0.5', '0.6', '0.7'];
+const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
+
+function buildThicknessOptions(baseVal) {
+  if (!baseVal || EXTRA_THICKNESS.includes(baseVal)) return EXTRA_THICKNESS;
+  return [baseVal, ...EXTRA_THICKNESS];
+}
 
 export default function Parameters({
   config,
   catalog,
   setSeriesId,
   onModelChange,
-  setThickness,
   setWidth,
   setHeight,
+  setDepth,
+  setBodyThickness,
+  setDoorThickness,
   setLockId,
   setVentilation,
   setBodyColor,
   setDoorColor,
 }) {
-  const { seriesId, modelId, thickness, width, height, lockId, ventilation, bodyColor, doorColor } =
+  const { seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor } =
     config;
 
   const modelEntries = Object.entries(catalog.models).filter(
@@ -24,6 +31,10 @@ export default function Parameters({
   );
 
   const lockEntries = Object.entries(catalog.locks);
+
+  const currentModel = modelId ? catalog.models[modelId] : null;
+  const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness);
+  const doorThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.doorThickness);
 
   return (
     <aside className='parameters'>
@@ -73,22 +84,8 @@ export default function Parameters({
         </div>
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Изменение толщины металла (мм)</span>
-        <div className='toggle-group'>
-          {THICKNESS_OPTIONS.map(t => (
-            <button
-              key={t}
-              className={`toggle-btn${thickness === t ? ' toggle-btn--active' : ''}`}
-              onClick={() => setThickness(t)}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      <div className='param-group'>
+<div className='param-group'>
         <span className='group-label'>Изменение габаритов</span>
         <div className='dim-fields'>
           <div className='param-group'>
@@ -115,6 +112,48 @@ export default function Parameters({
               onChange={e => setHeight(e.target.value)}
             />
           </div>
+          <div className='param-group'>
+            <label className='group-label group-label--sm' htmlFor='depth'>
+              Глубина (мм)
+            </label>
+            <input
+              className='group-input'
+              type='number'
+              id='depth'
+              value={depth}
+              onChange={e => setDepth(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className='param-group'>
+        <span className='group-label'>Толщина металла корпуса (мм)</span>
+        <div className='toggle-group'>
+          {bodyThicknessOptions.map(t => (
+            <button
+              key={t}
+              className={`toggle-btn${bodyThickness === t ? ' toggle-btn--active' : ''}`}
+              onClick={() => setBodyThickness(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className='param-group'>
+        <span className='group-label'>Толщина металла двери (мм)</span>
+        <div className='toggle-group'>
+          {doorThicknessOptions.map(t => (
+            <button
+              key={t}
+              className={`toggle-btn${doorThickness === t ? ' toggle-btn--active' : ''}`}
+              onClick={() => setDoorThickness(t)}
+            >
+              {t}
+            </button>
+          ))}
         </div>
       </div>
 
