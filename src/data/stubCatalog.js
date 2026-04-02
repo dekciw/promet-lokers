@@ -1,3 +1,14 @@
+const DEFAULT_SPECS = {
+  depth: 500,
+  thickness: '0.5',
+  bodyThickness: '0.5',
+  doorThickness: '0.5',
+  lockId: 'key_basic',
+  ventilation: false,
+  bodyColorName: 'RAL 7038',
+  doorColorName: 'RAL 7038',
+};
+
 export const STUB_CATALOG = {
   series: [
     { id: 'ml', name: 'Серия «ML»' },
@@ -10,45 +21,21 @@ export const STUB_CATALOG = {
       seriesId: 'ml',
       basePrice: 12000,
       article: 'SHL-ML-USI',
-      defaultSpecs: {
-        width: 400,
-        height: 1850,
-        thickness: '0.5',
-        lockId: 'key_basic',
-        ventilation: false,
-        bodyColorName: 'RAL 7038',
-        doorColorName: 'RAL 7038',
-      },
+      defaultSpecs: { width: 400, height: 1850, ...DEFAULT_SPECS },
     },
     'ml-std': {
       name: 'Шкаф металлический стандартный',
       seriesId: 'ml',
       basePrice: 9500,
       article: 'SHL-ML-STD',
-      defaultSpecs: {
-        width: 400,
-        height: 1800,
-        thickness: '0.5',
-        lockId: 'key_basic',
-        ventilation: false,
-        bodyColorName: 'RAL 7038',
-        doorColorName: 'RAL 7038',
-      },
+      defaultSpecs: { width: 400, height: 1800, ...DEFAULT_SPECS },
     },
     'sl-lite': {
       name: 'Шкаф металлический lite',
       seriesId: 'sl',
       basePrice: 7200,
       article: 'SHL-SL-LITE',
-      defaultSpecs: {
-        width: 300,
-        height: 1800,
-        thickness: '0.5',
-        lockId: 'key_basic',
-        ventilation: false,
-        bodyColorName: 'RAL 7038',
-        doorColorName: 'RAL 7038',
-      },
+      defaultSpecs: { width: 300, height: 1800, ...DEFAULT_SPECS },
     },
   },
 

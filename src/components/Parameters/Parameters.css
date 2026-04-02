@@ -208,3 +208,46 @@
 	border-color: var(--c-orange);
 	color: var(--c-orange);
 }
+
+/* ──────────── АДАПТИВ ──────────── */
+
+/* Ноутбук (≤1279px) — чуть уже панель */
+@media (max-width: 1279px) {
+	.parameters {
+		width: 320px;
+	}
+}
+
+/* Планшет (≤1023px) — панель на всю ширину, снизу */
+@media (max-width: 1023px) {
+	.parameters {
+		width: 100%;
+		border-left: none;
+		border-top: 1px solid var(--c-border);
+		padding: 24px 32px;
+	}
+
+	/* Группы параметров в сетку 2 колонки */
+	.params-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 24px 32px;
+	}
+}
+
+/* Мобильный (≤767px) — одна колонка, компактные отступы */
+@media (max-width: 767px) {
+	.parameters {
+		padding: 16px;
+		gap: 20px;
+	}
+
+	.dim-fields {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.title {
+		font-size: 18px;
+	}
+}

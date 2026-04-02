@@ -395,6 +395,58 @@
 	transform: none;
 }
 
+/* ──────────── АДАПТИВ ──────────── */
+
+/* Ноутбук (≤1279px) — чуть меньше падинги */
+@media (max-width: 1279px) {
+	.configurator {
+		padding: 24px;
+		gap: 24px;
+	}
+}
+
+/* Планшет (≤1023px) — сетка 2 колонки, итоговая карточка на всю ширину */
+@media (max-width: 1023px) {
+	.config-grid {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.config-col--final {
+		grid-column: 1 / -1;
+	}
+}
+
+/* Мобильный (≤767px) — одна колонка */
+@media (max-width: 767px) {
+	.configurator {
+		padding: 16px;
+		gap: 16px;
+	}
+
+	.config-grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+
+	.config-col--final {
+		grid-column: unset;
+	}
+
+	.title {
+		font-size: 22px;
+		line-height: 28px;
+	}
+
+	.model-label,
+	.model-value {
+		font-size: 14px;
+	}
+
+	.top-row {
+		gap: 12px;
+	}
+}
+
 /* 3D Предпросмотр — скрыт до реализации
 .preview {
 	aspect-ratio: 16 / 9;

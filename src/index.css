@@ -91,3 +91,27 @@ body {
 	flex: 1 1 0;
 	min-width: 0;
 }
+
+/* ──────────── АДАПТИВ ──────────── */
+
+/* Ноутбук (≤1279px) — сужаем панель параметров, остальное не трогаем */
+@media (max-width: 1279px) {
+	.layout {
+		min-height: calc(100vh - 99px);
+	}
+}
+
+/* Планшет (≤1023px) — панель параметров уходит под конфигуратор */
+@media (max-width: 1023px) {
+	.layout {
+		flex-direction: column;
+		min-height: unset;
+	}
+}
+
+/* Мобильный (≤767px) — параметры поднимаем выше конфигуратора */
+@media (max-width: 767px) {
+	.layout {
+		flex-direction: column-reverse;
+	}
+}

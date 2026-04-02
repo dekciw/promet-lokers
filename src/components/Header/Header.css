@@ -73,6 +73,59 @@
 	clip-path: inset(0 0 0 13%);
 }
 
+/* ──────────── АДАПТИВ ──────────── */
+
+/* Ноутбук (≤1279px) */
+@media (max-width: 1279px) {
+	.tagline {
+		font-size: 10px;
+		letter-spacing: 0.5px;
+	}
+}
+
+/* Мобильный (≤767px) */
+@media (max-width: 767px) {
+	.header {
+		height: auto;
+		min-height: 64px;
+		padding: 10px 16px;
+	}
+
+	.deco {
+		display: none;
+	}
+
+	.logo {
+		height: 28px;
+	}
+
+	.brand {
+		gap: 10px;
+	}
+
+	.site-name {
+		font-size: 17px;
+	}
+
+	.tagline {
+		white-space: normal;
+		font-size: 9px;
+		letter-spacing: 0.4px;
+		max-width: 200px;
+	}
+}
+
+/* Очень маленький экран (≤380px) — Galaxy A/S small, старые iPhone */
+@media (max-width: 380px) {
+	.tagline {
+		display: none;
+	}
+
+	.site-name {
+		font-size: 15px;
+	}
+}
+
 /* Правая часть: личный кабинет */
 .account {
 	display: flex;

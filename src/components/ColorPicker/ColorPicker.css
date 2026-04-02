@@ -130,3 +130,26 @@
 	color: var(--c-text-mid);
 	line-height: 1;
 }
+
+/* ──────────── АДАПТИВ ──────────── */
+
+/* Мобильный (≤767px) — дропдаун открывается вниз, не вверх */
+@media (max-width: 767px) {
+	.dropdown {
+		top: 100%;
+		bottom: auto;
+		border-top: 1px solid var(--c-border);
+		border-bottom: 1px solid var(--c-border);
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+		border-bottom-left-radius: var(--r-sm);
+		border-bottom-right-radius: var(--r-sm);
+	}
+
+	.color-picker--open .trigger {
+		border-top-left-radius: var(--r-sm);
+		border-top-right-radius: var(--r-sm);
+		border-bottom-left-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+}
