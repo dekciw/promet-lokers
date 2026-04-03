@@ -3,6 +3,7 @@ import Header from './components/Header/Header';
 import Configurator from './components/Configurator/Configurator';
 import Parameters from './components/Parameters/Parameters';
 import Footer from './components/Footer/Footer';
+import LoginScreen from './components/LoginScreen/LoginScreen';
 import { loadCatalog } from './api/loadCatalog';
 import './index.css';
 
@@ -25,6 +26,8 @@ function calcPrice(config, catalog) {
 }
 
 export default function App() {
+  const [isAuth, setIsAuth] = useState(() => localStorage.getItem('promet_auth') === '1');
+
   const [catalog, setCatalog] = useState(null);
   const [catalogError, setCatalogError] = useState(false);
   const [retryKey, setRetryKey] = useState(0);
@@ -66,6 +69,10 @@ export default function App() {
       setBodyThickness('0.5');
       setDoorThickness('0.5');
     }
+  }
+
+  if (!isAuth) {
+    return <LoginScreen onAuth={() => setIsAuth(true)} />;
   }
 
   if (catalogError) {
