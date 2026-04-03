@@ -126,7 +126,7 @@
 /* Поля габаритов */
 .dim-fields {
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 16px;
 }
 
@@ -207,6 +207,94 @@
 .vent-btn--active {
 	border-color: var(--c-orange);
 	color: var(--c-orange);
+}
+
+/* ──────────── Stepper (кнопки ± для габаритов) ──────────── */
+
+@keyframes stepper-shake {
+	0%, 100% { transform: translateX(0); }
+	20%       { transform: translateX(-5px); }
+	40%       { transform: translateX(5px); }
+	60%       { transform: translateX(-4px); }
+	80%       { transform: translateX(4px); }
+}
+
+.stepper {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	width: 100%;
+}
+
+.stepper-row {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	border: 1px solid var(--c-border);
+	border-radius: var(--r-sm);
+	overflow: hidden;
+	transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.stepper--limit .stepper-row {
+	border-color: #e53e3e;
+	box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.15);
+	animation: stepper-shake 0.35s ease;
+}
+
+.stepper-btn {
+	flex-shrink: 0;
+	width: 36px;
+	height: 42px;
+	background: var(--c-white);
+	border: none;
+	border-right: 1px solid var(--c-border);
+	font-size: 18px;
+	color: var(--c-text-muted);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.15s, color 0.15s;
+	line-height: 1;
+	user-select: none;
+}
+
+.stepper-btn:last-child {
+	border-right: none;
+	border-left: 1px solid var(--c-border);
+}
+
+.stepper-btn:hover {
+	background: #f5f6f7;
+	color: var(--c-primary);
+}
+
+.stepper-field {
+	flex: 1;
+	min-width: 20px;
+	border: none;
+	outline: none;
+	background: transparent;
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+	text-align: center;
+	padding: 11px 4px;
+	-moz-appearance: textfield;
+}
+
+.stepper-field::-webkit-inner-spin-button,
+.stepper-field::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.stepper-hint {
+	font-size: 11px;
+	color: #e53e3e;
+	letter-spacing: 0.3px;
 }
 
 /* ──────────── АДАПТИВ ──────────── */

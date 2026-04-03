@@ -395,6 +395,13 @@
 	transform: none;
 }
 
+.btn:disabled {
+	opacity: 0.4;
+	cursor: not-allowed;
+	pointer-events: none;
+	box-shadow: none;
+}
+
 /* ──────────── АДАПТИВ ──────────── */
 
 /* Ноутбук (≤1279px) — чуть меньше падинги */
