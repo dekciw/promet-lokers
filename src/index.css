@@ -81,6 +81,36 @@ body {
 	min-height: 100vh;
 }
 
+/* Экран статуса (загрузка / ошибка каталога) */
+.app-status {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	gap: 16px;
+	padding: 40px;
+	text-align: center;
+	color: var(--c-brand);
+	font-size: 15px;
+}
+
+.app-status__retry {
+	padding: 8px 24px;
+	background: var(--c-brand);
+	color: #fff;
+	border: none;
+	border-radius: var(--r-sm);
+	cursor: pointer;
+	font-family: var(--f-main);
+	font-size: 14px;
+	transition: background 0.15s;
+}
+
+.app-status__retry:hover {
+	background: #0a47a0;
+}
+
 /* Основная раскладка страницы */
 .layout {
 	display: flex;

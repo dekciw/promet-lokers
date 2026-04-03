@@ -7,6 +7,8 @@ import LoginScreen from './components/LoginScreen/LoginScreen';
 import { loadCatalog } from './api/loadCatalog';
 import './index.css';
 
+const DEFAULT_THICKNESS = '0.5';
+
 function calcPrice(config, catalog) {
   const model = catalog.models[config.modelId];
   if (!model) return null;
@@ -34,12 +36,11 @@ export default function App() {
 
   const [seriesId, setSeriesId] = useState('');
   const [modelId, setModelId] = useState('');
-  const [thickness, setThickness] = useState('0.5');
   const [width, setWidth] = useState('');
   const [height, setHeight] = useState('');
   const [depth, setDepth] = useState('');
-  const [bodyThickness, setBodyThickness] = useState('0.5');
-  const [doorThickness, setDoorThickness] = useState('0.5');
+  const [bodyThickness, setBodyThickness] = useState(DEFAULT_THICKNESS);
+  const [doorThickness, setDoorThickness] = useState(DEFAULT_THICKNESS);
   const [lockId, setLockId] = useState('key_basic');
   const [ventilation, setVentilation] = useState(false);
   const [bodyColor, setBodyColor] = useState(null);
@@ -58,16 +59,14 @@ export default function App() {
       setWidth(String(specs.width));
       setHeight(String(specs.height));
       setDepth(String(specs.depth));
-      setThickness(specs.thickness);
       setBodyThickness(specs.bodyThickness);
       setDoorThickness(specs.doorThickness);
     } else {
       setWidth('');
       setHeight('');
       setDepth('');
-      setThickness('0.5');
-      setBodyThickness('0.5');
-      setDoorThickness('0.5');
+      setBodyThickness(DEFAULT_THICKNESS);
+      setDoorThickness(DEFAULT_THICKNESS);
     }
   }
 
@@ -77,10 +76,10 @@ export default function App() {
 
   if (catalogError) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#0C53B3' }}>
+      <div className='app-status'>
         <p>Не удалось загрузить каталог. Проверьте подключение к интернету.</p>
         <button
-          style={{ marginTop: 16, padding: '8px 24px', background: '#0C53B3', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}
+          className='app-status__retry'
           onClick={() => { setCatalogError(false); setRetryKey(k => k + 1); }}
         >
           Повторить
@@ -91,7 +90,7 @@ export default function App() {
 
   if (!catalog) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: '#0C53B3' }}>
+      <div className='app-status'>
         Загрузка каталога...
       </div>
     );
@@ -100,7 +99,6 @@ export default function App() {
   const config = {
     seriesId,
     modelId,
-    thickness,
     width,
     height,
     depth,
@@ -124,7 +122,6 @@ export default function App() {
           catalog={catalog}
           setSeriesId={setSeriesId}
           onModelChange={handleModelChange}
-          setThickness={setThickness}
           setWidth={setWidth}
           setHeight={setHeight}
           setDepth={setDepth}

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect, Fragment } from 'react';
+import { useState, useRef, useCallback, Fragment } from 'react';
+import { useClickOutside } from '../../hooks/useClickOutside';
 import './ColorPicker.css';
 
 const COLORS = [
@@ -34,17 +35,8 @@ const COLORS = [
 export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
-
-	/* Закрывает дропдаун, если пользователь кликнул за пределами компонента. */
-	useEffect(() => {
-		function handleClickOutside(e) {
-			if (ref.current && !ref.current.contains(e.target)) {
-				setOpen(false);
-			}
-		}
-		document.addEventListener('click', handleClickOutside);
-		return () => document.removeEventListener('click', handleClickOutside);
-	}, []);
+	const closeDropdown = useCallback(() => setOpen(false), []);
+	useClickOutside(ref, closeDropdown);
 
 	/* Переключает открытие/закрытие дропдауна по клику на кнопку-триггер.
 	   stopPropagation нужен, чтобы клик не попал в handleClickOutside и сразу не закрыл список */
@@ -72,7 +64,7 @@ export default function ColorPicker({ placeholder, selected, onSelect, standardL
 		<div className={`color-picker${open ? ' color-picker--open' : ''}`} ref={ref}>
 			<button type='button' className='trigger' aria-expanded={open} onClick={handleTriggerClick}>
 				<span className='trigger-swatch' style={swatchStyle} />
-				<span className='trigger-text' style={selected ? { color: 'var(--c-text-dark)' } : {}}>
+				<span className={`trigger-text${selected ? ' trigger-text--selected' : ''}`}>
 					{selected ? selected.name : placeholder}
 				</span>
 				<img className='trigger-arrow' src='/img/arrow-down.svg' alt='' />

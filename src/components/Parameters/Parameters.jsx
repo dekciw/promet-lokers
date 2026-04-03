@@ -1,6 +1,60 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker';
+import { useClickOutside } from '../../hooks/useClickOutside';
+import { clamp } from '../../utils/clamp';
 import './Parameters.css';
+
+const HEIGHT_MIN = 1400;
+const HEIGHT_MAX = 1900;
+const DEPTH_MIN = 300;
+const WIDTH_RANGE = 50;
+const LIMIT_HINT_DURATION = 1500;
+const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
+
+function CustomSelect({ id, value, onChange, options, placeholder }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  const closeDropdown = useCallback(() => setOpen(false), []);
+  useClickOutside(ref, closeDropdown);
+
+  const selected = options.find(o => o.value === value);
+
+  function handleSelect(val) {
+    onChange(val);
+    setOpen(false);
+  }
+
+  return (
+    <div className={`cselect${open ? ' cselect--open' : ''}`} ref={ref}>
+      <button
+        type='button'
+        id={id}
+        className='cselect-trigger'
+        onClick={e => { e.stopPropagation(); setOpen(p => !p); }}
+        aria-expanded={open}
+      >
+        <span className={`cselect-text${!selected ? ' cselect-text--placeholder' : ''}`}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <img className='cselect-arrow' src='/img/arrow-down.svg' alt='' />
+      </button>
+
+      {open && (
+        <ul className='cselect-dropdown'>
+          {options.map(o => (
+            <li
+              key={o.value}
+              className={`cselect-item${o.value === value ? ' cselect-item--active' : ''}`}
+              onClick={() => handleSelect(o.value)}
+            >
+              {o.label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function StepperInput({ id, value, min, max, step = 50, onChange }) {
   const [limitSide, setLimitSide] = useState(null);
@@ -9,14 +63,14 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
   function triggerLimit(side) {
     if (timerRef.current) clearTimeout(timerRef.current);
     setLimitSide(side);
-    timerRef.current = setTimeout(() => setLimitSide(null), 1500);
+    timerRef.current = setTimeout(() => setLimitSide(null), LIMIT_HINT_DURATION);
   }
 
   function handleStep(dir) {
     const current = Number(value);
     if (dir < 0 && current <= min) { triggerLimit('min'); return; }
     if (dir > 0 && current >= max) { triggerLimit('max'); return; }
-    onChange(String(Math.min(Math.max(current + dir * step, min), max)));
+    onChange(String(clamp(current + dir * step, min, max)));
   }
 
   const hintText =
@@ -39,7 +93,7 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
           onBlur={e => {
             if (min == null || max == null) return;
             const val = Number(e.target.value);
-            if (!isNaN(val)) onChange(String(Math.min(Math.max(val, min), max)));
+            if (!isNaN(val)) onChange(String(clamp(val, min, max)));
           }}
         />
         <button className='stepper-btn' type='button' onClick={() => handleStep(1)}>+</button>
@@ -48,8 +102,6 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
     </div>
   );
 }
-
-const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 
 function buildThicknessOptions(baseVal) {
   if (!baseVal || EXTRA_THICKNESS.includes(baseVal)) return EXTRA_THICKNESS;
@@ -78,18 +130,18 @@ export default function Parameters({
     ([, m]) => !seriesId || m.seriesId === seriesId
   );
 
-  const lockEntries = Object.entries(catalog.locks);
+  const lockEntries = Object.entries(catalog.locks).sort((a, b) => a[1].surcharge - b[1].surcharge);
 
   const currentModel = modelId ? catalog.models[modelId] : null;
   const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness);
   const doorThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.doorThickness);
 
   const defaultWidth = currentModel?.defaultSpecs?.width ?? null;
-  const minWidth = defaultWidth !== null ? defaultWidth - 50 : undefined;
-  const maxWidth = defaultWidth !== null ? defaultWidth + 50 : undefined;
+  const minWidth = defaultWidth !== null ? defaultWidth - WIDTH_RANGE : undefined;
+  const maxWidth = defaultWidth !== null ? defaultWidth + WIDTH_RANGE : undefined;
 
   const defaultDepth = currentModel?.defaultSpecs?.depth ?? null;
-  const minDepth = defaultDepth !== null ? 300 : undefined;
+  const minDepth = defaultDepth !== null ? DEPTH_MIN : undefined;
   const maxDepth = defaultDepth !== null ? defaultDepth : undefined;
 
   return (
@@ -97,88 +149,41 @@ export default function Parameters({
       <h2 className='title'>Параметры</h2>
 
       <div className='param-group'>
-        <label className='group-label' htmlFor='series'>
-          Серия шкафа
-        </label>
-        <div className='select-wrap'>
-          <select
-            className='select'
-            id='series'
-            value={seriesId}
-            onChange={e => setSeriesId(e.target.value)}
-          >
-            <option value='' disabled hidden>Выберите серию</option>
-            {catalog.series.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-          <img className='arrow' src='/img/arrow-down.svg' alt='' />
-        </div>
+        <label className='group-label' htmlFor='series'>Серия шкафа</label>
+        <CustomSelect
+          id='series'
+          value={seriesId}
+          onChange={setSeriesId}
+          placeholder='Выберите серию'
+          options={catalog.series.map(s => ({ value: s.id, label: s.name }))}
+        />
       </div>
 
       <div className='param-group'>
-        <label className='group-label' htmlFor='model'>
-          Модель шкафа
-        </label>
-        <div className='select-wrap'>
-          <select
-            className='select'
-            id='model'
-            value={modelId}
-            onChange={e => onModelChange(e.target.value)}
-          >
-            <option value='' disabled hidden>Выберите модель шкафа</option>
-            {modelEntries.map(([id, m]) => (
-              <option key={id} value={id}>
-                {m.name}
-              </option>
-            ))}
-          </select>
-          <img className='arrow' src='/img/arrow-down.svg' alt='' />
-        </div>
+        <label className='group-label' htmlFor='model'>Модель шкафа</label>
+        <CustomSelect
+          id='model'
+          value={modelId}
+          onChange={onModelChange}
+          placeholder='Выберите модель'
+          options={modelEntries.map(([id, m]) => ({ value: id, label: m.name }))}
+        />
       </div>
 
-
-<div className='param-group'>
+      <div className='param-group'>
         <span className='group-label'>Изменение габаритов</span>
         <div className='dim-fields'>
           <div className='param-group'>
-            <label className='group-label group-label--sm' htmlFor='width'>
-              Ширина (мм)
-            </label>
-            <StepperInput
-              id='width'
-              value={width}
-              min={minWidth}
-              max={maxWidth}
-              onChange={setWidth}
-            />
+            <label className='group-label group-label--sm' htmlFor='width'>Ширина (мм)</label>
+            <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} />
           </div>
           <div className='param-group'>
-            <label className='group-label group-label--sm' htmlFor='height'>
-              Высота (мм)
-            </label>
-            <StepperInput
-              id='height'
-              value={height}
-              min={1400}
-              max={1900}
-              onChange={setHeight}
-            />
+            <label className='group-label group-label--sm' htmlFor='height'>Высота (мм)</label>
+            <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} />
           </div>
           <div className='param-group'>
-            <label className='group-label group-label--sm' htmlFor='depth'>
-              Глубина (мм)
-            </label>
-            <StepperInput
-              id='depth'
-              value={depth}
-              min={minDepth}
-              max={maxDepth}
-              onChange={setDepth}
-            />
+            <label className='group-label group-label--sm' htmlFor='depth'>Глубина (мм)</label>
+            <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} />
           </div>
         </div>
       </div>
@@ -249,20 +254,12 @@ export default function Parameters({
 
       <div className='param-group'>
         <span className='group-label'>Изменение цвета корпуса</span>
-        <ColorPicker
-          placeholder='Стандартный цвет'
-          selected={bodyColor}
-          onSelect={setBodyColor}
-        />
+        <ColorPicker placeholder='Стандартный цвет' selected={bodyColor} onSelect={setBodyColor} />
       </div>
 
       <div className='param-group'>
         <span className='group-label'>Изменение цвета двери</span>
-        <ColorPicker
-          placeholder='Стандартный цвет'
-          selected={doorColor}
-          onSelect={setDoorColor}
-        />
+        <ColorPicker placeholder='Стандартный цвет' selected={doorColor} onSelect={setDoorColor} />
       </div>
     </aside>
   );
