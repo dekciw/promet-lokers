@@ -27,6 +27,7 @@ function calcPrice(config, catalog) {
 export default function App() {
   const [catalog, setCatalog] = useState(null);
   const [catalogError, setCatalogError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
 
   const [seriesId, setSeriesId] = useState('');
   const [modelId, setModelId] = useState('');
@@ -45,7 +46,7 @@ export default function App() {
     loadCatalog()
       .then(setCatalog)
       .catch(() => setCatalogError(true));
-  }, []);
+  }, [retryKey]);
 
   function handleModelChange(newModelId) {
     setModelId(newModelId);
@@ -70,7 +71,13 @@ export default function App() {
   if (catalogError) {
     return (
       <div style={{ padding: 40, textAlign: 'center', color: '#0C53B3' }}>
-        Не удалось загрузить каталог. Проверьте подключение к интернету.
+        <p>Не удалось загрузить каталог. Проверьте подключение к интернету.</p>
+        <button
+          style={{ marginTop: 16, padding: '8px 24px', background: '#0C53B3', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14 }}
+          onClick={() => { setCatalogError(false); setRetryKey(k => k + 1); }}
+        >
+          Повторить
+        </button>
       </div>
     );
   }

@@ -31,7 +31,7 @@ const COLORS = [
 ];
 
 /* Выпадающий список выбора цвета показывает цветовые группы, запоминает выбранный цвет и закрывается при клике вне компонента. */
-export default function ColorPicker({ placeholder, selected, onSelect }) {
+export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 
@@ -79,6 +79,12 @@ export default function ColorPicker({ placeholder, selected, onSelect }) {
 			</button>
 
 			<ul className='dropdown'>
+				{selected && (
+					<li className='item item--reset' onClick={() => handleSelect(null)}>
+						<span className='item-swatch item-swatch--standard' />
+						<span className='item-name'>{standardLabel}</span>
+					</li>
+				)}
 				{COLORS.map(group => (
 					<Fragment key={group.group}>
 						<li className='group'>{group.group}</li>

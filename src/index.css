@@ -84,7 +84,7 @@ body {
 /* Основная раскладка страницы */
 .layout {
 	display: flex;
-	min-height: calc(100vh - 70px);
+	min-height: calc(100vh - 99px);
 }
 
 .layout__content {

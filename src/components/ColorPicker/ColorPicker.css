@@ -24,6 +24,10 @@
 	outline: none;
 }
 
+.trigger:hover {
+	border-color: var(--c-primary);
+}
+
 .color-picker--open .trigger {
 	border-color: var(--c-border);
 	border-top-left-radius: 0;
@@ -114,6 +118,21 @@
 
 .item--active {
 	background: var(--c-primary-bg);
+}
+
+.item--reset {
+	border-bottom: 1px solid var(--c-border);
+	margin-bottom: 4px;
+}
+
+.item-swatch--standard {
+	background: repeating-linear-gradient(
+		45deg,
+		#e2e8f0,
+		#e2e8f0 3px,
+		#f8fafc 3px,
+		#f8fafc 6px
+	);
 }
 
 .item-swatch {

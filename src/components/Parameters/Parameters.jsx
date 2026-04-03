@@ -250,7 +250,7 @@ export default function Parameters({
       <div className='param-group'>
         <span className='group-label'>Изменение цвета корпуса</span>
         <ColorPicker
-          placeholder='Выберите цвет корпуса'
+          placeholder='Стандартный цвет'
           selected={bodyColor}
           onSelect={setBodyColor}
         />
@@ -259,7 +259,7 @@ export default function Parameters({
       <div className='param-group'>
         <span className='group-label'>Изменение цвета двери</span>
         <ColorPicker
-          placeholder='Выберите цвет двери'
+          placeholder='Стандартный цвет'
           selected={doorColor}
           onSelect={setDoorColor}
         />
