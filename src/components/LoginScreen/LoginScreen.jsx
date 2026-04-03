@@ -2,7 +2,7 @@ import { useState } from 'react';
 import './LoginScreen.css';
 
 const LOGIN = 'admin';
-const PASSWORD = '123456789';
+const PASSWORD = '1787810';
 
 export default function LoginScreen({ onAuth }) {
   const [login, setLogin] = useState('');
