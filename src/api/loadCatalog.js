@@ -1,4 +1,4 @@
-const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || 'promet-f4543';
 const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/catalog/main`;
 
 const CACHE_KEY = 'promet_catalog_v1';
