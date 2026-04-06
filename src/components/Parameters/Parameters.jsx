@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import ColorPicker from '../ColorPicker/ColorPicker';
+import { ColorPicker } from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { clamp } from '../../utils/clamp';
 import styles from './Parameters.module.css';
@@ -108,7 +108,7 @@ function buildThicknessOptions(baseVal) {
   return [baseVal, ...EXTRA_THICKNESS];
 }
 
-export default function Parameters({
+export function Parameters({
   config,
   catalog,
   setSeriesId,

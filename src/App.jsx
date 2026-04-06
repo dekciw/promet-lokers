@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import Header from './components/Header/Header';
-import Configurator from './components/Configurator/Configurator';
-import Parameters from './components/Parameters/Parameters';
-import Footer from './components/Footer/Footer';
-import LoginScreen from './components/LoginScreen/LoginScreen';
+import { Header } from './components/Header/Header';
+import { Configurator } from './components/Configurator/Configurator';
+import { Parameters } from './components/Parameters/Parameters';
+import { Footer } from './components/Footer/Footer';
+import { LoginScreen } from './components/LoginScreen/LoginScreen';
 import { loadCatalog } from './api/loadCatalog';
 import './index.css';
 
@@ -27,7 +27,7 @@ function calcPrice(config, catalog) {
   );
 }
 
-export default function App() {
+export function App() {
   const [isAuth, setIsAuth] = useState(() => localStorage.getItem('promet_auth') === '1');
 
   const [catalog, setCatalog] = useState(null);
