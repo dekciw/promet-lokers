@@ -4,7 +4,7 @@ import styles from './LoginScreen.module.css';
 const LOGIN = 'admin';
 const PASSWORD = '1787810';
 
-export function LoginScreen({ onAuth }) {
+export default function LoginScreen({ onAuth }) {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);

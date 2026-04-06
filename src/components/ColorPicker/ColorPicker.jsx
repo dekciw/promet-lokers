@@ -31,7 +31,7 @@ const COLORS = [
 	},
 ];
 
-export function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
+export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 	const closeDropdown = useCallback(() => setOpen(false), []);

@@ -48,7 +48,7 @@ function buildFinalSpecsList(config, defaults, lock) {
 	];
 }
 
-export function Configurator({ config, price, catalog }) {
+export default function Configurator({ config, price, catalog }) {
 	const model = config.modelId ? catalog.models[config.modelId] : null;
 	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
