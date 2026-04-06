@@ -407,7 +407,7 @@
 	}
 
 	/* Группы параметров в сетку 2 колонки */
-	.params-grid {
+	.paramsGrid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 24px 32px;
