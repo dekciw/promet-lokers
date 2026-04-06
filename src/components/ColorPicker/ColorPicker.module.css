@@ -1,9 +1,7 @@
-/* Корневой контейнер */
-.color-picker {
+.colorPicker {
 	position: relative;
 }
 
-/* Кнопка-триггер */
 .trigger {
 	display: flex;
 	align-items: center;
@@ -27,15 +25,14 @@
 	border-color: var(--c-primary);
 }
 
-.color-picker--open .trigger {
+.colorPickerOpen .trigger {
 	border-color: var(--c-primary);
 	border-top-left-radius: 0;
 	border-top-right-radius: 0;
 	box-shadow: 0 0 0 2px var(--c-primary-border);
 }
 
-/* Цветовой квадратик в триггере */
-.trigger-swatch {
+.triggerSwatch {
 	width: 20px;
 	height: 20px;
 	border-radius: 4px;
@@ -43,7 +40,7 @@
 	border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.trigger-text {
+.triggerText {
 	flex: 1;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -51,11 +48,11 @@
 	color: var(--c-text-faint);
 }
 
-.trigger-text--selected {
+.triggerTextSelected {
 	color: var(--c-text-dark);
 }
 
-.trigger-arrow {
+.triggerArrow {
 	width: 20px;
 	height: 20px;
 	pointer-events: none;
@@ -63,11 +60,10 @@
 	transition: transform 0.2s;
 }
 
-.color-picker--open .trigger-arrow {
+.colorPickerOpen .triggerArrow {
 	transform: rotate(180deg);
 }
 
-/* Выпадающий список */
 .dropdown {
 	display: none;
 	position: absolute;
@@ -92,11 +88,10 @@
 	display: none;
 }
 
-.color-picker--open .dropdown {
+.colorPickerOpen .dropdown {
 	display: block;
 }
 
-/* Заголовок группы */
 .group {
 	padding: 10px 12px 4px;
 	font-size: 10px;
@@ -108,7 +103,6 @@
 	user-select: none;
 }
 
-/* Элемент цвета */
 .item {
 	display: flex;
 	align-items: center;
@@ -122,21 +116,21 @@
 	background: var(--c-bg);
 }
 
-.item--active {
+.itemActive {
 	background: var(--c-primary-bg);
 }
 
-.item--active .item-name {
+.itemActive .itemName {
 	color: var(--c-primary);
 	font-weight: 600;
 }
 
-.item--reset {
+.itemReset {
 	border-bottom: 1px solid var(--c-border);
 	margin-bottom: 2px;
 }
 
-.item-swatch {
+.itemSwatch {
 	width: 20px;
 	height: 20px;
 	border-radius: 4px;
@@ -144,7 +138,7 @@
 	border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.item-swatch--standard {
+.itemSwatchStandard {
 	background: repeating-linear-gradient(
 		45deg,
 		#e2e8f0,
@@ -154,7 +148,7 @@
 	);
 }
 
-.item-name {
+.itemName {
 	font-size: 13px;
 	font-weight: 400;
 	color: var(--c-text-mid);

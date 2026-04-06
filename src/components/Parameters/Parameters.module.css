@@ -18,13 +18,13 @@
 }
 
 /* Группа параметра */
-.param-group {
+.paramGroup {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.group-label {
+.groupLabel {
 	display: block;
 	font-size: 14px;
 	font-weight: 400;
@@ -34,13 +34,13 @@
 	line-height: 20px;
 }
 
-.group-label--sm {
+.groupLabelSm {
 	font-size: 10px;
 	letter-spacing: 0.5px;
 	line-height: 15px;
 }
 
-.group-input {
+.groupInput {
 	background: var(--c-white);
 	border: 1px solid var(--c-border);
 	border-radius: var(--r-sm);
@@ -56,7 +56,7 @@
 		box-shadow 0.15s;
 }
 
-.group-input:focus {
+.groupInput:focus {
 	border-color: var(--c-primary);
 	box-shadow: 0 0 0 2px var(--c-primary-border);
 }
@@ -66,7 +66,7 @@
 	position: relative;
 }
 
-.cselect-trigger {
+.cselectTrigger {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -85,34 +85,34 @@
 	outline: none;
 }
 
-.cselect-trigger:hover {
+.cselectTrigger:hover {
 	border-color: var(--c-primary);
 }
 
-.cselect-trigger:focus-visible {
+.cselectTrigger:focus-visible {
 	border-color: var(--c-primary);
 	box-shadow: 0 0 0 2px var(--c-primary-border);
 }
 
-.cselect--open .cselect-trigger {
+.cselectOpen .cselectTrigger {
 	border-color: var(--c-primary);
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 	box-shadow: 0 0 0 2px var(--c-primary-border);
 }
 
-.cselect-text {
+.cselectText {
 	flex: 1;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.cselect-text--placeholder {
+.cselectTextPlaceholder {
 	color: var(--c-text-faint);
 }
 
-.cselect-arrow {
+.cselectArrow {
 	width: 20px;
 	height: 20px;
 	flex-shrink: 0;
@@ -120,11 +120,11 @@
 	transition: transform 0.2s;
 }
 
-.cselect--open .cselect-arrow {
+.cselectOpen .cselectArrow {
 	transform: rotate(180deg);
 }
 
-.cselect-dropdown {
+.cselectDropdown {
 	position: absolute;
 	top: 100%;
 	left: 0;
@@ -143,11 +143,11 @@
 	scrollbar-width: none;
 }
 
-.cselect-dropdown::-webkit-scrollbar {
+.cselectDropdown::-webkit-scrollbar {
 	display: none;
 }
 
-.cselect-item {
+.cselectItem {
 	padding: 10px 14px;
 	font-size: 14px;
 	color: var(--c-text-mid);
@@ -155,24 +155,24 @@
 	transition: background 0.1s;
 }
 
-.cselect-item:hover {
+.cselectItem:hover {
 	background: var(--c-bg);
 	color: var(--c-text-dark);
 }
 
-.cselect-item--active {
+.cselectItemActive {
 	background: var(--c-primary-bg);
 	color: var(--c-primary);
 	font-weight: 500;
 }
 
 /* Толщина металла */
-.toggle-group {
+.toggleGroup {
 	display: flex;
 	gap: 8px;
 }
 
-.toggle-btn {
+.toggleBtn {
 	padding: 9px 17px;
 	border-radius: var(--r-sm);
 	border: 1px solid var(--c-border-subtle);
@@ -188,37 +188,37 @@
 		color 0.15s;
 }
 
-.toggle-btn:hover {
+.toggleBtn:hover {
 	border-color: var(--c-border);
 	background: var(--c-bg);
 }
 
-.toggle-btn--active {
+.toggleBtnActive {
 	background: var(--c-white);
 	border-color: var(--c-orange);
 	color: var(--c-orange);
 }
 
-.toggle-btn--active:hover {
+.toggleBtnActive:hover {
 	background: var(--c-white);
 }
 
 /* Поля габаритов */
-.dim-fields {
+.dimFields {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 	gap: 16px;
 }
 
 /* Список замков */
-.lock-list {
+.lockList {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
 }
 
-.lock-item {
+.lockItem {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -233,38 +233,38 @@
 	text-align: left;
 }
 
-.lock-item:hover {
+.lockItem:hover {
 	border-color: var(--c-border);
 	background: var(--c-bg);
 }
 
-.lock-item--active {
+.lockItemActive {
 	border-color: var(--c-orange);
 }
 
-.lock-item--active:hover {
+.lockItemActive:hover {
 	background: var(--c-white);
 }
 
-.lock-name {
+.lockName {
 	font-size: 14px;
 	font-weight: 400;
 	color: var(--c-text-dark);
 	line-height: 20px;
 }
 
-.lock-item--active .lock-name {
+.lockItemActive .lockName {
 	color: var(--c-orange);
 }
 
 
 /* Вентиляция */
-.vent-toggle {
+.ventToggle {
 	display: flex;
 	gap: 8px;
 }
 
-.vent-btn {
+.ventBtn {
 	flex: 1;
 	padding: 9px 4px;
 	border-radius: var(--r-sm);
@@ -281,17 +281,17 @@
 		color 0.15s;
 }
 
-.vent-btn:hover {
+.ventBtn:hover {
 	border-color: var(--c-border);
 	background: var(--c-bg);
 }
 
-.vent-btn--active {
+.ventBtnActive {
 	border-color: var(--c-orange);
 	color: var(--c-orange);
 }
 
-.vent-btn--active:hover {
+.ventBtnActive:hover {
 	background: var(--c-white);
 }
 
@@ -312,7 +312,7 @@
 	width: 100%;
 }
 
-.stepper-row {
+.stepperRow {
 	display: flex;
 	align-items: center;
 	width: 100%;
@@ -322,13 +322,13 @@
 	transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.stepper--limit .stepper-row {
+.stepperLimit .stepperRow {
 	border-color: #e53e3e;
 	box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.15);
 	animation: stepper-shake 0.35s ease;
 }
 
-.stepper-btn {
+.stepperBtn {
 	flex-shrink: 0;
 	width: 36px;
 	height: 42px;
@@ -346,22 +346,22 @@
 	user-select: none;
 }
 
-.stepper-btn:last-child {
+.stepperBtn:last-child {
 	border-right: none;
 	border-left: 1px solid var(--c-border);
 }
 
-.stepper-btn:hover {
+.stepperBtn:hover {
 	background: #f5f6f7;
 	color: var(--c-primary);
 }
 
-.stepper-btn:active {
+.stepperBtn:active {
 	background: var(--c-primary-bg);
 	color: var(--c-primary);
 }
 
-.stepper-field {
+.stepperField {
 	flex: 1;
 	min-width: 20px;
 	border: none;
@@ -376,13 +376,13 @@
 	-moz-appearance: textfield;
 }
 
-.stepper-field::-webkit-inner-spin-button,
-.stepper-field::-webkit-outer-spin-button {
+.stepperField::-webkit-inner-spin-button,
+.stepperField::-webkit-outer-spin-button {
 	-webkit-appearance: none;
 	margin: 0;
 }
 
-.stepper-hint {
+.stepperHint {
 	font-size: 11px;
 	color: #e53e3e;
 	letter-spacing: 0.3px;
@@ -421,7 +421,7 @@
 		gap: 20px;
 	}
 
-	.dim-fields {
+	.dimFields {
 		grid-template-columns: 1fr;
 		gap: 12px;
 	}

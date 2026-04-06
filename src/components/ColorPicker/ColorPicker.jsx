@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
 import { useClickOutside } from '../../hooks/useClickOutside';
-import './ColorPicker.css';
+import styles from './ColorPicker.module.css';
 
 const COLORS = [
 	{
@@ -31,28 +31,22 @@ const COLORS = [
 	},
 ];
 
-/* Выпадающий список выбора цвета показывает цветовые группы, запоминает выбранный цвет и закрывается при клике вне компонента. */
 export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 	const closeDropdown = useCallback(() => setOpen(false), []);
 	useClickOutside(ref, closeDropdown);
 
-	/* Переключает открытие/закрытие дропдауна по клику на кнопку-триггер.
-	   stopPropagation нужен, чтобы клик не попал в handleClickOutside и сразу не закрыл список */
 	function handleTriggerClick(e) {
 		e.stopPropagation();
 		setOpen(prev => !prev);
 	}
 
-	/* Передаёт выбранный цвет в родительский компонент через onSelect и закрывает дропдаун */
 	function handleSelect(item) {
 		onSelect(item);
 		setOpen(false);
 	}
 
-	/* Возвращает inline-стили для цветового квадратика (swatch):
-	   белый цвет получает видимую рамку, остальные — полупрозрачную тёмную */
 	function getSwatchStyle(colorHex) {
 		const border = colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)';
 		return { background: colorHex, border };
@@ -61,33 +55,33 @@ export default function ColorPicker({ placeholder, selected, onSelect, standardL
 	const swatchStyle = selected ? getSwatchStyle(selected.color) : {};
 
 	return (
-		<div className={`color-picker${open ? ' color-picker--open' : ''}`} ref={ref}>
-			<button type='button' className='trigger' aria-expanded={open} onClick={handleTriggerClick}>
-				<span className='trigger-swatch' style={swatchStyle} />
-				<span className={`trigger-text${selected ? ' trigger-text--selected' : ''}`}>
+		<div className={`${styles.colorPicker}${open ? ` ${styles.colorPickerOpen}` : ''}`} ref={ref}>
+			<button type='button' className={styles.trigger} aria-expanded={open} onClick={handleTriggerClick}>
+				<span className={styles.triggerSwatch} style={swatchStyle} />
+				<span className={`${styles.triggerText}${selected ? ` ${styles.triggerTextSelected}` : ''}`}>
 					{selected ? selected.name : placeholder}
 				</span>
-				<img className='trigger-arrow' src='/img/arrow-down.svg' alt='' />
+				<img className={styles.triggerArrow} src='/img/arrow-down.svg' alt='' />
 			</button>
 
-			<ul className='dropdown'>
+			<ul className={styles.dropdown}>
 				{selected && (
-					<li className='item item--reset' onClick={() => handleSelect(null)}>
-						<span className='item-swatch item-swatch--standard' />
-						<span className='item-name'>{standardLabel}</span>
+					<li className={`${styles.item} ${styles.itemReset}`} onClick={() => handleSelect(null)}>
+						<span className={`${styles.itemSwatch} ${styles.itemSwatchStandard}`} />
+						<span className={styles.itemName}>{standardLabel}</span>
 					</li>
 				)}
 				{COLORS.map(group => (
 					<Fragment key={group.group}>
-						<li className='group'>{group.group}</li>
+						<li className={styles.group}>{group.group}</li>
 						{group.items.map(item => (
 							<li
 								key={item.name}
-								className={`item${selected?.name === item.name ? ' item--active' : ''}`}
+								className={`${styles.item}${selected?.name === item.name ? ` ${styles.itemActive}` : ''}`}
 								onClick={() => handleSelect(item)}
 							>
-								<span className='item-swatch' style={{ background: item.color }} />
-								<span className='item-name'>{item.name}</span>
+								<span className={styles.itemSwatch} style={{ background: item.color }} />
+								<span className={styles.itemName}>{item.name}</span>
 							</li>
 						))}
 					</Fragment>

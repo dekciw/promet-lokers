@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { clamp } from '../../utils/clamp';
-import './Parameters.css';
+import styles from './Parameters.module.css';
 
 const HEIGHT_MIN = 1400;
 const HEIGHT_MAX = 1900;
@@ -25,26 +25,26 @@ function CustomSelect({ id, value, onChange, options, placeholder }) {
   }
 
   return (
-    <div className={`cselect${open ? ' cselect--open' : ''}`} ref={ref}>
+    <div className={`${styles.cselect}${open ? ` ${styles.cselectOpen}` : ''}`} ref={ref}>
       <button
         type='button'
         id={id}
-        className='cselect-trigger'
+        className={styles.cselectTrigger}
         onClick={e => { e.stopPropagation(); setOpen(p => !p); }}
         aria-expanded={open}
       >
-        <span className={`cselect-text${!selected ? ' cselect-text--placeholder' : ''}`}>
+        <span className={`${styles.cselectText}${!selected ? ` ${styles.cselectTextPlaceholder}` : ''}`}>
           {selected ? selected.label : placeholder}
         </span>
-        <img className='cselect-arrow' src='/img/arrow-down.svg' alt='' />
+        <img className={styles.cselectArrow} src='/img/arrow-down.svg' alt='' />
       </button>
 
       {open && (
-        <ul className='cselect-dropdown'>
+        <ul className={styles.cselectDropdown}>
           {options.map(o => (
             <li
               key={o.value}
-              className={`cselect-item${o.value === value ? ' cselect-item--active' : ''}`}
+              className={`${styles.cselectItem}${o.value === value ? ` ${styles.cselectItemActive}` : ''}`}
               onClick={() => handleSelect(o.value)}
             >
               {o.label}
@@ -78,11 +78,11 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
     limitSide === 'max' ? 'Максимальное значение' : null;
 
   return (
-    <div className={`stepper${limitSide ? ' stepper--limit' : ''}`}>
-      <div className='stepper-row'>
-        <button className='stepper-btn' type='button' onClick={() => handleStep(-1)}>−</button>
+    <div className={`${styles.stepper}${limitSide ? ` ${styles.stepperLimit}` : ''}`}>
+      <div className={styles.stepperRow}>
+        <button className={styles.stepperBtn} type='button' onClick={() => handleStep(-1)}>−</button>
         <input
-          className='stepper-field'
+          className={styles.stepperField}
           type='number'
           id={id}
           value={value}
@@ -96,9 +96,9 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
             if (!isNaN(val)) onChange(String(clamp(val, min, max)));
           }}
         />
-        <button className='stepper-btn' type='button' onClick={() => handleStep(1)}>+</button>
+        <button className={styles.stepperBtn} type='button' onClick={() => handleStep(1)}>+</button>
       </div>
-      {hintText && <span className='stepper-hint'>{hintText}</span>}
+      {hintText && <span className={styles.stepperHint}>{hintText}</span>}
     </div>
   );
 }
@@ -145,11 +145,11 @@ export default function Parameters({
   const maxDepth = defaultDepth !== null ? defaultDepth : undefined;
 
   return (
-    <aside className='parameters'>
-      <h2 className='title'>Параметры</h2>
+    <aside className={styles.parameters}>
+      <h2 className={styles.title}>Параметры</h2>
 
-      <div className='param-group'>
-        <label className='group-label' htmlFor='series'>Серия шкафа</label>
+      <div className={styles.paramGroup}>
+        <label className={styles.groupLabel} htmlFor='series'>Серия шкафа</label>
         <CustomSelect
           id='series'
           value={seriesId}
@@ -159,8 +159,8 @@ export default function Parameters({
         />
       </div>
 
-      <div className='param-group'>
-        <label className='group-label' htmlFor='model'>Модель шкафа</label>
+      <div className={styles.paramGroup}>
+        <label className={styles.groupLabel} htmlFor='model'>Модель шкафа</label>
         <CustomSelect
           id='model'
           value={modelId}
@@ -170,31 +170,31 @@ export default function Parameters({
         />
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Изменение габаритов</span>
-        <div className='dim-fields'>
-          <div className='param-group'>
-            <label className='group-label group-label--sm' htmlFor='width'>Ширина (мм)</label>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Изменение габаритов</span>
+        <div className={styles.dimFields}>
+          <div className={styles.paramGroup}>
+            <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='width'>Ширина (мм)</label>
             <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} />
           </div>
-          <div className='param-group'>
-            <label className='group-label group-label--sm' htmlFor='height'>Высота (мм)</label>
+          <div className={styles.paramGroup}>
+            <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='height'>Высота (мм)</label>
             <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} />
           </div>
-          <div className='param-group'>
-            <label className='group-label group-label--sm' htmlFor='depth'>Глубина (мм)</label>
+          <div className={styles.paramGroup}>
+            <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='depth'>Глубина (мм)</label>
             <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} />
           </div>
         </div>
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Толщина металла корпуса (мм)</span>
-        <div className='toggle-group'>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
+        <div className={styles.toggleGroup}>
           {bodyThicknessOptions.map(t => (
             <button
               key={t}
-              className={`toggle-btn${bodyThickness === t ? ' toggle-btn--active' : ''}`}
+              className={`${styles.toggleBtn}${bodyThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
               onClick={() => setBodyThickness(t)}
             >
               {t}
@@ -203,13 +203,13 @@ export default function Parameters({
         </div>
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Толщина металла двери (мм)</span>
-        <div className='toggle-group'>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Толщина металла двери (мм)</span>
+        <div className={styles.toggleGroup}>
           {doorThicknessOptions.map(t => (
             <button
               key={t}
-              className={`toggle-btn${doorThickness === t ? ' toggle-btn--active' : ''}`}
+              className={`${styles.toggleBtn}${doorThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
               onClick={() => setDoorThickness(t)}
             >
               {t}
@@ -218,33 +218,33 @@ export default function Parameters({
         </div>
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Выбор замка</span>
-        <ul className='lock-list'>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Выбор замка</span>
+        <ul className={styles.lockList}>
           {lockEntries.map(([id, lock]) => (
             <li key={id}>
               <button
-                className={`lock-item${lockId === id ? ' lock-item--active' : ''}`}
+                className={`${styles.lockItem}${lockId === id ? ` ${styles.lockItemActive}` : ''}`}
                 onClick={() => setLockId(id)}
               >
-                <span className='lock-name'>{lock.name}</span>
+                <span className={styles.lockName}>{lock.name}</span>
               </button>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Дополнительная вентиляция шкафа</span>
-        <div className='vent-toggle'>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Дополнительная вентиляция шкафа</span>
+        <div className={styles.ventToggle}>
           <button
-            className={`vent-btn${ventilation ? ' vent-btn--active' : ''}`}
+            className={`${styles.ventBtn}${ventilation ? ` ${styles.ventBtnActive}` : ''}`}
             onClick={() => setVentilation(true)}
           >
             Да
           </button>
           <button
-            className={`vent-btn${!ventilation ? ' vent-btn--active' : ''}`}
+            className={`${styles.ventBtn}${!ventilation ? ` ${styles.ventBtnActive}` : ''}`}
             onClick={() => setVentilation(false)}
           >
             Нет
@@ -252,13 +252,13 @@ export default function Parameters({
         </div>
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Изменение цвета корпуса</span>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Изменение цвета корпуса</span>
         <ColorPicker placeholder='Стандартный цвет' selected={bodyColor} onSelect={setBodyColor} />
       </div>
 
-      <div className='param-group'>
-        <span className='group-label'>Изменение цвета двери</span>
+      <div className={styles.paramGroup}>
+        <span className={styles.groupLabel}>Изменение цвета двери</span>
         <ColorPicker placeholder='Стандартный цвет' selected={doorColor} onSelect={setDoorColor} />
       </div>
     </aside>

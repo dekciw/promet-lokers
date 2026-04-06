@@ -34,7 +34,7 @@
 	gap: 2px;
 }
 
-.site-name {
+.siteName {
 	font-family: var(--f-display);
 	font-size: 20px;
 	font-weight: 400;
@@ -103,7 +103,7 @@
 		gap: 10px;
 	}
 
-	.site-name {
+	.siteName {
 		font-size: 17px;
 	}
 
@@ -121,7 +121,7 @@
 		display: none;
 	}
 
-	.site-name {
+	.siteName {
 		font-size: 15px;
 	}
 }
@@ -144,7 +144,7 @@
 	background: rgba(255, 255, 255, 0.08);
 }
 
-.account-icon {
+.accountIcon {
 	width: 17px;
 	height: 17px;
 	object-fit: contain;
@@ -152,7 +152,7 @@
 	opacity: 0.85;
 }
 
-.account-text {
+.accountText {
 	font-size: 13px;
 	font-weight: 500;
 	color: rgba(255, 255, 255, 0.85);

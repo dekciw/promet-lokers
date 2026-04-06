@@ -1,6 +1,6 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { calcDiff } from '../../utils/calcDiff';
-import './Configurator.css';
+import styles from './Configurator.module.css';
 
 function buildCurrentForDiff(config, lock) {
 	// width/height/depth → Number, чтобы '400' !== 400 не давало ложный диф
@@ -97,94 +97,94 @@ export default function Configurator({ config, price, catalog }) {
 
 	return (
 		<main className='layout__content'>
-			<div className='configurator'>
-				<div className='top-row'>
-					<div className='heading'>
-						<h1 className='title'>Конфигурация</h1>
-						<div className='model'>
-							<span className='model-label'>Текущая модель:</span>
-							<span className='model-value'>{modelDisplay}</span>
+			<div className={styles.configurator}>
+				<div className={styles.topRow}>
+					<div className={styles.heading}>
+						<h1 className={styles.title}>Конфигурация</h1>
+						<div className={styles.model}>
+							<span className={styles.modelLabel}>Текущая модель:</span>
+							<span className={styles.modelValue}>{modelDisplay}</span>
 						</div>
 					</div>
 
-					<div className='article-badge'>
-						<span className='badge-label'>Артикул</span>
-						<span className='badge-code'>{model?.article ?? '—'}</span>
+					<div className={styles.articleBadge}>
+						<span className={styles.badgeLabel}>Артикул</span>
+						<span className={styles.badgeCode}>{model?.article ?? '—'}</span>
 					</div>
 				</div>
 
 				{/* 3D Предпросмотр — скрыт до реализации (Фаза 3) */}
 
-				<div className='config-grid'>
-					<div className='config-col config-col--default'>
-						<span className='col-title'>
+				<div className={styles.configGrid}>
+					<div className={`${styles.configCol} ${styles.configColDefault}`}>
+						<span className={styles.colTitle}>
 							Стандартное
 							<br />
 							исполнение
 						</span>
 						{defaultSpecsList.length === 0 ? (
-							<p className='no-changes'>Выберите модель</p>
+							<p className={styles.noChanges}>Выберите модель</p>
 						) : (
-							<ul className='spec-list'>
+							<ul className={styles.specList}>
 								{defaultSpecsList.map(({ label, value }) => (
-									<li key={label} className='spec-item'>
-										<span className='spec-label'>{label}</span>
-										<span className='spec-value'>{value}</span>
+									<li key={label} className={styles.specItem}>
+										<span className={styles.specLabel}>{label}</span>
+										<span className={styles.specValue}>{value}</span>
 									</li>
 								))}
 							</ul>
 						)}
 					</div>
 
-					<div className='config-col config-col--changed'>
-						<span className='col-title'>
+					<div className={`${styles.configCol} ${styles.configColChanged}`}>
+						<span className={styles.colTitle}>
 							Нестандартное
 							<br />
 							исполнение
 						</span>
 						{diffItemsToRender.length === 0 ? (
-							<p className='no-changes'>Нет изменений</p>
+							<p className={styles.noChanges}>Нет изменений</p>
 						) : (
-							<ul className='diff-list'>
+							<ul className={styles.diffList}>
 								{diffItemsToRender.map(({ label, value, leaving }) => (
 									<li
 										key={label}
-										className={`diff-item${leaving ? ' diff-item--leaving' : ''}`}
+										className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}`}
 									>
-										<span className='diff-label'>{label}</span>
-										<span className='diff-value'>{value}</span>
+										<span className={styles.diffLabel}>{label}</span>
+										<span className={styles.diffValue}>{value}</span>
 									</li>
 								))}
 							</ul>
 						)}
 					</div>
 
-					<div className='config-col config-col--final'>
-						<div className='col-top'>
-							<span className='col-title'>
+					<div className={`${styles.configCol} ${styles.configColFinal}`}>
+						<div className={styles.colTop}>
+							<span className={styles.colTitle}>
 								Итоговая
 								<br />
 								конфигурация
 							</span>
-							<ul className='final-spec'>
+							<ul className={styles.finalSpec}>
 								{finalSpecsList.map(({ label, value }) => (
-									<li key={label} className='final-item'>
-										<span className='final-label'>{label}</span>
-										<span className='final-value'>{value}</span>
+									<li key={label} className={styles.finalItem}>
+										<span className={styles.finalLabel}>{label}</span>
+										<span className={styles.finalValue}>{value}</span>
 									</li>
 								))}
-								<li className='final-item final-item--price'>
-									<span className='final-label'>Стоимость:</span>
-									<span className='final-value'>{priceDisplay}</span>
+								<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
+									<span className={styles.finalLabel}>Стоимость:</span>
+									<span className={styles.finalValue}>{priceDisplay}</span>
 								</li>
 							</ul>
 						</div>
 
-						<div className='actions'>
-							<button className='btn btn--primary' disabled={!model}>
+						<div className={styles.actions}>
+							<button className={`${styles.btn} ${styles.btnPrimary}`} disabled={!model}>
 								КП для клиента
 							</button>
-							<button className='btn btn--secondary' disabled={!model}>
+							<button className={`${styles.btn} ${styles.btnSecondary}`} disabled={!model}>
 								Бланк НЗ
 							</button>
 						</div>

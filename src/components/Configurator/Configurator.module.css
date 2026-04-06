@@ -8,7 +8,7 @@
 }
 
 /* Верхняя строка: заголовок слева, артикул справа */
-.top-row {
+.topRow {
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
@@ -37,14 +37,14 @@
 	flex-wrap: wrap;
 }
 
-.model-label {
+.modelLabel {
 	font-size: 16px;
 	font-weight: 400;
 	color: var(--c-text-muted);
 	line-height: 24px;
 }
 
-.model-value {
+.modelValue {
 	font-size: 16px;
 	font-weight: 600;
 	color: var(--c-text-mid);
@@ -52,7 +52,7 @@
 }
 
 /* Бейдж артикула */
-.article-badge {
+.articleBadge {
 	background: var(--c-white);
 	border: 1px solid var(--c-border);
 	border-radius: var(--r-sm);
@@ -63,7 +63,7 @@
 	flex-shrink: 0;
 }
 
-.badge-label {
+.badgeLabel {
 	font-size: 10px;
 	font-weight: 700;
 	color: var(--c-text-faint);
@@ -72,7 +72,7 @@
 	line-height: 15px;
 }
 
-.badge-code {
+.badgeCode {
 	font-family: var(--f-mono);
 	font-weight: 700;
 	font-size: 14px;
@@ -81,14 +81,14 @@
 }
 
 /* Сетка трёх колонок */
-.config-grid {
+.configGrid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	gap: 24px;
 }
 
 /* Колонки */
-.config-col {
+.configCol {
 	border-radius: var(--r-lg);
 	padding: 21px;
 	display: flex;
@@ -96,17 +96,17 @@
 	gap: 16px;
 }
 
-.config-col--default {
+.configColDefault {
 	background: var(--card-default-bg);
 	border: 1px solid var(--card-default-border);
 }
 
-.config-col--changed {
+.configColChanged {
 	background: var(--card-changed-bg);
 	border: 1px solid var(--card-changed-border);
 }
 
-.config-col--final {
+.configColFinal {
 	background: var(--card-final-bg);
 	border: 1px solid var(--card-final-border);
 	padding: 24px;
@@ -114,7 +114,7 @@
 	box-shadow: var(--s-primary);
 }
 
-.col-title {
+.colTitle {
 	display: block;
 	font-size: 16px;
 	font-weight: 400;
@@ -124,16 +124,16 @@
 	line-height: 24px;
 }
 
-.config-col--changed .col-title {
+.configColChanged .colTitle {
 	color: var(--card-changed-title);
 }
 
-.config-col--final .col-title {
+.configColFinal .colTitle {
 	font-weight: 700;
 	color: var(--card-final-text);
 }
 
-.col-top {
+.colTop {
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -182,13 +182,13 @@
 }
 
 /* Список стандартного исполнения */
-.spec-list {
+.specList {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 }
 
-.spec-item {
+.specItem {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -199,23 +199,23 @@
 	animation: itemIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
-.spec-item:first-child {
+.specItem:first-child {
 	padding-top: 0;
 }
 
-.spec-item:last-child {
+.specItem:last-child {
 	border-bottom: none;
 	padding-bottom: 0;
 }
 
-.spec-label {
+.specLabel {
 	font-size: 12px;
 	font-weight: 400;
 	color: var(--card-default-title);
 	line-height: 16px;
 }
 
-.spec-value {
+.specValue {
 	font-size: 12px;
 	font-weight: 500;
 	color: var(--card-default-text);
@@ -223,7 +223,7 @@
 }
 
 /* Плейсхолдер при отсутствии данных / изменений */
-.no-changes {
+.noChanges {
 	font-size: 12px;
 	font-weight: 400;
 	color: var(--c-text-faint);
@@ -232,13 +232,13 @@
 }
 
 /* Список нестандартного исполнения */
-.diff-list {
+.diffList {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 }
 
-.diff-item {
+.diffItem {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -249,21 +249,21 @@
 	animation: itemIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
-.diff-item--leaving {
+.diffItemLeaving {
 	animation: itemOut 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 	pointer-events: none;
 }
 
-.diff-item:first-child {
+.diffItem:first-child {
 	padding-top: 0;
 }
 
-.diff-item:last-child {
+.diffItem:last-child {
 	border-bottom: none;
 	padding-bottom: 0;
 }
 
-.diff-label {
+.diffLabel {
 	font-size: 12px;
 	font-weight: 400;
 	color: var(--card-changed-title);
@@ -271,7 +271,7 @@
 	line-height: 16px;
 }
 
-.diff-value {
+.diffValue {
 	font-size: 12px;
 	font-weight: 500;
 	color: var(--card-changed-text);
@@ -279,13 +279,13 @@
 }
 
 /* Итоговая колонка */
-.final-spec {
+.finalSpec {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 }
 
-.final-item {
+.finalItem {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
@@ -296,38 +296,38 @@
 	animation: itemIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
-.final-item + .final-item {
+.finalItem + .finalItem {
 	padding-top: 8px;
 }
 
-.final-item:last-child {
+.finalItem:last-child {
 	border-bottom: none;
 	padding-bottom: 0;
 	padding-top: 8px;
 	align-items: center;
 }
 
-.final-label {
+.finalLabel {
 	font-size: 12px;
 	font-weight: 400;
 	color: var(--card-final-label);
 	line-height: 16px;
 }
 
-.final-value {
+.finalValue {
 	font-size: 12px;
 	font-weight: 500;
 	color: var(--card-final-text);
 	line-height: 16px;
 }
 
-.final-item--price .final-label {
+.finalItemPrice .finalLabel {
 	font-size: 14px;
 	color: var(--card-final-label);
 	line-height: 20px;
 }
 
-.final-item--price .final-value {
+.finalItemPrice .finalValue {
 	font-size: 18px;
 	font-weight: 700;
 	line-height: 28px;
@@ -363,34 +363,34 @@
 	transform: scale(0.97);
 }
 
-.btn--primary {
+.btnPrimary {
 	background: var(--c-orange);
 	color: #fff;
 	border: none;
 	box-shadow: 0 4px 12px rgba(245, 130, 20, 0.35);
 }
 
-.btn--primary:hover {
+.btnPrimary:hover {
 	background: var(--c-orange-hover);
 }
 
-.btn--primary:active {
+.btnPrimary:active {
 	background: var(--c-orange-active);
 	box-shadow: 0 2px 6px rgba(245, 130, 20, 0.25);
 	transform: translateY(0);
 }
 
-.btn--secondary {
+.btnSecondary {
 	background: rgba(255, 255, 255, 0.1);
 	color: #fff;
 	border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.btn--secondary:hover {
+.btnSecondary:hover {
 	background: rgba(255, 255, 255, 0.2);
 }
 
-.btn--secondary:active {
+.btnSecondary:active {
 	background: rgba(255, 255, 255, 0.28);
 	transform: none;
 }
@@ -414,11 +414,11 @@
 
 /* Планшет (≤1023px) — сетка 2 колонки, итоговая карточка на всю ширину */
 @media (max-width: 1023px) {
-	.config-grid {
+	.configGrid {
 		grid-template-columns: 1fr 1fr;
 	}
 
-	.config-col--final {
+	.configColFinal {
 		grid-column: 1 / -1;
 	}
 }
@@ -430,12 +430,12 @@
 		gap: 16px;
 	}
 
-	.config-grid {
+	.configGrid {
 		grid-template-columns: 1fr;
 		gap: 12px;
 	}
 
-	.config-col--final {
+	.configColFinal {
 		grid-column: unset;
 	}
 
@@ -444,12 +444,12 @@
 		line-height: 28px;
 	}
 
-	.model-label,
-	.model-value {
+	.modelLabel,
+	.modelValue {
 		font-size: 14px;
 	}
 
-	.top-row {
+	.topRow {
 		gap: 12px;
 	}
 }

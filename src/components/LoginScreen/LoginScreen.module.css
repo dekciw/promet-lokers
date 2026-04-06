@@ -1,4 +1,4 @@
-@keyframes login-shake {
+@keyframes loginShake {
   0%, 100% { transform: translateX(0); }
   20%       { transform: translateX(-8px); }
   40%       { transform: translateX(8px); }
@@ -6,7 +6,7 @@
   80%       { transform: translateX(6px); }
 }
 
-.login-page {
+.loginPage {
   min-height: 100vh;
   background: var(--c-bg);
   display: flex;
@@ -15,7 +15,7 @@
   padding: 24px;
 }
 
-.login-card {
+.loginCard {
   background: var(--c-white);
   border: 1px solid var(--c-border);
   border-radius: var(--r-lg);
@@ -28,30 +28,28 @@
   gap: 32px;
 }
 
-.login-card--shake {
-  animation: login-shake 0.4s ease;
+.loginCardShake {
+  animation: loginShake 0.4s ease;
 }
 
-/* Логотип */
-.login-logo {
+.loginLogo {
   display: flex;
   justify-content: center;
 }
 
-.login-logo-img {
+.loginLogoImg {
   height: 48px;
   width: auto;
 }
 
-/* Заголовок */
-.login-header {
+.loginHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
 }
 
-.login-title {
+.loginTitle {
   font-size: 22px;
   font-weight: 700;
   color: var(--c-brand);
@@ -59,34 +57,33 @@
   letter-spacing: -0.3px;
 }
 
-.login-subtitle {
+.loginSubtitle {
   font-size: 13px;
   font-weight: 400;
   color: var(--c-text-muted);
   line-height: 20px;
 }
 
-/* Форма */
-.login-form {
+.loginForm {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.login-field {
+.loginField {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.login-label {
+.loginLabel {
   font-size: 13px;
   font-weight: 500;
   color: var(--c-text-mid);
   letter-spacing: 0.2px;
 }
 
-.login-input {
+.loginInput {
   height: 44px;
   padding: 0 14px;
   border: 1px solid var(--c-border);
@@ -99,25 +96,24 @@
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.login-input:focus {
+.loginInput:focus {
   border-color: var(--c-primary);
   box-shadow: 0 0 0 2px var(--c-primary-border);
 }
 
-.login-input--error {
+.loginInputError {
   border-color: #e53e3e;
   box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.15);
 }
 
-.login-error {
+.loginError {
   font-size: 13px;
   color: #e53e3e;
   text-align: center;
   margin-top: -4px;
 }
 
-/* Кнопка */
-.login-btn {
+.loginBtn {
   margin-top: 4px;
   height: 46px;
   width: 100%;
@@ -133,19 +129,18 @@
   box-shadow: 0 4px 12px rgba(12, 83, 179, 0.3);
 }
 
-.login-btn:hover {
+.loginBtn:hover {
   background: #0a47a0;
 }
 
-.login-btn:active {
+.loginBtn:active {
   background: #093d8a;
   transform: scale(0.98);
   box-shadow: 0 2px 6px rgba(12, 83, 179, 0.2);
 }
 
-/* Мобильный */
 @media (max-width: 480px) {
-  .login-card {
+  .loginCard {
     padding: 36px 24px 32px;
   }
 }

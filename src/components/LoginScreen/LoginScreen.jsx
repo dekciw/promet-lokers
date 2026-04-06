@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import './LoginScreen.css';
+import styles from './LoginScreen.module.css';
 
 const LOGIN = 'admin';
 const PASSWORD = '1787810';
@@ -30,22 +30,22 @@ export default function LoginScreen({ onAuth }) {
   }
 
   return (
-    <div className='login-page'>
-      <div className={`login-card${shake ? ' login-card--shake' : ''}`}>
-        <div className='login-logo'>
-          <img src='/img/logo.svg' alt='Промет' className='login-logo-img' />
+    <div className={styles.loginPage}>
+      <div className={`${styles.loginCard}${shake ? ` ${styles.loginCardShake}` : ''}`}>
+        <div className={styles.loginLogo}>
+          <img src='/img/logo.svg' alt='Промет' className={styles.loginLogoImg} />
         </div>
 
-        <div className='login-header'>
-          <h1 className='login-title'>Вход в систему</h1>
-          <p className='login-subtitle'>Конфигуратор шкафов-локеров</p>
+        <div className={styles.loginHeader}>
+          <h1 className={styles.loginTitle}>Вход в систему</h1>
+          <p className={styles.loginSubtitle}>Конфигуратор шкафов-локеров</p>
         </div>
 
-        <form className='login-form' onSubmit={handleSubmit} noValidate>
-          <div className='login-field'>
-            <label className='login-label' htmlFor='login'>Логин</label>
+        <form className={styles.loginForm} onSubmit={handleSubmit} noValidate>
+          <div className={styles.loginField}>
+            <label className={styles.loginLabel} htmlFor='login'>Логин</label>
             <input
-              className={`login-input${error ? ' login-input--error' : ''}`}
+              className={`${styles.loginInput}${error ? ` ${styles.loginInputError}` : ''}`}
               id='login'
               type='text'
               value={login}
@@ -55,10 +55,10 @@ export default function LoginScreen({ onAuth }) {
             />
           </div>
 
-          <div className='login-field'>
-            <label className='login-label' htmlFor='password'>Пароль</label>
+          <div className={styles.loginField}>
+            <label className={styles.loginLabel} htmlFor='password'>Пароль</label>
             <input
-              className={`login-input${error ? ' login-input--error' : ''}`}
+              className={`${styles.loginInput}${error ? ` ${styles.loginInputError}` : ''}`}
               id='password'
               type='password'
               value={password}
@@ -68,10 +68,10 @@ export default function LoginScreen({ onAuth }) {
           </div>
 
           {error && (
-            <p className='login-error'>Неверный логин или пароль</p>
+            <p className={styles.loginError}>Неверный логин или пароль</p>
           )}
 
-          <button className='login-btn' type='submit'>
+          <button className={styles.loginBtn} type='submit'>
             Войти
           </button>
         </form>
