@@ -54,9 +54,7 @@ export default function Configurator({ config, price, catalog }) {
 	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
 
-	const defaultsForDiff = defaults
-		? { ...defaults, lockName: catalog.locks[defaults.lockId]?.name }
-		: null;
+	const defaultsForDiff = defaults ? { ...defaults, lockName: catalog.locks[defaults.lockId]?.name } : null;
 	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff);
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
@@ -72,10 +70,7 @@ export default function Configurator({ config, price, catalog }) {
 
 		if (removed.length === 0) return;
 
-		setLeavingItems(curr => [
-			...curr.filter(c => !removed.some(r => r.label === c.label)),
-			...removed,
-		]);
+		setLeavingItems(curr => [...curr.filter(c => !removed.some(r => r.label === c.label)), ...removed]);
 
 		const timer = setTimeout(() => {
 			setLeavingItems(curr => curr.filter(c => !removed.some(r => r.label === c.label)));
@@ -87,9 +82,7 @@ export default function Configurator({ config, price, catalog }) {
 	// Для рендера: текущие + уходящие (уходящие помечены флагом)
 	const diffItemsToRender = [
 		...changedSpecs.map(item => ({ ...item, leaving: false })),
-		...leavingItems
-			.filter(l => !changedSpecs.some(c => c.label === l.label))
-			.map(item => ({ ...item, leaving: true })),
+		...leavingItems.filter(l => !changedSpecs.some(c => c.label === l.label)).map(item => ({ ...item, leaving: true })),
 	];
 
 	const priceDisplay = price !== null ? `${price.toLocaleString('ru-RU')} ₽` : '—';
@@ -147,10 +140,7 @@ export default function Configurator({ config, price, catalog }) {
 						) : (
 							<ul className={styles.diffList}>
 								{diffItemsToRender.map(({ label, value, leaving }) => (
-									<li
-										key={label}
-										className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}`}
-									>
+									<li key={label} className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}`}>
 										<span className={styles.diffLabel}>{label}</span>
 										<span className={styles.diffValue}>{value}</span>
 									</li>
