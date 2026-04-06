@@ -1,32 +1,29 @@
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import styles from './LoginScreen.module.css';
 
 const LOGIN = 'admin';
 const PASSWORD = '1787810';
 
-export default function LoginScreen({ onAuth }) {
-  const [login, setLogin] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState(false);
+export function LoginScreen({ onAuth }) {
   const [shake, setShake] = useState(false);
 
-  function handleSubmit(e) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm();
+
+  function onSubmit({ login, password }) {
     if (login === LOGIN && password === PASSWORD) {
       localStorage.setItem('promet_auth', '1');
       onAuth();
     } else {
-      setError(true);
+      setError('root', { message: 'Неверный логин или пароль' });
       setShake(true);
       setTimeout(() => setShake(false), 400);
     }
-  }
-
-  function handleChange(setter) {
-    return (e) => {
-      setError(false);
-      setter(e.target.value);
-    };
   }
 
   return (
@@ -41,34 +38,32 @@ export default function LoginScreen({ onAuth }) {
           <p className={styles.loginSubtitle}>Конфигуратор шкафов-локеров</p>
         </div>
 
-        <form className={styles.loginForm} onSubmit={handleSubmit} noValidate>
+        <form className={styles.loginForm} onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className={styles.loginField}>
             <label className={styles.loginLabel} htmlFor='login'>Логин</label>
             <input
-              className={`${styles.loginInput}${error ? ` ${styles.loginInputError}` : ''}`}
+              className={`${styles.loginInput}${errors.root ? ` ${styles.loginInputError}` : ''}`}
               id='login'
               type='text'
-              value={login}
-              onChange={handleChange(setLogin)}
               autoComplete='username'
               autoFocus
+              {...register('login', { required: true })}
             />
           </div>
 
           <div className={styles.loginField}>
             <label className={styles.loginLabel} htmlFor='password'>Пароль</label>
             <input
-              className={`${styles.loginInput}${error ? ` ${styles.loginInputError}` : ''}`}
+              className={`${styles.loginInput}${errors.root ? ` ${styles.loginInputError}` : ''}`}
               id='password'
               type='password'
-              value={password}
-              onChange={handleChange(setPassword)}
               autoComplete='current-password'
+              {...register('password', { required: true })}
             />
           </div>
 
-          {error && (
-            <p className={styles.loginError}>Неверный логин или пароль</p>
+          {errors.root && (
+            <p className={styles.loginError}>{errors.root.message}</p>
           )}
 
           <button className={styles.loginBtn} type='submit'>

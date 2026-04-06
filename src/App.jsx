@@ -3,7 +3,7 @@ import Header from './components/Header/Header';
 import Configurator from './components/Configurator/Configurator';
 import Parameters from './components/Parameters/Parameters';
 import Footer from './components/Footer/Footer';
-import LoginScreen from './components/LoginScreen/LoginScreen';
+import { LoginScreen } from './components/LoginScreen/LoginScreen';
 import { loadCatalog } from './api/loadCatalog';
 import './index.css';
 
