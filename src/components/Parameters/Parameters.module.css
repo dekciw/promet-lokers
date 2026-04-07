@@ -93,6 +93,16 @@
 	position: relative;
 }
 
+.cselectDisabled {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.cselectDisabled .cselectTrigger {
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
 .cselectTrigger {
 	display: flex;
 	align-items: center;

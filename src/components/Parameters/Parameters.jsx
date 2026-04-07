@@ -11,7 +11,7 @@ const WIDTH_RANGE = 50;
 const LIMIT_HINT_DURATION = 1500;
 const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 
-function CustomSelect({ id, value, onChange, options, placeholder }) {
+function CustomSelect({ id, value, onChange, options, placeholder, disabled }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const closeDropdown = useCallback(() => setOpen(false), []);
@@ -25,13 +25,14 @@ function CustomSelect({ id, value, onChange, options, placeholder }) {
   }
 
   return (
-    <div className={`${styles.cselect}${open ? ` ${styles.cselectOpen}` : ''}`} ref={ref}>
+    <div className={`${styles.cselect}${open ? ` ${styles.cselectOpen}` : ''}${disabled ? ` ${styles.cselectDisabled}` : ''}`} ref={ref}>
       <button
         type='button'
         id={id}
         className={styles.cselectTrigger}
-        onClick={e => { e.stopPropagation(); setOpen(p => !p); }}
+        onClick={e => { if (disabled) return; e.stopPropagation(); setOpen(p => !p); }}
         aria-expanded={open}
+        disabled={disabled}
       >
         <span className={`${styles.cselectText}${!selected ? ` ${styles.cselectTextPlaceholder}` : ''}`}>
           {selected ? selected.label : placeholder}
@@ -127,9 +128,9 @@ export default function Parameters({
   const { seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor } =
     config;
 
-  const modelEntries = Object.entries(catalog.models).filter(
-    ([, m]) => !seriesId || m.seriesId === seriesId
-  );
+  const modelEntries = seriesId
+    ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId)
+    : [];
 
   const lockEntries = Object.entries(catalog.locks).sort((a, b) => a[1].surcharge - b[1].surcharge);
 
@@ -178,6 +179,7 @@ export default function Parameters({
           onChange={onModelChange}
           placeholder='Выберите модель'
           options={modelEntries.map(([id, m]) => ({ value: id, label: m.name }))}
+          disabled={!seriesId}
         />
         {seriesId && !modelId && (
           <p className={styles.hint}>Теперь выберите модель шкафа</p>
