@@ -186,6 +186,8 @@ export default function Parameters({
         )}
       </div>
 
+      <div className={!modelId ? styles.paramsDisabled : undefined}>
+
       <div className={styles.paramGroup}>
         <span className={styles.groupLabel}>Изменение габаритов</span>
         <div className={styles.dimFields}>
@@ -281,6 +283,7 @@ export default function Parameters({
       </div>
 
       </div>{/* /paramsGrid */}
+      </div>{/* /paramsDisabled */}
     </aside>
   );
 }

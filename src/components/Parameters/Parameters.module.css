@@ -93,6 +93,12 @@
 	position: relative;
 }
 
+.paramsDisabled {
+	opacity: 0.4;
+	pointer-events: none;
+	user-select: none;
+}
+
 .cselectDisabled {
 	opacity: 0.45;
 	cursor: not-allowed;
