@@ -94,9 +94,18 @@
 }
 
 .paramsDisabled {
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
 	opacity: 0.4;
 	pointer-events: none;
 	user-select: none;
+}
+
+.paramsGrid {
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
 }
 
 .cselectDisabled {
