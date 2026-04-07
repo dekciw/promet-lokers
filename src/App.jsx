@@ -90,7 +90,7 @@ export default function App() {
     }, 330);
   }
 
-  function handleModelChange(newModelId) {
+  function applyModel(newModelId) {
     setModelId(newModelId);
     if (newModelId && catalog?.models[newModelId]) {
       const specs = catalog.models[newModelId].defaultSpecs;
@@ -105,6 +105,18 @@ export default function App() {
       setDepth('');
       setBodyThickness(DEFAULT_THICKNESS);
       setDoorThickness(DEFAULT_THICKNESS);
+    }
+  }
+
+  function handleModelChange(newModelId) {
+    if (modelId && newModelId) {
+      setIsResetting(true);
+      setTimeout(() => {
+        applyModel(newModelId);
+        setIsResetting(false);
+      }, 330);
+    } else {
+      applyModel(newModelId);
     }
   }
 

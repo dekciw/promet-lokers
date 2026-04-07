@@ -122,7 +122,7 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 									: 'Выберите модель шкафа'}
 							</p>
 						) : (
-							<ul className={styles.specList}>
+							<ul className={styles.specList} key={config.modelId}>
 								{defaultSpecsList.map(({ label, value }) => (
 									<li key={label} className={styles.specItem}>
 										<span className={styles.specLabel}>{label}</span>
@@ -160,7 +160,7 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 								<br />
 								конфигурация
 							</span>
-							<ul className={styles.finalSpec}>
+							<ul className={styles.finalSpec} key={config.modelId}>
 								{finalSpecsList.map(({ label, value }) => (
 									<li key={label} className={styles.finalItem}>
 										<span className={styles.finalLabel}>{label}</span>
