@@ -196,6 +196,8 @@ export default function Parameters({
         </div>
       </div>
 
+      <div className={styles.paramsGrid}>
+
       <div className={styles.paramGroup}>
         <span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
         <div className={styles.toggleGroup}>
@@ -269,6 +271,8 @@ export default function Parameters({
         <span className={styles.groupLabel}>Изменение цвета двери</span>
         <ColorPicker placeholder='Стандартный цвет' selected={doorColor} onSelect={setDoorColor} />
       </div>
+
+      </div>{/* /paramsGrid */}
     </aside>
   );
 }

@@ -432,6 +432,11 @@
 		grid-template-columns: 1fr 1fr;
 		gap: 24px 32px;
 	}
+
+	/* Замок — на всю ширину, список слишком длинный для полуколонки */
+	.paramsGrid .paramGroup:has(.lockList) {
+		grid-column: 1 / -1;
+	}
 }
 
 /* Мобильный (≤767px) — одна колонка, компактные отступы */
