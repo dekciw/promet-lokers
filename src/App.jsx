@@ -72,6 +72,20 @@ export default function App() {
     }, 330);
   }
 
+  function handleSeriesChange(newSeriesId) {
+    setSeriesId(newSeriesId);
+    setModelId('');
+    setWidth('');
+    setHeight('');
+    setDepth('');
+    setBodyThickness(DEFAULT_THICKNESS);
+    setDoorThickness(DEFAULT_THICKNESS);
+    setLockId('key_basic');
+    setVentilation(false);
+    setBodyColor(null);
+    setDoorColor(null);
+  }
+
   function handleModelChange(newModelId) {
     setModelId(newModelId);
     if (newModelId && catalog?.models[newModelId]) {
@@ -140,7 +154,7 @@ export default function App() {
         <Parameters
           config={config}
           catalog={catalog}
-          setSeriesId={setSeriesId}
+          setSeriesId={handleSeriesChange}
           onModelChange={handleModelChange}
           setWidth={setWidth}
           setHeight={setHeight}
