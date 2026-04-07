@@ -80,17 +80,6 @@
 	line-height: 20px;
 }
 
-@keyframes gridOut {
-	from {
-		opacity: 1;
-		transform: translateY(0);
-	}
-	to {
-		opacity: 0;
-		transform: translateY(10px);
-	}
-}
-
 /* Сетка трёх колонок */
 .configGrid {
 	display: grid;
@@ -98,8 +87,12 @@
 	gap: 24px;
 }
 
-.configGridLeaving {
-	animation: gridOut 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+/* При сбросе — все элементы списков сворачиваются как itemOut */
+.configGridLeaving .specItem,
+.configGridLeaving .diffItem,
+.configGridLeaving .finalItem {
+	animation: itemOut 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+	pointer-events: none;
 }
 
 /* Колонки */
