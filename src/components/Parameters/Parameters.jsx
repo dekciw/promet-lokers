@@ -186,7 +186,7 @@ export default function Parameters({
         )}
       </div>
 
-      <div className={!modelId ? styles.paramsDisabled : undefined}>
+      <div className={`${styles.paramsBody}${!modelId ? ` ${styles.paramsDisabled}` : ''}`}>
 
       <div className={styles.paramGroup}>
         <span className={styles.groupLabel}>Изменение габаритов</span>

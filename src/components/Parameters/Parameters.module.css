@@ -93,10 +93,13 @@
 	position: relative;
 }
 
-.paramsDisabled {
+.paramsBody {
 	display: flex;
 	flex-direction: column;
 	gap: 40px;
+}
+
+.paramsDisabled {
 	opacity: 0.4;
 	pointer-events: none;
 	user-select: none;
