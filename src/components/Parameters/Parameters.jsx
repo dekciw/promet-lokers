@@ -122,6 +122,7 @@ export default function Parameters({
   setVentilation,
   setBodyColor,
   setDoorColor,
+  onReset,
 }) {
   const { seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor } =
     config;
@@ -146,7 +147,14 @@ export default function Parameters({
 
   return (
     <aside className={styles.parameters}>
-      <h2 className={styles.title}>Параметры</h2>
+      <div className={styles.titleRow}>
+        <h2 className={styles.title}>Параметры</h2>
+        {config.modelId && (
+          <button type='button' className={styles.resetBtn} onClick={onReset}>
+            Сбросить
+          </button>
+        )}
+      </div>
 
       <div className={styles.paramGroup}>
         <label className={styles.groupLabel} htmlFor='series'>Серия шкафа</label>

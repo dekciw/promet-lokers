@@ -52,6 +52,20 @@ export default function App() {
       .catch(() => setCatalogError(true));
   }, [retryKey]);
 
+  function handleReset() {
+    setSeriesId('');
+    setModelId('');
+    setWidth('');
+    setHeight('');
+    setDepth('');
+    setBodyThickness(DEFAULT_THICKNESS);
+    setDoorThickness(DEFAULT_THICKNESS);
+    setLockId('key_basic');
+    setVentilation(false);
+    setBodyColor(null);
+    setDoorColor(null);
+  }
+
   function handleModelChange(newModelId) {
     setModelId(newModelId);
     if (newModelId && catalog?.models[newModelId]) {
@@ -131,6 +145,7 @@ export default function App() {
           setVentilation={setVentilation}
           setBodyColor={setBodyColor}
           setDoorColor={setDoorColor}
+          onReset={handleReset}
         />
       </div>
       <Footer />
