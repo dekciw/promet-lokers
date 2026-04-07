@@ -52,18 +52,24 @@ export default function App() {
       .catch(() => setCatalogError(true));
   }, [retryKey]);
 
+  const [isResetting, setIsResetting] = useState(false);
+
   function handleReset() {
-    setSeriesId('');
-    setModelId('');
-    setWidth('');
-    setHeight('');
-    setDepth('');
-    setBodyThickness(DEFAULT_THICKNESS);
-    setDoorThickness(DEFAULT_THICKNESS);
-    setLockId('key_basic');
-    setVentilation(false);
-    setBodyColor(null);
-    setDoorColor(null);
+    setIsResetting(true);
+    setTimeout(() => {
+      setSeriesId('');
+      setModelId('');
+      setWidth('');
+      setHeight('');
+      setDepth('');
+      setBodyThickness(DEFAULT_THICKNESS);
+      setDoorThickness(DEFAULT_THICKNESS);
+      setLockId('key_basic');
+      setVentilation(false);
+      setBodyColor(null);
+      setDoorColor(null);
+      setIsResetting(false);
+    }, 350);
   }
 
   function handleModelChange(newModelId) {
@@ -130,7 +136,7 @@ export default function App() {
     <>
       <Header />
       <div className='layout'>
-        <Configurator config={config} price={price} catalog={catalog} />
+        <Configurator config={config} price={price} catalog={catalog} isResetting={isResetting} />
         <Parameters
           config={config}
           catalog={catalog}

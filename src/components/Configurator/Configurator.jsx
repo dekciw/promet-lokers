@@ -48,7 +48,7 @@ function buildFinalSpecsList(config, defaults, lock) {
 	];
 }
 
-export default function Configurator({ config, price, catalog }) {
+export default function Configurator({ config, price, catalog, isResetting }) {
 	const model = config.modelId ? catalog.models[config.modelId] : null;
 	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
@@ -108,7 +108,7 @@ export default function Configurator({ config, price, catalog }) {
 
 				{/* 3D Предпросмотр — скрыт до реализации (Фаза 3) */}
 
-				<div className={styles.configGrid}>
+				<div className={`${styles.configGrid}${isResetting ? ` ${styles.configGridLeaving}` : ''}`}>
 					<div className={`${styles.configCol} ${styles.configColDefault}`}>
 						<span className={styles.colTitle}>
 							Стандартное
