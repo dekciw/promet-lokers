@@ -60,29 +60,43 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
 
 	// Отслеживаем элементы которые уходят из нестандартного заказа — держим их в DOM пока анимация не закончится
+	// Каждый элемент хранит modelId — чтобы при смене модели старые не появлялись в новой карточке
 	const [leavingItems, setLeavingItems] = useState([]);
 	const prevSpecsRef = useRef([]);
+	const prevModelIdRef = useRef(config.modelId);
 
 	useLayoutEffect(() => {
+		// При смене модели — обновляем ref и выходим без setState
+		// Старые leaving-элементы отфильтруются в рендере по modelId
+		if (prevModelIdRef.current !== config.modelId) {
+			prevModelIdRef.current = config.modelId;
+			prevSpecsRef.current = changedSpecs;
+			return;
+		}
+
 		const prev = prevSpecsRef.current;
 		const removed = prev.filter(p => !changedSpecs.some(c => c.label === p.label));
 		prevSpecsRef.current = changedSpecs;
 
 		if (removed.length === 0) return;
 
-		setLeavingItems(curr => [...curr.filter(c => !removed.some(r => r.label === c.label)), ...removed]);
+		const withModel = removed.map(r => ({ ...r, modelId: config.modelId }));
+
+		setLeavingItems(curr => [...curr.filter(c => !removed.some(r => r.label === c.label)), ...withModel]);
 
 		const timer = setTimeout(() => {
 			setLeavingItems(curr => curr.filter(c => !removed.some(r => r.label === c.label)));
 		}, 400);
 
 		return () => clearTimeout(timer);
-	}, [changedSpecs]);
+	}, [changedSpecs, config.modelId]);
 
-	// Для рендера: текущие + уходящие (уходящие помечены флагом)
+	// Для рендера: текущие + уходящие только текущей модели (старые отфильтровываются автоматически)
 	const diffItemsToRender = [
 		...changedSpecs.map(item => ({ ...item, leaving: false })),
-		...leavingItems.filter(l => !changedSpecs.some(c => c.label === l.label)).map(item => ({ ...item, leaving: true })),
+		...leavingItems
+			.filter(l => l.modelId === config.modelId && !changedSpecs.some(c => c.label === l.label))
+			.map(item => ({ ...item, leaving: true })),
 	];
 
 	const priceDisplay = price !== null ? `${price.toLocaleString('ru-RU')} ₽` : '—';
