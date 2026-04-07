@@ -183,7 +183,7 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 								))}
 								<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
 									<span className={styles.finalLabel}>Стоимость:</span>
-									<span className={styles.finalValue}>{priceDisplay}</span>
+									<span key={priceDisplay} className={styles.finalValue}>{priceDisplay}</span>
 								</li>
 							</ul>
 						</div>
