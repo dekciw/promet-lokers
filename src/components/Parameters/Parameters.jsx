@@ -165,6 +165,9 @@ export default function Parameters({
           placeholder='Выберите серию'
           options={catalog.series.map(s => ({ value: s.id, label: s.name }))}
         />
+        {!seriesId && (
+          <p className={styles.hint}>Начните с выбора серии шкафа</p>
+        )}
       </div>
 
       <div className={styles.paramGroup}>
@@ -176,6 +179,9 @@ export default function Parameters({
           placeholder='Выберите модель'
           options={modelEntries.map(([id, m]) => ({ value: id, label: m.name }))}
         />
+        {seriesId && !modelId && (
+          <p className={styles.hint}>Теперь выберите модель шкафа</p>
+        )}
       </div>
 
       <div className={styles.paramGroup}>

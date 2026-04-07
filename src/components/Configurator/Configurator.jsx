@@ -116,7 +116,11 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 							исполнение
 						</span>
 						{defaultSpecsList.length === 0 ? (
-							<p className={styles.noChanges}>Выберите модель</p>
+							<p className={styles.noChanges}>
+								{!config.seriesId
+									? 'Выберите серию и модель'
+									: 'Выберите модель шкафа'}
+							</p>
 						) : (
 							<ul className={styles.specList}>
 								{defaultSpecsList.map(({ label, value }) => (

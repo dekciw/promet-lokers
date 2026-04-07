@@ -37,6 +37,13 @@
 	color: var(--c-danger, #e53e3e);
 }
 
+.hint {
+	font-size: 12px;
+	color: var(--c-brand);
+	margin: 0;
+	opacity: 0.75;
+}
+
 /* Группа параметра */
 .paramGroup {
 	display: flex;
