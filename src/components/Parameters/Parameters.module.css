@@ -48,7 +48,7 @@
 .paramGroup {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 12px;
 }
 
 .groupLabel {
@@ -96,7 +96,7 @@
 .paramsDisabled {
 	display: flex;
 	flex-direction: column;
-	gap: 32px;
+	gap: 40px;
 	opacity: 0.4;
 	pointer-events: none;
 	user-select: none;
@@ -105,7 +105,7 @@
 .paramsGrid {
 	display: flex;
 	flex-direction: column;
-	gap: 32px;
+	gap: 40px;
 }
 
 .cselectDisabled {
@@ -225,16 +225,16 @@
 }
 
 .toggleBtn {
-	padding: 9px 17px;
+	padding: 10px 20px;
 	border-radius: var(--r-sm);
 	border: 1px solid var(--c-border-subtle);
 	background: var(--c-white);
 	font-family: var(--f-main);
-	font-size: 12px;
+	font-size: 14px;
 	font-weight: 400;
 	color: var(--c-text-dark);
 	cursor: pointer;
-	line-height: 16px;
+	line-height: 20px;
 	transition:
 		border-color 0.15s,
 		color 0.15s;
@@ -267,7 +267,7 @@
 	list-style: none;
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
+	gap: 10px;
 }
 
 .lockItem {
