@@ -69,7 +69,7 @@ export default function App() {
       setBodyColor(null);
       setDoorColor(null);
       setIsResetting(false);
-    }, 350);
+    }, 330);
   }
 
   function handleModelChange(newModelId) {

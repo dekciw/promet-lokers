@@ -87,12 +87,24 @@
 	gap: 24px;
 }
 
-/* При сбросе — все элементы списков сворачиваются как itemOut */
+/* При сбросе — элементы плавно сворачиваются */
+@keyframes itemCollapse {
+	from {
+		opacity: 1;
+		max-height: 38px;
+	}
+	to {
+		opacity: 0;
+		max-height: 0;
+	}
+}
+
 .configGridLeaving .specItem,
 .configGridLeaving .diffItem,
 .configGridLeaving .finalItem {
-	animation: itemOut 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+	animation: itemCollapse 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 	pointer-events: none;
+	overflow: hidden;
 }
 
 /* Колонки */
