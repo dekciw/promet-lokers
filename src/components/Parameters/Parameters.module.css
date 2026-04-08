@@ -24,17 +24,39 @@
 }
 
 .resetBtn {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-family: var(--f-main);
 	font-size: 13px;
-	color: var(--c-text-muted);
-	background: none;
-	border: none;
+	font-weight: 500;
+	color: #e53e3e;
+	background: rgba(229, 62, 62, 0.06);
+	border: 1px solid rgba(229, 62, 62, 0.3);
+	border-radius: var(--r-sm);
+	padding: 6px 12px;
 	cursor: pointer;
-	padding: 4px 0;
-	transition: color 0.15s;
+	line-height: 18px;
+	transition:
+		background 0.15s,
+		border-color 0.15s,
+		transform 0.1s;
 }
 
 .resetBtn:hover {
-	color: var(--c-danger, #e53e3e);
+	background: rgba(229, 62, 62, 0.12);
+	border-color: rgba(229, 62, 62, 0.5);
+}
+
+.resetBtn:active {
+	transform: scale(0.96);
+	background: rgba(229, 62, 62, 0.18);
+}
+
+.resetBtnIcon {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
 }
 
 .hint {

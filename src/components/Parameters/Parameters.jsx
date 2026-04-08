@@ -152,6 +152,10 @@ export default function Parameters({
         <h2 className={styles.title}>Параметры</h2>
         {config.modelId && (
           <button type='button' className={styles.resetBtn} onClick={onReset}>
+            <svg className={styles.resetBtnIcon} viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
+              <path d='M2 7a5 5 0 1 0 1.5-3.5L2 5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
+              <path d='M2 2v3h3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
+            </svg>
             Сбросить
           </button>
         )}

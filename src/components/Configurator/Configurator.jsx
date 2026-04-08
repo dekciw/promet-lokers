@@ -48,7 +48,7 @@ function buildFinalSpecsList(config, defaults, lock) {
 	];
 }
 
-export default function Configurator({ config, price, catalog, isResetting }) {
+export default function Configurator({ config, price, catalog, isResetting, resetKey }) {
 	const model = config.modelId ? catalog.models[config.modelId] : null;
 	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
@@ -136,7 +136,7 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 									: 'Выберите модель шкафа'}
 							</p>
 						) : (
-							<ul className={styles.specList} key={config.modelId}>
+							<ul className={styles.specList} key={`${config.modelId}-${resetKey}`}>
 								{defaultSpecsList.map(({ label, value }) => (
 									<li key={label} className={styles.specItem}>
 										<span className={styles.specLabel}>{label}</span>
@@ -174,7 +174,7 @@ export default function Configurator({ config, price, catalog, isResetting }) {
 								<br />
 								конфигурация
 							</span>
-							<ul className={styles.finalSpec} key={config.modelId}>
+							<ul className={styles.finalSpec} key={`${config.modelId}-${resetKey}`}>
 								{finalSpecsList.map(({ label, value }) => (
 									<li key={label} className={styles.finalItem}>
 										<span className={styles.finalLabel}>{label}</span>
