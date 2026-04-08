@@ -1,126 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Header from './components/Header/Header';
 import Configurator from './components/Configurator/Configurator';
 import Parameters from './components/Parameters/Parameters';
 import Footer from './components/Footer/Footer';
 import { LoginScreen } from './components/LoginScreen/LoginScreen';
-import { loadCatalog } from './api/loadCatalog';
+import { useCatalog } from './hooks/useCatalog';
+import { useConfig } from './hooks/useConfig';
+import { calcPrice } from './utils/calcPrice';
 import './index.css';
-
-const DEFAULT_THICKNESS = '0.5';
-
-function calcPrice(config, catalog) {
-  const model = catalog.models[config.modelId];
-  if (!model) return null;
-
-  const lockSurcharge = catalog.locks[config.lockId]?.surcharge ?? 0;
-  const ventSurcharge = config.ventilation ? catalog.ventSurcharge : 0;
-  const bodyColorSurcharge = config.bodyColor?.surcharge ?? 0;
-  const doorColorSurcharge = config.doorColor?.surcharge ?? 0;
-
-  return (
-    model.basePrice +
-    lockSurcharge +
-    ventSurcharge +
-    bodyColorSurcharge +
-    doorColorSurcharge
-  );
-}
 
 export default function App() {
   const [isAuth, setIsAuth] = useState(() => localStorage.getItem('promet_auth') === '1');
-
-  const [catalog, setCatalog] = useState(null);
-  const [catalogError, setCatalogError] = useState(false);
-  const [retryKey, setRetryKey] = useState(0);
-
-  const [seriesId, setSeriesId] = useState('');
-  const [modelId, setModelId] = useState('');
-  const [width, setWidth] = useState('');
-  const [height, setHeight] = useState('');
-  const [depth, setDepth] = useState('');
-  const [bodyThickness, setBodyThickness] = useState(DEFAULT_THICKNESS);
-  const [doorThickness, setDoorThickness] = useState(DEFAULT_THICKNESS);
-  const [lockId, setLockId] = useState('key_basic');
-  const [ventilation, setVentilation] = useState(false);
-  const [bodyColor, setBodyColor] = useState(null);
-  const [doorColor, setDoorColor] = useState(null);
-
-  useEffect(() => {
-    loadCatalog()
-      .then(setCatalog)
-      .catch(() => setCatalogError(true));
-  }, [retryKey]);
-
-  const [isResetting, setIsResetting] = useState(false);
-  const [resetKey, setResetKey] = useState(0);
-
-  function handleReset() {
-    if (!modelId || !catalog?.models[modelId]) return;
-    setIsResetting(true);
-    setTimeout(() => {
-      const specs = catalog.models[modelId].defaultSpecs;
-      setWidth(String(specs.width));
-      setHeight(String(specs.height));
-      setDepth(String(specs.depth));
-      setBodyThickness(specs.bodyThickness);
-      setDoorThickness(specs.doorThickness);
-      setLockId(specs.lockId);
-      setVentilation(specs.ventilation ?? false);
-      setBodyColor(null);
-      setDoorColor(null);
-      setResetKey(k => k + 1);
-      setIsResetting(false);
-    }, 330);
-  }
-
-  function handleSeriesChange(newSeriesId) {
-    setIsResetting(true);
-    setTimeout(() => {
-      setSeriesId(newSeriesId);
-      setModelId('');
-      setWidth('');
-      setHeight('');
-      setDepth('');
-      setBodyThickness(DEFAULT_THICKNESS);
-      setDoorThickness(DEFAULT_THICKNESS);
-      setLockId('key_basic');
-      setVentilation(false);
-      setBodyColor(null);
-      setDoorColor(null);
-      setIsResetting(false);
-    }, 330);
-  }
-
-  function applyModel(newModelId) {
-    setModelId(newModelId);
-    if (newModelId && catalog?.models[newModelId]) {
-      const specs = catalog.models[newModelId].defaultSpecs;
-      setWidth(String(specs.width));
-      setHeight(String(specs.height));
-      setDepth(String(specs.depth));
-      setBodyThickness(specs.bodyThickness);
-      setDoorThickness(specs.doorThickness);
-    } else {
-      setWidth('');
-      setHeight('');
-      setDepth('');
-      setBodyThickness(DEFAULT_THICKNESS);
-      setDoorThickness(DEFAULT_THICKNESS);
-    }
-  }
-
-  function handleModelChange(newModelId) {
-    if (modelId && newModelId) {
-      setIsResetting(true);
-      setTimeout(() => {
-        applyModel(newModelId);
-        setIsResetting(false);
-      }, 330);
-    } else {
-      applyModel(newModelId);
-    }
-  }
+  const { catalog, catalogError, retry } = useCatalog();
+  const { config, setters, isResetting, resetKey } = useConfig(catalog);
 
   if (!isAuth) {
     return <LoginScreen onAuth={() => setIsAuth(true)} />;
@@ -130,10 +22,7 @@ export default function App() {
     return (
       <div className='app-status'>
         <p>Не удалось загрузить каталог. Проверьте подключение к интернету.</p>
-        <button
-          className='app-status__retry'
-          onClick={() => { setCatalogError(false); setRetryKey(k => k + 1); }}
-        >
+        <button className='app-status__retry' onClick={retry}>
           Повторить
         </button>
       </div>
@@ -141,26 +30,8 @@ export default function App() {
   }
 
   if (!catalog) {
-    return (
-      <div className='app-status'>
-        Загрузка каталога...
-      </div>
-    );
+    return <div className='app-status'>Загрузка каталога...</div>;
   }
-
-  const config = {
-    seriesId,
-    modelId,
-    width,
-    height,
-    depth,
-    bodyThickness,
-    doorThickness,
-    lockId,
-    ventilation,
-    bodyColor,
-    doorColor,
-  };
 
   const price = calcPrice(config, catalog);
 
@@ -169,22 +40,7 @@ export default function App() {
       <Header />
       <div className='layout'>
         <Configurator config={config} price={price} catalog={catalog} isResetting={isResetting} resetKey={resetKey} />
-        <Parameters
-          config={config}
-          catalog={catalog}
-          setSeriesId={handleSeriesChange}
-          onModelChange={handleModelChange}
-          setWidth={setWidth}
-          setHeight={setHeight}
-          setDepth={setDepth}
-          setBodyThickness={setBodyThickness}
-          setDoorThickness={setDoorThickness}
-          setLockId={setLockId}
-          setVentilation={setVentilation}
-          setBodyColor={setBodyColor}
-          setDoorColor={setDoorColor}
-          onReset={handleReset}
-        />
+        <Parameters config={config} catalog={catalog} {...setters} />
       </div>
       <Footer />
     </>

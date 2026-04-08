@@ -1,5 +1,6 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { calcDiff } from '../../utils/calcDiff';
+import { getColorHex } from '../../utils/colors';
 import styles from './Configurator.module.css';
 
 function buildCurrentForDiff(config, lock) {
@@ -27,8 +28,8 @@ function buildDefaultSpecsList(defaults, catalog) {
 		{ label: 'Толщина двери:', value: `${defaults.doorThickness} мм` },
 		{ label: 'Замок:', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
 		{ label: 'Вентиляция:', value: defaults.ventilation ? 'Да' : 'Нет' },
-		{ label: 'Цвет корпуса:', value: defaults.bodyColorName },
-		{ label: 'Цвет двери:', value: defaults.doorColorName },
+		{ label: 'Цвет корпуса:', value: defaults.bodyColorName, colorHex: getColorHex(defaults.bodyColorName) },
+		{ label: 'Цвет двери:', value: defaults.doorColorName, colorHex: getColorHex(defaults.doorColorName) },
 	];
 }
 
@@ -137,10 +138,21 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 							</p>
 						) : (
 							<ul className={styles.specList} key={`${config.modelId}-${resetKey}`}>
-								{defaultSpecsList.map(({ label, value }) => (
+								{defaultSpecsList.map(({ label, value, colorHex }) => (
 									<li key={label} className={styles.specItem}>
 										<span className={styles.specLabel}>{label}</span>
-										<span className={styles.specValue}>{value}</span>
+										<span className={styles.specValue}>
+											{colorHex && (
+												<span
+													className={styles.colorSwatch}
+													style={{
+														background: colorHex,
+														border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
+													}}
+												/>
+											)}
+											{value}
+										</span>
 									</li>
 								))}
 							</ul>

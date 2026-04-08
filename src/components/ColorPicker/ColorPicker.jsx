@@ -1,35 +1,7 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
 import { useClickOutside } from '../../hooks/useClickOutside';
+import { COLORS } from '../../utils/colors';
 import styles from './ColorPicker.module.css';
-
-const COLORS = [
-	{
-		group: 'Базовые',
-		items: [
-			{ color: '#3e4c5e', name: '5002 шагрень' },
-			{ color: '#ffffff', name: '9003 гладкая' },
-			{ color: '#c5c7c4', name: '7035 муар' },
-			{ color: '#373f41', name: '7016 гладкая' },
-		],
-	},
-	{
-		group: 'Популярные',
-		items: [
-			{ color: '#4c7041', name: 'RAL 6018' },
-			{ color: '#2874b2', name: 'RAL 5012' },
-			{ color: '#9b111e', name: 'RAL 3000' },
-		],
-	},
-	{
-		group: 'Яркие',
-		items: [
-			{ color: '#f1eb9c', name: 'RAL 1016' },
-			{ color: '#f3e03b', name: 'RAL 1018' },
-			{ color: '#8d3f7d', name: 'RAL 4006' },
-			{ color: '#d1552c', name: 'RAL 2008' },
-		],
-	},
-];
 
 export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
 	const [open, setOpen] = useState(false);

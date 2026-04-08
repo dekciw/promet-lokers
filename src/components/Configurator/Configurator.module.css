@@ -240,6 +240,17 @@
 	font-weight: 500;
 	color: var(--card-default-text);
 	line-height: 16px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.colorSwatch {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border-radius: 3px;
+	flex-shrink: 0;
 }
 
 /* Плейсхолдер при отсутствии данных / изменений */
