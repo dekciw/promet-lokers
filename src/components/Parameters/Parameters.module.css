@@ -59,6 +59,59 @@
 	flex-shrink: 0;
 }
 
+.resetConfirm {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.resetConfirmText {
+	font-size: 13px;
+	font-weight: 500;
+	color: #e53e3e;
+}
+
+.resetConfirmYes {
+	font-family: var(--f-main);
+	font-size: 12px;
+	font-weight: 600;
+	color: #fff;
+	background: #e53e3e;
+	border: none;
+	border-radius: var(--r-sm);
+	padding: 5px 10px;
+	cursor: pointer;
+	transition: background 0.15s, transform 0.1s;
+	line-height: 18px;
+}
+
+.resetConfirmYes:hover {
+	background: #c53030;
+}
+
+.resetConfirmYes:active {
+	transform: scale(0.96);
+}
+
+.resetConfirmNo {
+	font-family: var(--f-main);
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--c-text-muted);
+	background: none;
+	border: 1px solid var(--c-border);
+	border-radius: var(--r-sm);
+	padding: 5px 10px;
+	cursor: pointer;
+	transition: border-color 0.15s, color 0.15s;
+	line-height: 18px;
+}
+
+.resetConfirmNo:hover {
+	border-color: var(--c-text-muted);
+	color: var(--c-text-dark);
+}
+
 .hint {
 	font-size: 12px;
 	color: var(--c-brand);

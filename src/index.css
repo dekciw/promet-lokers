@@ -122,6 +122,63 @@ body {
 	min-width: 0;
 }
 
+/* Тултип через data-tooltip атрибут */
+[data-tooltip] {
+	position: relative;
+}
+
+[data-tooltip]::after {
+	content: attr(data-tooltip);
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 50%;
+	transform: translateX(-50%);
+	background: #1e293b;
+	color: #fff;
+	font-family: var(--f-main);
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.4;
+	white-space: nowrap;
+	padding: 6px 10px;
+	border-radius: 6px;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.15s;
+	z-index: 500;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-tooltip]::before {
+	content: '';
+	position: absolute;
+	bottom: calc(100% + 3px);
+	left: 50%;
+	transform: translateX(-50%);
+	border: 5px solid transparent;
+	border-top-color: #1e293b;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.15s;
+	z-index: 500;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before {
+	opacity: 1;
+}
+
+/* Отключаем анимации для пользователей с настройкой "уменьшить движение" */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
 /* ──────────── АДАПТИВ ──────────── */
 
 /* Ноутбук (≤1279px) — сужаем панель параметров, остальное не трогаем */

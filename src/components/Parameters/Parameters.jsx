@@ -128,6 +128,25 @@ export default function Parameters({
   const { seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor } =
     config;
 
+  const [confirmReset, setConfirmReset] = useState(false);
+  const confirmTimerRef = useRef(null);
+
+  function handleResetClick() {
+    setConfirmReset(true);
+    confirmTimerRef.current = setTimeout(() => setConfirmReset(false), 3000);
+  }
+
+  function handleConfirm() {
+    clearTimeout(confirmTimerRef.current);
+    setConfirmReset(false);
+    onReset();
+  }
+
+  function handleCancel() {
+    clearTimeout(confirmTimerRef.current);
+    setConfirmReset(false);
+  }
+
   const modelEntries = seriesId
     ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId)
     : [];
@@ -151,13 +170,21 @@ export default function Parameters({
       <div className={styles.titleRow}>
         <h2 className={styles.title}>Параметры</h2>
         {config.modelId && (
-          <button type='button' className={styles.resetBtn} onClick={onReset}>
-            <svg className={styles.resetBtnIcon} viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
-              <path d='M2 7a5 5 0 1 0 1.5-3.5L2 5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
-              <path d='M2 2v3h3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
-            </svg>
-            Сбросить
-          </button>
+          confirmReset ? (
+            <div className={styles.resetConfirm}>
+              <span className={styles.resetConfirmText}>Сбросить?</span>
+              <button type='button' className={styles.resetConfirmYes} onClick={handleConfirm}>Да</button>
+              <button type='button' className={styles.resetConfirmNo} onClick={handleCancel}>Отмена</button>
+            </div>
+          ) : (
+            <button type='button' className={styles.resetBtn} onClick={handleResetClick}>
+              <svg className={styles.resetBtnIcon} viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
+                <path d='M2 7a5 5 0 1 0 1.5-3.5L2 5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
+                <path d='M2 2v3h3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
+              </svg>
+              Сбросить
+            </button>
+          )
         )}
       </div>
 
@@ -190,7 +217,10 @@ export default function Parameters({
         )}
       </div>
 
-      <div className={`${styles.paramsBody}${!modelId ? ` ${styles.paramsDisabled}` : ''}`}>
+      <div
+        className={`${styles.paramsBody}${!modelId ? ` ${styles.paramsDisabled}` : ''}`}
+        data-tooltip={!modelId ? 'Сначала выберите модель шкафа' : undefined}
+      >
 
       <div className={styles.paramGroup}>
         <span className={styles.groupLabel}>Изменение габаритов</span>
