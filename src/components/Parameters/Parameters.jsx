@@ -165,6 +165,19 @@ export default function Parameters({
   const minDepth = defaultDepth !== null ? DEPTH_MIN : undefined;
   const maxDepth = defaultDepth !== null ? defaultDepth : undefined;
 
+  const specs = currentModel?.defaultSpecs;
+  const hasChanges = !!(modelId && specs && (
+    String(width) !== String(specs.width) ||
+    String(height) !== String(specs.height) ||
+    String(depth) !== String(specs.depth) ||
+    bodyThickness !== specs.bodyThickness ||
+    doorThickness !== specs.doorThickness ||
+    lockId !== (specs.lockId ?? 'key_basic') ||
+    ventilation !== (specs.ventilation ?? false) ||
+    bodyColor !== null ||
+    doorColor !== null
+  ));
+
   return (
     <aside className={styles.parameters}>
       <div className={styles.titleRow}>
@@ -199,8 +212,8 @@ export default function Parameters({
           <span className={styles.stepLabel}>Модель</span>
         </div>
         <div className={styles.stepLine} />
-        <div className={`${styles.step} ${modelId ? styles.stepActive : styles.stepPending}`}>
-          <div className={styles.stepCircle}>3</div>
+        <div className={`${styles.step} ${hasChanges ? styles.stepDone : modelId ? styles.stepActive : styles.stepPending}`}>
+          <div className={styles.stepCircle}>{hasChanges ? '✓' : '3'}</div>
           <span className={styles.stepLabel}>Параметры</span>
         </div>
       </div>
