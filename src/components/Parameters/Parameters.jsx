@@ -188,6 +188,23 @@ export default function Parameters({
         )}
       </div>
 
+      <div className={styles.steps}>
+        <div className={`${styles.step} ${seriesId ? styles.stepDone : styles.stepActive}`}>
+          <div className={styles.stepCircle}>{seriesId ? '✓' : '1'}</div>
+          <span className={styles.stepLabel}>Серия</span>
+        </div>
+        <div className={styles.stepLine} />
+        <div className={`${styles.step} ${modelId ? styles.stepDone : seriesId ? styles.stepActive : styles.stepPending}`}>
+          <div className={styles.stepCircle}>{modelId ? '✓' : '2'}</div>
+          <span className={styles.stepLabel}>Модель</span>
+        </div>
+        <div className={styles.stepLine} />
+        <div className={`${styles.step} ${modelId ? styles.stepActive : styles.stepPending}`}>
+          <div className={styles.stepCircle}>3</div>
+          <span className={styles.stepLabel}>Параметры</span>
+        </div>
+      </div>
+
       <div className={styles.paramGroup}>
         <label className={styles.groupLabel} htmlFor='series'>Серия шкафа</label>
         <CustomSelect

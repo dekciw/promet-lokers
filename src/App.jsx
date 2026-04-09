@@ -7,6 +7,7 @@ import LoginScreen from './components/LoginScreen/LoginScreen';
 import { useCatalog } from './hooks/useCatalog';
 import { useConfig } from './hooks/useConfig';
 import { calcPrice } from './utils/calcPrice';
+import CatalogSkeleton from './components/CatalogSkeleton/CatalogSkeleton';
 import './index.css';
 
 export default function App() {
@@ -30,7 +31,12 @@ export default function App() {
   }
 
   if (!catalog) {
-    return <div className='app-status'>Загрузка каталога...</div>;
+    return (
+      <>
+        <Header />
+        <CatalogSkeleton />
+      </>
+    );
   }
 
   const price = calcPrice(config, catalog);

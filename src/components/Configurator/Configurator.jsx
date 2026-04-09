@@ -136,8 +136,8 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 							</p>
 						) : (
 							<ul className={styles.specList} key={`${config.modelId}-${resetKey}`}>
-								{defaultSpecsList.map(({ label, value, colorHex }) => (
-									<li key={label} className={styles.specItem}>
+								{defaultSpecsList.map(({ label, value, colorHex }, i) => (
+									<li key={label} className={styles.specItem} style={{ animationDelay: `${i * 0.1}s` }}>
 										<span className={styles.specLabel}>{label}</span>
 										<span className={styles.specValue}>
 											{colorHex && (
@@ -167,8 +167,8 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 							<p className={styles.noChanges}>Нет изменений</p>
 						) : (
 							<ul className={styles.diffList}>
-								{diffItemsToRender.map(({ label, value, leaving }) => (
-									<li key={label} className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}`}>
+								{diffItemsToRender.map(({ label, value, leaving }, i) => (
+									<li key={label} className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}`} style={!leaving ? { animationDelay: `${i * 0.1}s` } : undefined}>
 										<span className={styles.diffLabel}>{label}</span>
 										<span className={styles.diffValue}>{value}</span>
 									</li>
@@ -185,8 +185,8 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 								конфигурация
 							</span>
 							<ul className={styles.finalSpec} key={`${config.modelId}-${resetKey}`}>
-								{finalSpecsList.map(({ label, value }) => (
-									<li key={label} className={styles.finalItem}>
+								{finalSpecsList.map(({ label, value }, i) => (
+									<li key={label} className={styles.finalItem} style={{ animationDelay: `${i * 0.1}s` }}>
 										<span className={styles.finalLabel}>{label}</span>
 										<span className={styles.finalValue}>{value}</span>
 									</li>
