@@ -47,20 +47,24 @@ export function useConfig(catalog) {
     }
   }
 
+  function clearParams() {
+    setWidth('');
+    setHeight('');
+    setDepth('');
+    setBodyThickness(DEFAULT_THICKNESS);
+    setDoorThickness(DEFAULT_THICKNESS);
+    setLockId('key_basic');
+    setVentilation(false);
+    setBodyColor(null);
+    setDoorColor(null);
+  }
+
   function handleSeriesChange(newSeriesId) {
     setIsResetting(true);
     setTimeout(() => {
       setSeriesId(newSeriesId);
       setModelId('');
-      setWidth('');
-      setHeight('');
-      setDepth('');
-      setBodyThickness(DEFAULT_THICKNESS);
-      setDoorThickness(DEFAULT_THICKNESS);
-      setLockId('key_basic');
-      setVentilation(false);
-      setBodyColor(null);
-      setDoorColor(null);
+      clearParams();
       setIsResetting(false);
     }, 330);
   }

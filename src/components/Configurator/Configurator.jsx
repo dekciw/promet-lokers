@@ -132,9 +132,7 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 						</span>
 						{defaultSpecsList.length === 0 ? (
 							<p className={styles.noChanges}>
-								{!config.seriesId
-									? 'Выберите серию и модель'
-									: 'Выберите модель шкафа'}
+								{!config.seriesId ? 'Выберите серию и модель' : 'Выберите модель шкафа'}
 							</p>
 						) : (
 							<ul className={styles.specList} key={`${config.modelId}-${resetKey}`}>
@@ -195,7 +193,9 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 								))}
 								<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
 									<span className={styles.finalLabel}>Стоимость:</span>
-									<span key={priceDisplay} className={styles.finalValue}>{priceDisplay}</span>
+									<span key={priceDisplay} className={styles.finalValue}>
+										{priceDisplay}
+									</span>
 								</li>
 							</ul>
 						</div>
