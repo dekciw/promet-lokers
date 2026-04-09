@@ -480,7 +480,16 @@
 	}
 
 	.topRow {
-		gap: 12px;
+		gap: 8px;
+		align-items: flex-start;
+	}
+
+	.articleBadge {
+		display: none;
+	}
+
+	.btn {
+		padding: 14px 12px;
 	}
 }
 

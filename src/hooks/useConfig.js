@@ -1,19 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const DEFAULT_THICKNESS = '0.5';
+const STORAGE_KEY = 'promet_config';
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getInitial(key, fallback) {
+  return loadSaved()?.[key] ?? fallback;
+}
 
 export function useConfig(catalog) {
-  const [seriesId, setSeriesId] = useState('');
-  const [modelId, setModelId] = useState('');
-  const [width, setWidth] = useState('');
-  const [height, setHeight] = useState('');
-  const [depth, setDepth] = useState('');
-  const [bodyThickness, setBodyThickness] = useState(DEFAULT_THICKNESS);
-  const [doorThickness, setDoorThickness] = useState(DEFAULT_THICKNESS);
-  const [lockId, setLockId] = useState('key_basic');
-  const [ventilation, setVentilation] = useState(false);
-  const [bodyColor, setBodyColor] = useState(null);
-  const [doorColor, setDoorColor] = useState(null);
+  const [seriesId, setSeriesId] = useState(() => getInitial('seriesId', ''));
+  const [modelId, setModelId] = useState(() => getInitial('modelId', ''));
+  const [width, setWidth] = useState(() => getInitial('width', ''));
+  const [height, setHeight] = useState(() => getInitial('height', ''));
+  const [depth, setDepth] = useState(() => getInitial('depth', ''));
+  const [bodyThickness, setBodyThickness] = useState(() => getInitial('bodyThickness', DEFAULT_THICKNESS));
+  const [doorThickness, setDoorThickness] = useState(() => getInitial('doorThickness', DEFAULT_THICKNESS));
+  const [lockId, setLockId] = useState(() => getInitial('lockId', 'key_basic'));
+  const [ventilation, setVentilation] = useState(() => getInitial('ventilation', false));
+  const [bodyColor, setBodyColor] = useState(() => getInitial('bodyColor', null));
+  const [doorColor, setDoorColor] = useState(() => getInitial('doorColor', null));
   const [isResetting, setIsResetting] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
@@ -101,6 +115,10 @@ export function useConfig(catalog) {
     bodyColor,
     doorColor,
   };
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+  }, [seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor]);
 
   const setters = {
     setSeriesId: handleSeriesChange,

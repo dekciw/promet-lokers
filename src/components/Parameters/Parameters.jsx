@@ -232,7 +232,7 @@ export default function Parameters({
         )}
       </div>
 
-      <div className={styles.paramGroup}>
+      <div key={seriesId || 'no-series'} className={`${styles.paramGroup} ${styles.modelGroup}`}>
         <label className={styles.groupLabel} htmlFor='model'>Модель шкафа</label>
         <CustomSelect
           id='model'

@@ -258,10 +258,24 @@
 	position: relative;
 }
 
+@keyframes modelGroupIn {
+	from { transform: translateY(8px); }
+	to   { transform: translateY(0); }
+}
+
+.modelGroup {
+	animation: modelGroupIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.modelGroup { animation: none; }
+}
+
 .paramsBody {
 	display: flex;
 	flex-direction: column;
 	gap: 40px;
+	transition: opacity 0.35s ease;
 }
 
 .paramsDisabled {
@@ -644,6 +658,12 @@
 	.parameters {
 		padding: 16px;
 		gap: 20px;
+	}
+
+	.paramsGrid {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
 	}
 
 	.dimFields {
