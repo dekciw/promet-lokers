@@ -24,93 +24,87 @@
 }
 
 .resetBtn {
-	display: inline-flex;
+	display: flex;
 	align-items: center;
-	gap: 6px;
-	font-family: var(--f-main);
-	font-size: 13px;
-	font-weight: 500;
-	color: #e53e3e;
-	background: rgba(229, 62, 62, 0.06);
-	border: 1px solid rgba(229, 62, 62, 0.3);
-	border-radius: var(--r-sm);
-	padding: 6px 12px;
+	justify-content: flex-start;
+	width: 36px;
+	height: 36px;
+	border: 1px solid var(--c-border);
+	border-radius: 50%;
 	cursor: pointer;
-	line-height: 18px;
-	transition:
-		background 0.15s,
-		border-color 0.15s,
-		transform 0.1s;
-}
-
-.resetBtn:hover {
-	background: rgba(229, 62, 62, 0.12);
-	border-color: rgba(229, 62, 62, 0.5);
-}
-
-.resetBtn:active {
-	transform: scale(0.96);
-	background: rgba(229, 62, 62, 0.18);
-}
-
-.resetBtnIcon {
-	width: 14px;
-	height: 14px;
+	position: relative;
+	overflow: hidden;
+	background: var(--c-bg);
+	color: var(--c-text-muted);
+	transition-duration: 0.3s;
 	flex-shrink: 0;
 }
 
-.resetConfirm {
-	display: inline-flex;
+.resetBtn:hover {
+	width: 124px;
+	border-radius: 18px;
+	background: #e53e3e;
+	border-color: #e53e3e;
+	color: #fff;
+	box-shadow: 0 2px 10px rgba(229, 62, 62, 0.28);
+	transition-duration: 0.3s;
+}
+
+.resetBtn:active {
+	transform: translate(1px, 1px);
+}
+
+.resetBtnSign {
+	width: 100%;
+	display: flex;
 	align-items: center;
-	gap: 6px;
+	justify-content: center;
+	flex-shrink: 0;
+	transition-duration: 0.3s;
 }
 
-.resetConfirmText {
-	font-size: 13px;
-	font-weight: 500;
-	color: #e53e3e;
+.resetBtnSign svg {
+	width: 14px;
+	height: 14px;
+	flex-shrink: 0;
+	stroke: currentColor;
 }
 
-.resetConfirmYes {
+.resetBtn:hover .resetBtnSign {
+	width: 30%;
+	padding-left: 20px;
+	transition-duration: 0.3s;
+}
+
+.resetBtnText {
+	position: absolute;
+	right: 0;
+	width: 0;
+	opacity: 0;
+	color: currentColor;
 	font-family: var(--f-main);
 	font-size: 12px;
 	font-weight: 600;
-	color: #fff;
-	background: #e53e3e;
-	border: none;
-	border-radius: var(--r-sm);
-	padding: 5px 10px;
-	cursor: pointer;
-	transition: background 0.15s, transform 0.1s;
-	line-height: 18px;
+	white-space: nowrap;
+	overflow: hidden;
+	transition-duration: 0.3s;
 }
 
-.resetConfirmYes:hover {
-	background: #c53030;
+.resetBtn:hover .resetBtnText {
+	opacity: 1;
+	width: 70%;
+	padding-right: 10px;
+	transition-duration: 0.3s;
 }
 
-.resetConfirmYes:active {
-	transform: scale(0.96);
+@media (prefers-reduced-motion: reduce) {
+	.resetBtn,
+	.resetBtnSign,
+	.resetBtnText {
+		transition: none;
+	}
 }
 
-.resetConfirmNo {
-	font-family: var(--f-main);
-	font-size: 12px;
-	font-weight: 500;
-	color: var(--c-text-muted);
-	background: none;
-	border: 1px solid var(--c-border);
-	border-radius: var(--r-sm);
-	padding: 5px 10px;
-	cursor: pointer;
-	transition: border-color 0.15s, color 0.15s;
-	line-height: 18px;
-}
-
-.resetConfirmNo:hover {
-	border-color: var(--c-text-muted);
-	color: var(--c-text-dark);
-}
 
 /* Индикатор шагов */
 .steps {
@@ -374,19 +368,39 @@
 	overflow: hidden;
 	max-height: 240px;
 	overflow-y: auto;
-	scrollbar-width: none;
+	scrollbar-width: thin;
+	scrollbar-color: #c1c1c1 transparent;
 }
 
 .cselectDropdown::-webkit-scrollbar {
-	display: none;
+	width: 8px;
+}
+
+.cselectDropdown::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.cselectDropdown::-webkit-scrollbar-thumb {
+	background: #c1c1c1;
+	border-radius: 4px;
+	border: 2px solid var(--c-white);
+}
+
+.cselectDropdown::-webkit-scrollbar-thumb:hover {
+	background: #a0a0a0;
 }
 
 .cselectItem {
-	padding: 10px 14px;
+	padding: 11px 14px;
 	font-size: 14px;
 	color: var(--c-text-mid);
 	cursor: pointer;
 	transition: background 0.1s;
+	border-bottom: 1px solid var(--c-border);
+}
+
+.cselectItem:last-child {
+	border-bottom: none;
 }
 
 .cselectItem:hover {
@@ -435,6 +449,7 @@
 
 .toggleBtnActive:hover {
 	background: var(--c-white);
+	border-color: var(--c-orange);
 }
 
 /* Поля габаритов */
@@ -478,6 +493,7 @@
 
 .lockItemActive:hover {
 	background: var(--c-white);
+	border-color: var(--c-orange);
 }
 
 .lockName {
@@ -527,6 +543,7 @@
 
 .ventBtnActive:hover {
 	background: var(--c-white);
+	border-color: var(--c-orange);
 }
 
 /* ──────────── Stepper (кнопки ± для габаритов) ──────────── */
@@ -538,6 +555,7 @@
 	60%       { transform: translateX(-4px); }
 	80%       { transform: translateX(4px); }
 }
+
 
 .stepper {
 	display: flex;
@@ -595,9 +613,25 @@
 	color: var(--c-primary);
 }
 
-.stepperField {
+.stepperDisplay {
 	flex: 1;
-	min-width: 20px;
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	height: 42px;
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 400;
+	color: var(--c-text-dark);
+}
+
+
+.stepperField {
+	position: absolute;
+	inset: 0;
+	width: 100%;
 	border: none;
 	outline: none;
 	background: transparent;
@@ -608,6 +642,10 @@
 	text-align: center;
 	padding: 11px 4px;
 	-moz-appearance: textfield;
+}
+
+.stepperFieldHidden {
+	opacity: 0;
 }
 
 .stepperField::-webkit-inner-spin-button,
