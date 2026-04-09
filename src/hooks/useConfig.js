@@ -84,19 +84,11 @@ export function useConfig(catalog) {
   }
 
   function handleReset() {
-    if (!modelId || !catalog?.models[modelId]) return;
     setIsResetting(true);
     setTimeout(() => {
-      const specs = catalog.models[modelId].defaultSpecs;
-      setWidth(String(specs.width));
-      setHeight(String(specs.height));
-      setDepth(String(specs.depth));
-      setBodyThickness(specs.bodyThickness);
-      setDoorThickness(specs.doorThickness);
-      setLockId(specs.lockId);
-      setVentilation(specs.ventilation ?? false);
-      setBodyColor(null);
-      setDoorColor(null);
+      setSeriesId('');
+      setModelId('');
+      clearParams();
       setResetKey(k => k + 1);
       setIsResetting(false);
     }, 330);

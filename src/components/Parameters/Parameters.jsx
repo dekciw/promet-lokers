@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { clamp } from '../../utils/clamp';
+import { useAppContext } from '../../context/AppContext';
 import styles from './Parameters.module.css';
 
 const HEIGHT_MIN = 1400;
@@ -109,22 +110,9 @@ function buildThicknessOptions(baseVal) {
   return [baseVal, ...EXTRA_THICKNESS];
 }
 
-export default function Parameters({
-  config,
-  catalog,
-  setSeriesId,
-  onModelChange,
-  setWidth,
-  setHeight,
-  setDepth,
-  setBodyThickness,
-  setDoorThickness,
-  setLockId,
-  setVentilation,
-  setBodyColor,
-  setDoorColor,
-  onReset,
-}) {
+export default function Parameters() {
+  const { config, catalog, setters } = useAppContext();
+  const { setSeriesId, onModelChange, setWidth, setHeight, setDepth, setBodyThickness, setDoorThickness, setLockId, setVentilation, setBodyColor, setDoorColor, onReset } = setters;
   const { seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor } =
     config;
 
@@ -182,7 +170,7 @@ export default function Parameters({
     <aside className={styles.parameters}>
       <div className={styles.titleRow}>
         <h2 className={styles.title}>Параметры</h2>
-        {config.modelId && (
+        {seriesId && (
           confirmReset ? (
             <div className={styles.resetConfirm}>
               <span className={styles.resetConfirmText}>Сбросить?</span>

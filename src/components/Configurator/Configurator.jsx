@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { calcDiff } from '../../utils/calcDiff';
 import { getColorHex } from '../../utils/colors';
+import { useAppContext } from '../../context/AppContext';
 import styles from './Configurator.module.css';
 
 function buildCurrentForDiff(config, lock) {
@@ -49,7 +50,8 @@ function buildFinalSpecsList(config, defaults, lock) {
 	];
 }
 
-export default function Configurator({ config, price, catalog, isResetting, resetKey }) {
+export default function Configurator() {
+	const { config, price, catalog, isResetting, resetKey } = useAppContext();
 	const model = config.modelId ? catalog.models[config.modelId] : null;
 	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
