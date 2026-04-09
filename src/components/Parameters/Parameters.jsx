@@ -219,7 +219,7 @@ export default function Parameters({
 
       <div
         className={`${styles.paramsBody}${!modelId ? ` ${styles.paramsDisabled}` : ''}`}
-        data-tooltip={!modelId ? 'Сначала выберите модель шкафа' : undefined}
+        data-tooltip={!modelId ? 'Не выбрана модель шкафа' : undefined}
       >
 
       <div className={styles.paramGroup}>

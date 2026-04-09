@@ -201,12 +201,12 @@ export default function Configurator({ config, price, catalog, isResetting, rese
 						</div>
 
 						<div className={styles.actions}>
-							<div data-tooltip={!config.seriesId ? 'Выберите серию шкафа' : !model ? 'Выберите модель шкафа' : undefined}>
+							<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : undefined}>
 								<button className={`${styles.btn} ${styles.btnPrimary}`} disabled={!model}>
 									КП для клиента
 								</button>
 							</div>
-							<div data-tooltip={!config.seriesId ? 'Выберите серию шкафа' : !model ? 'Выберите модель шкафа' : undefined}>
+							<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : undefined}>
 								<button className={`${styles.btn} ${styles.btnSecondary}`} disabled={!model}>
 									Бланк НЗ
 								</button>
