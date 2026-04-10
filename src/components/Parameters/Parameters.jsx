@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, Fragment } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { clamp } from '../../utils/clamp';
@@ -13,15 +14,15 @@ const LIMIT_HINT_DURATION = 1500;
 const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 
 // ── Slot counter ──────────────────────────────────────────────
-const SLOT_SETS = 3;   // 30 цифр в колонке (0-9 повторяется 3 раза)
-const SLOT_HIGH = 22;  // сброс когда позиция >= 22
-const SLOT_LOW  = 8;   // сброс когда позиция < 8
-const DIGIT_H   = 20;  // высота одной ячейки в px
+const SLOT_SETS = 3;
+const SLOT_HIGH = 22;
+const SLOT_LOW  = 8;
+const DIGIT_H   = 20;
 
 function SlotDigit({ digit, direction }) {
-  const posRef  = useRef(10 + digit); // стартуем в средней группе
+  const posRef  = useRef(10 + digit);
   const prevRef = useRef(digit);
-  const [pos, setPos]       = useState(10 + digit);
+  const [pos, setPos]         = useState(10 + digit);
   const [instant, setInstant] = useState(false);
 
   useEffect(() => {
@@ -30,14 +31,13 @@ function SlotDigit({ digit, direction }) {
     prevRef.current = digit;
 
     const delta = direction === 'up'
-      ? (digit >= prev ? digit - prev : 10 - prev + digit)       // вперёд / через 9→0
-      : (digit <= prev ? digit - prev : -(prev + 10 - digit));   // назад  / через 0→9
+      ? (digit >= prev ? digit - prev : 10 - prev + digit)
+      : (digit <= prev ? digit - prev : -(prev + 10 - digit));
 
     const cur  = posRef.current;
     const next = cur + delta;
 
     if (next >= SLOT_HIGH || next < SLOT_LOW) {
-      // мгновенный прыжок на эквивалентную позицию, потом анимация
       const adj  = next >= SLOT_HIGH ? -10 : 10;
       const snap = cur + adj;
       const fin  = snap + delta;
@@ -198,58 +198,148 @@ function buildThicknessOptions(baseVal) {
   return [baseVal, ...EXTRA_THICKNESS];
 }
 
+// ── Stepper ────────────────────────────────────────────────────
+const STEP_LABELS = ['Серия', 'Модель', 'Параметры'];
+
+const slideVariants = {
+  initial: (dir) => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0 }),
+  animate: { x: 0, opacity: 1 },
+  exit:    (dir) => ({ x: dir > 0 ? '45%'  : '-45%', opacity: 0 }),
+};
+
 export default function Parameters() {
   const { config, catalog, setters } = useAppContext();
-  const { setSeriesId, onModelChange, setWidth, setHeight, setDepth, setBodyThickness, setDoorThickness, setLockId, setVentilation, setBodyColor, setDoorColor, onReset } = setters;
-  const { seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor } =
-    config;
+  const {
+    setSeriesId, onModelChange, setWidth, setHeight, setDepth,
+    setBodyThickness, setDoorThickness, setLockId, setVentilation,
+    setBodyColor, setDoorColor, onReset,
+  } = setters;
+  const {
+    seriesId, modelId, width, height, depth,
+    bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor,
+  } = config;
 
+  // ── stepper state ──────────────────────────────────────────
+  const [stepperStep, setStepperStep] = useState(
+    () => modelId ? 3 : seriesId ? 2 : 1
+  );
+  const [direction, setDirection] = useState(1);
+  const [isSliding, setIsSliding] = useState(false);
+
+  // ── dropdown mutual exclusion ──────────────────────────────
   const [openSelectId, setOpenSelectId] = useState(null);
   const handleSeriesOpen = useCallback((v) => setOpenSelectId(v ? 'series' : null), []);
-  const handleModelOpen = useCallback((v) => setOpenSelectId(v ? 'model' : null), [])
+  const handleModelOpen  = useCallback((v) => setOpenSelectId(v ? 'model'  : null), []);
 
+  // ── navigation ────────────────────────────────────────────
+  const stepperStepRef = useRef(stepperStep);
+  stepperStepRef.current = stepperStep;
 
+  function goToStep(newStep) {
+    if (newStep === stepperStepRef.current) return;
+    setIsSliding(true);
+    setOpenSelectId(null);
+    setDirection(newStep > stepperStepRef.current ? 1 : -1);
+    setStepperStep(newStep);
+    setTimeout(() => setIsSliding(false), 450);
+  }
+
+  function handleStepClick(step) {
+    if (step === 2 && !seriesId) return;
+    if (step === 3 && !modelId) return;
+    goToStep(step);
+  }
+
+  function handleReset() {
+    onReset();
+    setDirection(-1);
+    setStepperStep(1);
+    setIsSliding(false);
+  }
+
+  // ── auto-advance ───────────────────────────────────────────
+  useEffect(() => {
+    if (seriesId && stepperStepRef.current === 1) {
+      const t = setTimeout(() => goToStep(2), 350);
+      return () => clearTimeout(t);
+    }
+  }, [seriesId]); // eslint-disable-line
+
+  useEffect(() => {
+    if (modelId && stepperStepRef.current === 2) {
+      const t = setTimeout(() => goToStep(3), 350);
+      return () => clearTimeout(t);
+    }
+  }, [modelId]); // eslint-disable-line
+
+  // ── derived data ───────────────────────────────────────────
   const modelEntries = seriesId
     ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId)
     : [];
-
   const lockEntries = Object.entries(catalog.locks).sort((a, b) => a[1].surcharge - b[1].surcharge);
-
   const currentModel = modelId ? catalog.models[modelId] : null;
   const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness);
   const doorThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.doorThickness);
 
   const defaultWidth = currentModel?.defaultSpecs?.width ?? null;
-  const minWidth = defaultWidth !== null ? defaultWidth - WIDTH_RANGE : undefined;
-  const maxWidth = defaultWidth !== null ? defaultWidth + WIDTH_RANGE : undefined;
-
+  const minWidth  = defaultWidth !== null ? defaultWidth - WIDTH_RANGE : undefined;
+  const maxWidth  = defaultWidth !== null ? defaultWidth + WIDTH_RANGE : undefined;
   const defaultDepth = currentModel?.defaultSpecs?.depth ?? null;
-  const minDepth = defaultDepth !== null ? DEPTH_MIN : undefined;
-  const maxDepth = defaultDepth !== null ? defaultDepth : undefined;
+  const minDepth  = defaultDepth !== null ? DEPTH_MIN : undefined;
+  const maxDepth  = defaultDepth !== null ? defaultDepth : undefined;
 
   const specs = currentModel?.defaultSpecs;
   const hasChanges = !!(modelId && specs && (
-    String(width) !== String(specs.width) ||
-    String(height) !== String(specs.height) ||
-    String(depth) !== String(specs.depth) ||
-    bodyThickness !== specs.bodyThickness ||
-    doorThickness !== specs.doorThickness ||
-    lockId !== (specs.lockId ?? 'key_basic') ||
-    ventilation !== (specs.ventilation ?? false) ||
-    bodyColor !== null ||
-    doorColor !== null
+    String(width)     !== String(specs.width)  ||
+    String(height)    !== String(specs.height) ||
+    String(depth)     !== String(specs.depth)  ||
+    bodyThickness     !== specs.bodyThickness  ||
+    doorThickness     !== specs.doorThickness  ||
+    lockId            !== (specs.lockId ?? 'key_basic') ||
+    ventilation       !== (specs.ventilation ?? false)  ||
+    bodyColor         !== null ||
+    doorColor         !== null
   ));
 
+  // ── step status ────────────────────────────────────────────
+  function getStepStatus(step) {
+    if (step === stepperStep) return 'active';
+    if (step === 1 && seriesId)    return 'complete';
+    if (step === 2 && modelId)     return 'complete';
+    if (step === 3 && hasChanges)  return 'complete';
+    return 'inactive';
+  }
+
+  function getCircleStyle(status) {
+    if (status === 'active') return {
+      background: 'var(--c-primary)',
+      boxShadow: 'none',
+      transform: 'scale(1.1)',
+    };
+    if (status === 'complete') return {
+      background: 'var(--c-primary)',
+      boxShadow: 'none',
+      transform: 'scale(1)',
+    };
+    return {
+      background: 'transparent',
+      boxShadow: 'none',
+      transform: 'scale(1)',
+    };
+  }
+
+  // ── render ─────────────────────────────────────────────────
   return (
     <aside className={styles.parameters}>
+
+      {/* Title row */}
       <div className={styles.titleRow}>
         <h2 className={styles.title}>Параметры</h2>
         {seriesId && (
-          <button type='button' className={styles.resetBtn} onClick={onReset}>
+          <button type='button' className={styles.resetBtn} onClick={handleReset}>
             <span className={styles.resetBtnSign}>
-              <svg viewBox='0 0 14 14' fill='none' xmlns='http://www.w3.org/2000/svg'>
-                <path d='M2 7a5 5 0 1 0 1.5-3.5L2 5' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
-                <path d='M2 2v3h3' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/>
+              <svg width='12' height='12' viewBox='0 0 15 15' fill='none'>
+                <path d='M2 2l11 11M13 2L2 13' stroke='white' strokeWidth='2.5' strokeLinecap='round'/>
               </svg>
             </span>
             <span className={styles.resetBtnText}>Сбросить</span>
@@ -257,157 +347,214 @@ export default function Parameters() {
         )}
       </div>
 
+      {/* Step indicators */}
       <div className={styles.steps}>
-        <div className={`${styles.step} ${seriesId ? styles.stepDone : styles.stepActive}`}>
-          <div className={styles.stepCircle}>{seriesId ? '✓' : '1'}</div>
-          <span className={styles.stepLabel}>Серия</span>
-        </div>
-        <div className={styles.stepLine} />
-        <div className={`${styles.step} ${modelId ? styles.stepDone : seriesId ? styles.stepActive : styles.stepPending}`}>
-          <div className={styles.stepCircle}>{modelId ? '✓' : '2'}</div>
-          <span className={styles.stepLabel}>Модель</span>
-        </div>
-        <div className={styles.stepLine} />
-        <div className={`${styles.step} ${hasChanges ? styles.stepDone : modelId ? styles.stepActive : styles.stepPending}`}>
-          <div className={styles.stepCircle}>{hasChanges ? '✓' : '3'}</div>
-          <span className={styles.stepLabel}>Параметры</span>
-        </div>
-      </div>
+        {STEP_LABELS.map((label, i) => {
+          const step   = i + 1;
+          const status = getStepStatus(step);
+          const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && !!modelId);
 
-      <div className={styles.paramGroup}>
-        <label className={styles.groupLabel} htmlFor='series'>Серия шкафа</label>
-        <CustomSelect
-          id='series'
-          value={seriesId}
-          onChange={setSeriesId}
-          placeholder='Выберите серию'
-          options={catalog.series.map(s => ({ value: s.id, label: s.name }))}
-          isOpen={openSelectId === 'series'}
-          onOpenChange={handleSeriesOpen}
-        />
-        {!seriesId && (
-          <p className={styles.hint}>Начните с выбора серии шкафа</p>
-        )}
-      </div>
-
-      <div key={seriesId || 'no-series'} className={`${styles.paramGroup} ${styles.modelGroup}`}>
-        <label className={styles.groupLabel} htmlFor='model'>Модель шкафа</label>
-        <CustomSelect
-          id='model'
-          value={modelId}
-          onChange={onModelChange}
-          placeholder='Выберите модель'
-          options={modelEntries.map(([id, m]) => ({ value: id, label: m.name }))}
-          disabled={!seriesId}
-          isOpen={openSelectId === 'model'}
-          onOpenChange={handleModelOpen}
-        />
-        {seriesId && !modelId && (
-          <p className={styles.hint}>Теперь выберите модель шкафа</p>
-        )}
-      </div>
-
-      <div
-        className={`${styles.paramsBody}${!modelId ? ` ${styles.paramsDisabled}` : ''}`}
-        data-tooltip={!modelId ? 'Не выбрана модель шкафа' : undefined}
-      >
-
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Изменение габаритов</span>
-        <div className={styles.dimFields}>
-          <div className={styles.paramGroup}>
-            <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='width'>Ширина (мм)</label>
-            <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} />
-          </div>
-          <div className={styles.paramGroup}>
-            <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='height'>Высота (мм)</label>
-            <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} />
-          </div>
-          <div className={styles.paramGroup}>
-            <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='depth'>Глубина (мм)</label>
-            <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} />
-          </div>
-        </div>
-      </div>
-
-      <div className={styles.paramsGrid}>
-
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
-        <div className={styles.toggleGroup}>
-          {bodyThicknessOptions.map(t => (
-            <button
-              key={t}
-              className={`${styles.toggleBtn}${bodyThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
-              onClick={() => setBodyThickness(t)}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Толщина металла двери (мм)</span>
-        <div className={styles.toggleGroup}>
-          {doorThicknessOptions.map(t => (
-            <button
-              key={t}
-              className={`${styles.toggleBtn}${doorThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
-              onClick={() => setDoorThickness(t)}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Выбор замка</span>
-        <ul className={styles.lockList}>
-          {lockEntries.map(([id, lock]) => (
-            <li key={id}>
+          return (
+            <Fragment key={step}>
               <button
-                className={`${styles.lockItem}${lockId === id ? ` ${styles.lockItemActive}` : ''}`}
-                onClick={() => setLockId(id)}
+                type='button'
+                className={styles.stepBtn}
+                onClick={() => handleStepClick(step)}
+                disabled={!canClick || isSliding}
               >
-                <span className={styles.lockName}>{lock.name}</span>
+                <span className={styles.stepLabel} data-status={status}>
+                  {label}
+                </span>
+                <motion.div
+                  className={styles.stepCircle}
+                  animate={getCircleStyle(status)}
+                  transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+                  style={{ border: status === 'inactive' ? '1.5px solid var(--c-border)' : 'none' }}
+                >
+                  {status === 'complete' ? (
+                    <svg width='12' height='12' viewBox='0 0 24 24' fill='none'>
+                      <motion.path
+                        d='M5 13l4 4L19 7'
+                        stroke='white'
+                        strokeWidth={2.5}
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        initial={{ pathLength: 0, opacity: 0 }}
+                        animate={{ pathLength: 1, opacity: 1 }}
+                        transition={{ duration: 0.35, ease: 'easeOut' }}
+                      />
+                    </svg>
+                  ) : status === 'active' ? (
+                    <div className={styles.stepDot} />
+                  ) : (
+                    <span className={styles.stepNum}>{step}</span>
+                  )}
+                </motion.div>
               </button>
-            </li>
-          ))}
-        </ul>
+
+              {i < STEP_LABELS.length - 1 && (
+                <div className={styles.stepLineWrap}>
+                  <motion.div
+                    className={styles.stepLineFill}
+                    initial={{ scaleX: (i === 0 ? !!seriesId : !!modelId) ? 1 : 0 }}
+                    animate={{ scaleX: (i === 0 ? !!seriesId : !!modelId) ? 1 : 0 }}
+                    transition={{ type: 'spring', stiffness: 100, damping: 15 }}
+                  />
+                </div>
+              )}
+            </Fragment>
+          );
+        })}
       </div>
 
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Дополнительная вентиляция шкафа</span>
-        <div className={styles.ventToggle}>
-          <button
-            className={`${styles.ventBtn}${ventilation ? ` ${styles.ventBtnActive}` : ''}`}
-            onClick={() => setVentilation(true)}
+      {/* Animated content */}
+      <div
+        className={styles.stepContent}
+        style={{ overflow: isSliding ? 'hidden' : 'visible' }}
+      >
+        <AnimatePresence initial={false} custom={direction} mode='popLayout'>
+          <motion.div
+            key={stepperStep}
+            custom={direction}
+            variants={slideVariants}
+            initial='initial'
+            animate='animate'
+            exit='exit'
+            transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+            style={{ width: '100%' }}
           >
-            Да
-          </button>
-          <button
-            className={`${styles.ventBtn}${!ventilation ? ` ${styles.ventBtnActive}` : ''}`}
-            onClick={() => setVentilation(false)}
-          >
-            Нет
-          </button>
-        </div>
+            {/* ── Step 1: Серия ── */}
+            {stepperStep === 1 && (
+              <div className={styles.stepPane}>
+                <div className={styles.paramGroup}>
+                  <label className={styles.groupLabel} htmlFor='series'>Серия шкафа</label>
+                  <CustomSelect
+                    id='series'
+                    value={seriesId}
+                    onChange={setSeriesId}
+                    placeholder='Выберите серию'
+                    options={catalog.series.map(s => ({ value: s.id, label: s.name }))}
+                    isOpen={openSelectId === 'series'}
+                    onOpenChange={handleSeriesOpen}
+                  />
+                  {!seriesId && <p className={styles.hint}>Начните с выбора серии шкафа</p>}
+                </div>
+              </div>
+            )}
+
+            {/* ── Step 2: Модель ── */}
+            {stepperStep === 2 && (
+              <div className={styles.stepPane}>
+                <div className={styles.paramGroup}>
+                  <label className={styles.groupLabel} htmlFor='model'>Модель шкафа</label>
+                  <CustomSelect
+                    id='model'
+                    value={modelId}
+                    onChange={onModelChange}
+                    placeholder='Выберите модель'
+                    options={modelEntries.map(([id, m]) => ({ value: id, label: m.name }))}
+                    isOpen={openSelectId === 'model'}
+                    onOpenChange={handleModelOpen}
+                  />
+                  {!modelId && <p className={styles.hint}>Теперь выберите модель шкафа</p>}
+                </div>
+              </div>
+            )}
+
+            {/* ── Step 3: Параметры ── */}
+            {stepperStep === 3 && (
+              <div className={styles.stepPane}>
+                <div className={styles.paramGroup}>
+                  <span className={styles.groupLabel}>Изменение габаритов</span>
+                  <div className={styles.dimFields}>
+                    <div className={styles.paramGroup}>
+                      <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='width'>Ширина (мм)</label>
+                      <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} />
+                    </div>
+                    <div className={styles.paramGroup}>
+                      <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='height'>Высота (мм)</label>
+                      <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} />
+                    </div>
+                    <div className={styles.paramGroup}>
+                      <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='depth'>Глубина (мм)</label>
+                      <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.paramsGrid}>
+                  <div className={styles.paramGroup}>
+                    <span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
+                    <div className={styles.toggleGroup}>
+                      {bodyThicknessOptions.map(t => (
+                        <button
+                          key={t}
+                          className={`${styles.toggleBtn}${bodyThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
+                          onClick={() => setBodyThickness(t)}
+                        >{t}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.paramGroup}>
+                    <span className={styles.groupLabel}>Толщина металла двери (мм)</span>
+                    <div className={styles.toggleGroup}>
+                      {doorThicknessOptions.map(t => (
+                        <button
+                          key={t}
+                          className={`${styles.toggleBtn}${doorThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
+                          onClick={() => setDoorThickness(t)}
+                        >{t}</button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className={styles.paramGroup}>
+                    <span className={styles.groupLabel}>Выбор замка</span>
+                    <ul className={styles.lockList}>
+                      {lockEntries.map(([id, lock]) => (
+                        <li key={id}>
+                          <button
+                            className={`${styles.lockItem}${lockId === id ? ` ${styles.lockItemActive}` : ''}`}
+                            onClick={() => setLockId(id)}
+                          >
+                            <span className={styles.lockName}>{lock.name}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className={styles.paramGroup}>
+                    <span className={styles.groupLabel}>Дополнительная вентиляция шкафа</span>
+                    <div className={styles.ventToggle}>
+                      <button
+                        className={`${styles.ventBtn}${ventilation ? ` ${styles.ventBtnActive}` : ''}`}
+                        onClick={() => setVentilation(true)}
+                      >Да</button>
+                      <button
+                        className={`${styles.ventBtn}${!ventilation ? ` ${styles.ventBtnActive}` : ''}`}
+                        onClick={() => setVentilation(false)}
+                      >Нет</button>
+                    </div>
+                  </div>
+
+                  <div className={styles.paramGroup}>
+                    <span className={styles.groupLabel}>Изменение цвета корпуса</span>
+                    <ColorPicker placeholder='Стандартный цвет' selected={bodyColor} onSelect={setBodyColor} />
+                  </div>
+
+                  <div className={styles.paramGroup}>
+                    <span className={styles.groupLabel}>Изменение цвета двери</span>
+                    <ColorPicker placeholder='Стандартный цвет' selected={doorColor} onSelect={setDoorColor} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Изменение цвета корпуса</span>
-        <ColorPicker placeholder='Стандартный цвет' selected={bodyColor} onSelect={setBodyColor} />
-      </div>
-
-      <div className={styles.paramGroup}>
-        <span className={styles.groupLabel}>Изменение цвета двери</span>
-        <ColorPicker placeholder='Стандартный цвет' selected={doorColor} onSelect={setDoorColor} />
-      </div>
-
-      </div>{/* /paramsGrid */}
-      </div>{/* /paramsDisabled */}
     </aside>
   );
 }

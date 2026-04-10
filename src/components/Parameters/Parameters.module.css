@@ -27,27 +27,17 @@
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
-	width: 36px;
-	height: 36px;
-	border: 1px solid var(--c-border);
+	width: 30px;
+	height: 30px;
+	border: none;
 	border-radius: 50%;
 	cursor: pointer;
 	position: relative;
 	overflow: hidden;
-	background: var(--c-bg);
-	color: var(--c-text-muted);
 	transition-duration: 0.3s;
+	box-shadow: 2px 2px 6px rgba(229, 62, 62, 0.3);
+	background-color: #e53e3e;
 	flex-shrink: 0;
-}
-
-.resetBtn:hover {
-	width: 124px;
-	border-radius: 18px;
-	background: #e53e3e;
-	border-color: #e53e3e;
-	color: #fff;
-	box-shadow: 0 2px 10px rgba(229, 62, 62, 0.28);
-	transition-duration: 0.3s;
 }
 
 .resetBtn:active {
@@ -63,37 +53,17 @@
 	transition-duration: 0.3s;
 }
 
-.resetBtnSign svg {
-	width: 14px;
-	height: 14px;
-	flex-shrink: 0;
-	stroke: currentColor;
-}
-
-.resetBtn:hover .resetBtnSign {
-	width: 30%;
-	padding-left: 20px;
-	transition-duration: 0.3s;
-}
-
 .resetBtnText {
 	position: absolute;
 	right: 0;
 	width: 0;
 	opacity: 0;
-	color: currentColor;
+	color: white;
 	font-family: var(--f-main);
 	font-size: 12px;
 	font-weight: 600;
 	white-space: nowrap;
 	overflow: hidden;
-	transition-duration: 0.3s;
-}
-
-.resetBtn:hover .resetBtnText {
-	opacity: 1;
-	width: 70%;
-	padding-right: 10px;
 	transition-duration: 0.3s;
 }
 
@@ -106,94 +76,116 @@
 }
 
 
-/* Индикатор шагов */
+/* ── Stepper индикаторы ── */
 .steps {
 	display: flex;
 	align-items: center;
-	gap: 0;
+	padding: 32px 12px 0; /* место для лейблов + отступ от краёв */
 }
 
-.step {
+.stepBtn {
+	position: relative;
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	justify-content: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 0;
 	flex-shrink: 0;
+	width: 26px;
+	height: 26px;
+	outline: none;
+}
+
+.stepBtn:disabled {
+	cursor: default;
+}
+
+.stepBtn:focus-visible .stepCircle {
+	outline: 2px solid var(--c-primary);
+	outline-offset: 2px;
 }
 
 .stepCircle {
-	width: 24px;
-	height: 24px;
+	width: 26px;
+	height: 26px;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	flex-shrink: 0;
+	/* цвет/тень анимируются через motion */
+}
+
+.stepDot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: #fff;
+	flex-shrink: 0;
+}
+
+.stepNum {
 	font-size: 11px;
 	font-weight: 700;
-	flex-shrink: 0;
-	transition:
-		background 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		border-color 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		color 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		box-shadow 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-		transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+	color: var(--c-text-faint);
 }
 
 .stepLabel {
+	position: absolute;
+	bottom: calc(100% + 6px);
+	left: 50%;
+	transform: translateX(-50%);
 	font-size: 12px;
 	font-weight: 500;
 	white-space: nowrap;
-	transition: color 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+	color: var(--c-text-faint);
+	transition: color 0.3s var(--ease-out), font-weight 0.15s;
 }
 
-.stepLine {
-	flex: 1;
-	height: 1px;
-	margin: 0 8px;
-	transition: background 0.75s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Состояния шага */
-.stepDone .stepCircle {
-	background: var(--c-primary);
-	border: none;
-	color: #fff;
-	transform: scale(1);
-}
-
-.stepDone .stepLabel {
-	color: var(--c-text-muted);
-}
-
-.stepDone .stepLine {
-	background: var(--c-primary);
-}
-
-.stepActive .stepCircle {
-	background: var(--c-primary);
-	border: none;
-	color: #fff;
-	box-shadow: 0 0 0 4px rgba(19, 127, 236, 0.18);
-	transform: scale(1.12);
-}
-
-.stepActive .stepLabel {
+.stepLabel[data-status='active'] {
 	color: var(--c-text-dark);
 	font-weight: 600;
 }
 
-.stepPending .stepCircle {
-	background: transparent;
-	border: 1.5px solid var(--c-border);
-	color: var(--c-text-faint);
-	transform: scale(1);
+.stepLabel[data-status='complete'] {
+	color: var(--c-text-muted);
 }
 
-.stepPending .stepLabel {
-	color: var(--c-text-faint);
-}
-
-.stepPending .stepLine {
+/* Линия между шагами */
+.stepLineWrap {
+	flex: 1;
+	height: 2px;
 	background: var(--c-border);
+	border-radius: 1px;
+	position: relative;
+	overflow: hidden;
+	margin: 0 2px;
+}
+
+.stepLineFill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--c-primary);
+	border-radius: 1px;
+	transform-origin: left;
+}
+
+/* ── Анимируемый контент ── */
+.stepContent {
+	position: relative;
+	flex: 1;
+}
+
+.stepPane {
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
+	padding: 12px 0 4px;
 }
 
 .hint {
@@ -252,30 +244,10 @@
 	position: relative;
 }
 
-@keyframes modelGroupIn {
-	from { transform: translateY(8px); }
-	to   { transform: translateY(0); }
-}
-
-.modelGroup {
-	animation: modelGroupIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.modelGroup { animation: none; }
-}
-
 .paramsBody {
 	display: flex;
 	flex-direction: column;
 	gap: 40px;
-	transition: opacity 0.35s ease;
-}
-
-.paramsDisabled {
-	opacity: 0.4;
-	pointer-events: none;
-	user-select: none;
 }
 
 .paramsGrid {
@@ -313,8 +285,9 @@
 	outline: none;
 }
 
-.cselectTrigger:hover {
-	border-color: var(--c-primary);
+.cselectTrigger:active {
+	transform: scale(0.99);
+	transition: transform 100ms ease-out;
 }
 
 .cselectTrigger:focus-visible {
@@ -352,6 +325,17 @@
 	transform: rotate(180deg);
 }
 
+@keyframes dropdownIn {
+	from {
+		opacity: 0;
+		transform: scaleY(0.97) translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: scaleY(1) translateY(0);
+	}
+}
+
 .cselectDropdown {
 	position: absolute;
 	top: 100%;
@@ -370,6 +354,8 @@
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: #c1c1c1 transparent;
+	transform-origin: top;
+	animation: dropdownIn 0.15s var(--ease-out);
 }
 
 .cselectDropdown::-webkit-scrollbar {
@@ -436,9 +422,9 @@
 		color 0.15s;
 }
 
-.toggleBtn:hover {
-	border-color: var(--c-border);
-	background: var(--c-bg);
+.toggleBtn:active {
+	transform: scale(0.96);
+	transition: transform 100ms ease-out;
 }
 
 .toggleBtnActive {
@@ -447,10 +433,6 @@
 	color: var(--c-orange);
 }
 
-.toggleBtnActive:hover {
-	background: var(--c-white);
-	border-color: var(--c-orange);
-}
 
 /* Поля габаритов */
 .dimFields {
@@ -482,19 +464,15 @@
 	text-align: left;
 }
 
-.lockItem:hover {
-	border-color: var(--c-border);
-	background: var(--c-bg);
+.lockItem:active {
+	transform: scale(0.98);
+	transition: transform 100ms ease-out;
 }
 
 .lockItemActive {
 	border-color: var(--c-orange);
 }
 
-.lockItemActive:hover {
-	background: var(--c-white);
-	border-color: var(--c-orange);
-}
 
 .lockName {
 	font-size: 14px;
@@ -531,9 +509,9 @@
 		color 0.15s;
 }
 
-.ventBtn:hover {
-	border-color: var(--c-border);
-	background: var(--c-bg);
+.ventBtn:active {
+	transform: scale(0.97);
+	transition: transform 100ms ease-out;
 }
 
 .ventBtnActive {
@@ -541,10 +519,6 @@
 	color: var(--c-orange);
 }
 
-.ventBtnActive:hover {
-	background: var(--c-white);
-	border-color: var(--c-orange);
-}
 
 /* ──────────── Stepper (кнопки ± для габаритов) ──────────── */
 
@@ -603,14 +577,11 @@
 	border-left: 1px solid var(--c-border);
 }
 
-.stepperBtn:hover {
-	background: #f5f6f7;
-	color: var(--c-primary);
-}
-
 .stepperBtn:active {
 	background: var(--c-primary-bg);
 	color: var(--c-primary);
+	transform: scale(0.92);
+	transition: transform 80ms ease-out;
 }
 
 .stepperDisplay {
@@ -658,6 +629,72 @@
 	font-size: 11px;
 	color: #e53e3e;
 	letter-spacing: 0.3px;
+}
+
+/* ──────────── HOVER (только pointer-устройства) ──────────── */
+@media (hover: hover) and (pointer: fine) {
+	.cselectTrigger:hover {
+		border-color: var(--c-primary);
+	}
+
+	.cselectItem:hover {
+		background: var(--c-bg);
+		color: var(--c-text-dark);
+	}
+
+	.toggleBtn:hover {
+		border-color: var(--c-border);
+		background: var(--c-bg);
+	}
+
+	.toggleBtnActive:hover {
+		background: var(--c-white);
+		border-color: var(--c-orange);
+	}
+
+	.lockItem:hover {
+		border-color: var(--c-border);
+		background: var(--c-bg);
+	}
+
+	.lockItemActive:hover {
+		background: var(--c-white);
+		border-color: var(--c-orange);
+	}
+
+	.ventBtn:hover {
+		border-color: var(--c-border);
+		background: var(--c-bg);
+	}
+
+	.ventBtnActive:hover {
+		background: var(--c-white);
+		border-color: var(--c-orange);
+	}
+
+	.stepperBtn:hover {
+		background: #f5f6f7;
+		color: var(--c-primary);
+	}
+
+	.resetBtn:hover {
+		width: 104px;
+		border-radius: 40px;
+		transition-duration: 0.3s;
+	}
+
+	.resetBtn:hover .resetBtnSign {
+		width: 30%;
+		padding-left: 12px;
+		transition-duration: 0.3s;
+	}
+
+	.resetBtn:hover .resetBtnText {
+		opacity: 1;
+		width: 70%;
+		padding-right: 10px;
+		transition-duration: 0.3s;
+	}
 }
 
 /* ──────────── АДАПТИВ ──────────── */
