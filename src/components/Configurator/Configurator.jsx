@@ -37,6 +37,7 @@ function buildDefaultSpecsList(defaults, catalog) {
 function buildFinalSpecsList(config, defaults, lock) {
 	if (!defaults) return [];
 	return [
+		{ label: 'Количество:', value: `${config.quantity ?? 10} шт.` },
 		{
 			label: 'Габариты:',
 			value: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
@@ -67,10 +68,17 @@ export default function Configurator() {
 	const [leavingItems, setLeavingItems] = useState([]);
 	const prevSpecsRef = useRef([]);
 	const prevModelIdRef = useRef(config.modelId);
+	const prevResetKeyRef = useRef(resetKey);
 
 	useLayoutEffect(() => {
+		// При сбросе — обновляем ref, leaving-элементы отфильтруются в рендере по resetKey
+		if (prevResetKeyRef.current !== resetKey) {
+			prevResetKeyRef.current = resetKey;
+			prevSpecsRef.current = changedSpecs;
+			return;
+		}
+
 		// При смене модели — обновляем ref и выходим без setState
-		// Старые leaving-элементы отфильтруются в рендере по modelId
 		if (prevModelIdRef.current !== config.modelId) {
 			prevModelIdRef.current = config.modelId;
 			prevSpecsRef.current = changedSpecs;
@@ -83,7 +91,7 @@ export default function Configurator() {
 
 		if (removed.length === 0) return;
 
-		const withModel = removed.map(r => ({ ...r, modelId: config.modelId }));
+		const withModel = removed.map(r => ({ ...r, modelId: config.modelId, resetKey }));
 
 		setLeavingItems(curr => [...curr.filter(c => !removed.some(r => r.label === c.label)), ...withModel]);
 
@@ -92,13 +100,13 @@ export default function Configurator() {
 		}, 400);
 
 		return () => clearTimeout(timer);
-	}, [changedSpecs, config.modelId]);
+	}, [changedSpecs, config.modelId, resetKey]);
 
-	// Для рендера: текущие + уходящие только текущей модели (старые отфильтровываются автоматически)
+	// Для рендера: текущие + уходящие только текущей модели и текущего resetKey
 	const diffItemsToRender = [
 		...changedSpecs.map(item => ({ ...item, leaving: false })),
 		...leavingItems
-			.filter(l => l.modelId === config.modelId && !changedSpecs.some(c => c.label === l.label))
+			.filter(l => l.modelId === config.modelId && l.resetKey === resetKey && !changedSpecs.some(c => c.label === l.label))
 			.map(item => ({ ...item, leaving: true })),
 	];
 

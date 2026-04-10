@@ -2,7 +2,6 @@ import { useState, useRef, useCallback, useEffect, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
-import { clamp } from '../../utils/clamp';
 import { useAppContext } from '../../context/AppContext';
 import styles from './Parameters.module.css';
 
@@ -136,10 +135,16 @@ function CustomSelect({ id, value, onChange, options, placeholder, disabled, isO
   );
 }
 
-function StepperInput({ id, value, min, max, step = 50, onChange, modified }) {
+function StepperInput({ id, value, min, max, step = 50, onChange, modified, defaultValue, snaps, editable }) {
   const [limitSide, setLimitSide] = useState(null);
   const [direction, setDirection] = useState('none');
+  const [inputVal, setInputVal] = useState(value);
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef(null);
   const timerRef = useRef(null);
+
+  // Синхронизируем inputVal когда value меняется извне (кнопки, сброс)
+  useEffect(() => { if (!focused) setInputVal(value); }, [value, focused]);
 
   function triggerLimit(side) {
     if (timerRef.current) clearTimeout(timerRef.current);
@@ -149,10 +154,52 @@ function StepperInput({ id, value, min, max, step = 50, onChange, modified }) {
 
   function handleStep(dir) {
     const current = Number(value);
-    if (dir < 0 && current <= min) { triggerLimit('min'); return; }
-    if (dir > 0 && current >= max) { triggerLimit('max'); return; }
+    const base    = defaultValue !== undefined ? Number(defaultValue) : current;
+
+    // Строим отсортированный список всех допустимых значений
+    const pts = new Set();
+    for (let v = base; v >= min; v -= step) pts.add(v);          // сетка вниз
+    for (let v = base + step; v < max; v += step) pts.add(v);    // сетка вверх
+    pts.add(max);                                                  // всегда включаем max
+    if (snaps) snaps.forEach(s => { if (s > min && s < max) pts.add(s); });
+
+    const sorted = [...pts].sort((a, b) => a - b);
+
+    let idx = sorted.indexOf(current);
+    if (idx === -1) {
+      // Текущее значение не в списке — находим ближайший индекс
+      idx = sorted.reduce((best, v, i) =>
+        Math.abs(v - current) < Math.abs(sorted[best] - current) ? i : best, 0);
+    }
+
+    const nextIdx = idx + dir;
+    if (nextIdx < 0 || nextIdx >= sorted.length) {
+      triggerLimit(dir > 0 ? 'max' : 'min');
+      return;
+    }
     setDirection(dir > 0 ? 'up' : 'down');
-    onChange(String(clamp(current + dir * step, min, max)));
+    onChange(String(sorted[nextIdx]));
+  }
+
+  function handleInputChange(e) {
+    const raw = e.target.value.replace(/\D/g, '');
+    setInputVal(raw);
+  }
+
+  function handleInputBlur() {
+    setFocused(false);
+    const num = parseInt(inputVal, 10);
+    if (!inputVal || isNaN(num) || num < min) {
+      onChange(String(min));
+    } else if (num > max) {
+      onChange(String(max));
+    } else {
+      onChange(String(num));
+    }
+  }
+
+  function handleInputKeyDown(e) {
+    if (e.key === 'Enter') e.target.blur();
   }
 
   const hintText =
@@ -165,9 +212,28 @@ function StepperInput({ id, value, min, max, step = 50, onChange, modified }) {
         <button className={styles.stepperBtn} type='button' onClick={() => handleStep(-1)}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(180deg)' }}><path d="M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/></svg>
         </button>
-        <div className={styles.stepperDisplay} id={id}>
-          {value && <SlotCounter value={value} direction={direction} />}
-        </div>
+        {editable && focused ? (
+          <input
+            ref={inputRef}
+            id={id}
+            className={styles.stepperEditInput}
+            type='text'
+            inputMode='numeric'
+            value={inputVal}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
+            onKeyDown={handleInputKeyDown}
+          />
+        ) : (
+          <div
+            className={styles.stepperDisplay}
+            id={id}
+            onClick={editable ? () => { setFocused(true); setInputVal(value); setTimeout(() => { inputRef.current?.select(); }, 0); } : undefined}
+            style={editable ? { cursor: 'text' } : undefined}
+          >
+            {value && <SlotCounter value={value} direction={direction} />}
+          </div>
+        )}
         <button className={styles.stepperBtn} type='button' onClick={() => handleStep(1)}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/></svg>
         </button>
@@ -196,11 +262,11 @@ export default function Parameters() {
   const {
     setSeriesId, onModelChange, setWidth, setHeight, setDepth,
     setBodyThickness, setDoorThickness, setLockId, setVentilation,
-    setBodyColor, setDoorColor, onReset,
+    setBodyColor, setDoorColor, setQuantity, onReset,
   } = setters;
   const {
     seriesId, modelId, width, height, depth,
-    bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor,
+    bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor, quantity,
   } = config;
 
   // ── stepper state ──────────────────────────────────────────
@@ -236,9 +302,6 @@ export default function Parameters() {
 
   function handleReset() {
     onReset();
-    setDirection(-1);
-    setStepperStep(1);
-    setIsSliding(false);
   }
 
   // ── auto-advance ───────────────────────────────────────────
@@ -462,19 +525,24 @@ export default function Parameters() {
             {stepperStep === 3 && (
               <div className={styles.stepPane}>
                 <div className={styles.paramGroup}>
+                  <label className={styles.groupLabel} htmlFor='quantity'>Количество шкафов (шт.)</label>
+                  <StepperInput id='quantity' value={String(quantity)} min={1} max={300} step={1} onChange={v => setQuantity(Number(v))} defaultValue={10} editable />
+                </div>
+
+                <div className={styles.paramGroup}>
                   <span className={styles.groupLabel}>Изменение габаритов</span>
                   <div className={styles.dimFields}>
                     <div className={styles.paramGroup}>
                       <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='width'>Ширина (мм)</label>
-                      <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} modified={!!specs && String(width) !== String(specs.width)} />
+                      <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} modified={!!specs && String(width) !== String(specs.width)} defaultValue={specs?.width} />
                     </div>
                     <div className={styles.paramGroup}>
                       <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='height'>Высота (мм)</label>
-                      <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} modified={!!specs && String(height) !== String(specs.height)} />
+                      <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} modified={!!specs && String(height) !== String(specs.height)} defaultValue={specs?.height} snaps={[1860]} />
                     </div>
                     <div className={styles.paramGroup}>
                       <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='depth'>Глубина (мм)</label>
-                      <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} modified={!!specs && String(depth) !== String(specs.depth)} />
+                      <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} modified={!!specs && String(depth) !== String(specs.depth)} defaultValue={specs?.depth} />
                     </div>
                   </div>
                 </div>

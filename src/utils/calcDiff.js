@@ -1,7 +1,7 @@
 const SPEC_FIELDS = [
-  { key: 'width',         label: 'Ширина:',         format: v => `${v} мм` },
-  { key: 'height',        label: 'Высота:',         format: v => `${v} мм` },
-  { key: 'depth',         label: 'Глубина:',        format: v => `${v} мм` },
+  { key: 'width',         label: 'Ширина:',          format: v => `${v} мм` },
+  { key: 'height',        label: 'Высота:',          format: v => `${v} мм` },
+  { key: 'depth',         label: 'Глубина:',         format: v => `${v} мм` },
   { key: 'bodyThickness', label: 'Толщина корпуса:', format: v => `${v} мм` },
   { key: 'doorThickness', label: 'Толщина двери:',   format: v => `${v} мм` },
   { key: 'lockName',      label: 'Замок:',           format: v => v },
@@ -17,9 +17,7 @@ export function calcDiff(current, defaults) {
     const currentVal = current[field.key];
     const defaultVal = defaults[field.key];
 
-    const isDifferent = String(currentVal) !== String(defaultVal);
-
-    if (isDifferent && currentVal !== undefined && currentVal !== null) {
+    if (currentVal !== undefined && currentVal !== null && String(currentVal) !== String(defaultVal)) {
       acc.push({ label: field.label, value: field.format(currentVal) });
     }
     return acc;

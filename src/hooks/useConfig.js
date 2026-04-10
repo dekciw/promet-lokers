@@ -28,6 +28,7 @@ export function useConfig(catalog) {
   const [ventilation, setVentilation] = useState(() => getInitial('ventilation', false));
   const [bodyColor, setBodyColor] = useState(() => getInitial('bodyColor', null));
   const [doorColor, setDoorColor] = useState(() => getInitial('doorColor', null));
+  const [quantity, setQuantity] = useState(() => getInitial('quantity', 10));
   const [isResetting, setIsResetting] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
@@ -86,9 +87,21 @@ export function useConfig(catalog) {
   function handleReset() {
     setIsResetting(true);
     setTimeout(() => {
-      setSeriesId('');
-      setModelId('');
-      clearParams();
+      if (modelId && catalog?.models[modelId]) {
+        const specs = catalog.models[modelId].defaultSpecs;
+        setWidth(String(specs.width));
+        setHeight(String(specs.height));
+        setDepth(String(specs.depth));
+        setBodyThickness(specs.bodyThickness);
+        setDoorThickness(specs.doorThickness);
+        setLockId(specs.lockId ?? 'key_basic');
+        setVentilation(specs.ventilation ?? false);
+      } else {
+        clearParams();
+      }
+      setBodyColor(null);
+      setDoorColor(null);
+      setQuantity(10);
       setResetKey(k => k + 1);
       setIsResetting(false);
     }, 330);
@@ -106,11 +119,12 @@ export function useConfig(catalog) {
     ventilation,
     bodyColor,
     doorColor,
+    quantity,
   };
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  }, [seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor]);
+  }, [seriesId, modelId, width, height, depth, bodyThickness, doorThickness, lockId, ventilation, bodyColor, doorColor, quantity]);
 
   const setters = {
     setSeriesId: handleSeriesChange,
@@ -124,6 +138,7 @@ export function useConfig(catalog) {
     setVentilation,
     setBodyColor,
     setDoorColor,
+    setQuantity,
     onReset: handleReset,
   };
 

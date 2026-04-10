@@ -550,6 +550,8 @@
 }
 
 
+/* ──────────── Количество шкафов ──────────── */
+
 /* ──────────── Stepper (кнопки ± для габаритов) ──────────── */
 
 @keyframes stepper-shake {
@@ -616,6 +618,20 @@
 	color: var(--c-primary);
 	transform: scale(0.92);
 	transition: transform 80ms ease-out;
+}
+
+.stepperEditInput {
+	flex: 1;
+	height: 42px;
+	border: none;
+	outline: none;
+	background: transparent;
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--c-text-dark);
+	text-align: center;
+	width: 0;
 }
 
 .stepperDisplay {

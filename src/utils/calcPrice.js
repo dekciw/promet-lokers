@@ -7,11 +7,12 @@ export function calcPrice(config, catalog) {
   const bodyColorSurcharge = config.bodyColor?.surcharge ?? 0;
   const doorColorSurcharge = config.doorColor?.surcharge ?? 0;
 
-  return (
+  const unitPrice =
     model.basePrice +
     lockSurcharge +
     ventSurcharge +
     bodyColorSurcharge +
-    doorColorSurcharge
-  );
+    doorColorSurcharge;
+
+  return unitPrice * (config.quantity ?? 1);
 }
