@@ -335,6 +335,9 @@
 	font-weight: 500;
 	color: var(--card-final-text);
 	line-height: 16px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
 
 .finalItemPrice .finalLabel {

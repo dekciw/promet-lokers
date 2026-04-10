@@ -153,6 +153,25 @@
 	color: var(--c-text-muted);
 }
 
+.stepBadge {
+	position: absolute;
+	top: -5px;
+	right: -5px;
+	min-width: 16px;
+	height: 16px;
+	background: var(--c-orange);
+	border-radius: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 9px;
+	font-weight: 700;
+	color: #fff;
+	padding: 0 3px;
+	pointer-events: none;
+	line-height: 1;
+}
+
 /* Линия между шагами */
 .stepLineWrap {
 	flex: 1;
@@ -392,9 +411,7 @@
 
 .cselectItemLabel {
 	flex: 1;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+	line-height: 1.4;
 }
 
 .cselectItemCheck {
@@ -561,6 +578,10 @@
 	transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+.stepperRowModified {
+	border-color: var(--c-orange);
+}
+
 .stepperLimit .stepperRow {
 	border-color: #e53e3e;
 	box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.15);
@@ -622,7 +643,7 @@
 /* ──────────── HOVER (только pointer-устройства) ──────────── */
 @media (hover: hover) and (pointer: fine) {
 	.cselectTrigger:hover {
-		border-color: var(--c-primary);
+		background: var(--c-bg);
 	}
 
 	.cselectItem:hover {

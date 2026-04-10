@@ -136,7 +136,7 @@ function CustomSelect({ id, value, onChange, options, placeholder, disabled, isO
   );
 }
 
-function StepperInput({ id, value, min, max, step = 50, onChange }) {
+function StepperInput({ id, value, min, max, step = 50, onChange, modified }) {
   const [limitSide, setLimitSide] = useState(null);
   const [direction, setDirection] = useState('none');
   const timerRef = useRef(null);
@@ -161,7 +161,7 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
 
   return (
     <div className={`${styles.stepper}${limitSide ? ` ${styles.stepperLimit}` : ''}`}>
-      <div className={styles.stepperRow}>
+      <div className={`${styles.stepperRow}${modified ? ` ${styles.stepperRowModified}` : ''}`}>
         <button className={styles.stepperBtn} type='button' onClick={() => handleStep(-1)}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(180deg)' }}><path d="M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/></svg>
         </button>
@@ -273,24 +273,24 @@ export default function Parameters() {
   const maxDepth  = defaultDepth !== null ? defaultDepth : undefined;
 
   const specs = currentModel?.defaultSpecs;
-  const hasChanges = !!(modelId && specs && (
-    String(width)     !== String(specs.width)  ||
-    String(height)    !== String(specs.height) ||
-    String(depth)     !== String(specs.depth)  ||
-    bodyThickness     !== specs.bodyThickness  ||
-    doorThickness     !== specs.doorThickness  ||
-    lockId            !== (specs.lockId ?? 'key_basic') ||
-    ventilation       !== (specs.ventilation ?? false)  ||
-    bodyColor         !== null ||
-    doorColor         !== null
-  ));
+  const changesCount = (modelId && specs) ? [
+    String(width)  !== String(specs.width),
+    String(height) !== String(specs.height),
+    String(depth)  !== String(specs.depth),
+    bodyThickness  !== specs.bodyThickness,
+    doorThickness  !== specs.doorThickness,
+    lockId         !== (specs.lockId ?? 'key_basic'),
+    ventilation    !== (specs.ventilation ?? false),
+    bodyColor      !== null,
+    doorColor      !== null,
+  ].filter(Boolean).length : 0;
 
   // ── step status ────────────────────────────────────────────
   function getStepStatus(step) {
     if (step === stepperStep) return 'active';
     if (step === 1 && seriesId)    return 'complete';
     if (step === 2 && modelId)     return 'complete';
-    if (step === 3 && hasChanges)  return 'complete';
+    if (step === 3 && modelId)     return 'complete';
     return 'inactive';
   }
 
@@ -374,6 +374,19 @@ export default function Parameters() {
                     <span className={styles.stepNum}>{step}</span>
                   )}
                 </motion.div>
+                <AnimatePresence>
+                  {step === 3 && changesCount > 0 && stepperStep !== 3 && (
+                    <motion.span
+                      className={styles.stepBadge}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    >
+                      {changesCount}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
 
               {i < STEP_LABELS.length - 1 && (
@@ -453,15 +466,15 @@ export default function Parameters() {
                   <div className={styles.dimFields}>
                     <div className={styles.paramGroup}>
                       <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='width'>Ширина (мм)</label>
-                      <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} />
+                      <StepperInput id='width' value={width} min={minWidth} max={maxWidth} onChange={setWidth} modified={!!specs && String(width) !== String(specs.width)} />
                     </div>
                     <div className={styles.paramGroup}>
                       <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='height'>Высота (мм)</label>
-                      <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} />
+                      <StepperInput id='height' value={height} min={HEIGHT_MIN} max={HEIGHT_MAX} onChange={setHeight} modified={!!specs && String(height) !== String(specs.height)} />
                     </div>
                     <div className={styles.paramGroup}>
                       <label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='depth'>Глубина (мм)</label>
-                      <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} />
+                      <StepperInput id='depth' value={depth} min={minDepth} max={maxDepth} onChange={setDepth} modified={!!specs && String(depth) !== String(specs.depth)} />
                     </div>
                   </div>
                 </div>

@@ -45,8 +45,8 @@ function buildFinalSpecsList(config, defaults, lock) {
 		{ label: 'Толщина двери:', value: `${config.doorThickness} мм` },
 		{ label: 'Замок:', value: lock?.name ?? config.lockId },
 		{ label: 'Вентиляция:', value: config.ventilation ? 'Да' : 'Нет' },
-		...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name }] : []),
-		...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name }] : []),
+		...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name, colorHex: config.bodyColor.color }] : []),
+		...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name, colorHex: config.doorColor.color }] : []),
 	];
 }
 
@@ -187,10 +187,21 @@ export default function Configurator() {
 								конфигурация
 							</span>
 							<ul className={styles.finalSpec} key={`${config.modelId}-${resetKey}`}>
-								{finalSpecsList.map(({ label, value }, i) => (
+								{finalSpecsList.map(({ label, value, colorHex }, i) => (
 									<li key={label} className={styles.finalItem} style={{ animationDelay: `${i * 0.1}s` }}>
 										<span className={styles.finalLabel}>{label}</span>
-										<span className={styles.finalValue}>{value}</span>
+										<span className={styles.finalValue}>
+											{colorHex && (
+												<span
+													className={styles.colorSwatch}
+													style={{
+														background: colorHex,
+														border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
+													}}
+												/>
+											)}
+											{value}
+										</span>
 									</li>
 								))}
 								<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
