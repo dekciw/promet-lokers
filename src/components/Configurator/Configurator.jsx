@@ -110,6 +110,16 @@ export default function Configurator() {
 			.map(item => ({ ...item, leaving: true })),
 	];
 
+	const [copied, setCopied] = useState(false);
+
+	function handleCopyArticle() {
+		if (!model?.article) return;
+		navigator.clipboard.writeText(model.article).then(() => {
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		});
+	}
+
 	const priceDisplay = price !== null ? `${price.toLocaleString('ru-RU')} ₽` : '—';
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : 'Модель не выбрана';
 
@@ -125,10 +135,15 @@ export default function Configurator() {
 						</div>
 					</div>
 
-					<div className={styles.articleBadge}>
-						<span className={styles.badgeLabel}>Артикул</span>
+					<button
+						className={`${styles.articleBadge}${model?.article ? ` ${styles.articleBadgeClickable}` : ''}`}
+						onClick={handleCopyArticle}
+						disabled={!model?.article}
+						type='button'
+					>
+						<span className={styles.badgeLabel}>{copied ? 'Скопировано!' : 'Артикул'}</span>
 						<span className={styles.badgeCode}>{model?.article ?? '—'}</span>
-					</div>
+					</button>
 				</div>
 
 				{/* 3D Предпросмотр — скрыт до реализации (Фаза 3) */}
@@ -234,6 +249,22 @@ export default function Configurator() {
 							</div>
 						</div>
 					</div>
+				</div>
+			</div>
+
+			{/* Мобильная sticky-плашка */}
+			<div className={`${styles.stickyBar}${model ? ` ${styles.stickyBarVisible}` : ''}`}>
+				<div className={styles.stickyPrice}>
+					<span className={styles.stickyPriceLabel}>Итого</span>
+					<span className={styles.stickyPriceValue}>{priceDisplay}</span>
+				</div>
+				<div className={styles.stickyActions}>
+					<button className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn}`} disabled={!model}>
+						НЗ
+					</button>
+					<button className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`} disabled={!model}>
+						КП для клиента
+					</button>
 				</div>
 			</div>
 		</main>
