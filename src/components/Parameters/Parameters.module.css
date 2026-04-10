@@ -296,10 +296,10 @@
 }
 
 .cselectOpen .cselectTrigger {
-	border-color: var(--c-primary);
+	border-color: var(--c-border);
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
-	box-shadow: 0 0 0 2px var(--c-primary-border);
+	box-shadow: none;
 }
 
 .cselectText {
@@ -342,7 +342,7 @@
 	left: 0;
 	right: 0;
 	background: var(--c-white);
-	border: 1px solid var(--c-primary);
+	border: 1px solid var(--c-border);
 	border-top: none;
 	border-bottom-left-radius: var(--r-sm);
 	border-bottom-right-radius: var(--r-sm);
@@ -377,27 +377,40 @@
 }
 
 .cselectItem {
-	padding: 11px 14px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 10px 12px 10px 14px;
 	font-size: 14px;
 	color: var(--c-text-mid);
 	cursor: pointer;
-	transition: background 0.1s;
-	border-bottom: 1px solid var(--c-border);
+	border-left: 3px solid transparent;
+	transition: background 0.12s, color 0.12s, padding-left 0.12s;
+	margin: 2px 4px;
+	border-radius: 6px;
 }
 
-.cselectItem:last-child {
-	border-bottom: none;
+.cselectItemLabel {
+	flex: 1;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
-.cselectItem:hover {
-	background: var(--c-bg);
-	color: var(--c-text-dark);
+.cselectItemCheck {
+	flex-shrink: 0;
+	color: var(--c-primary);
+	margin-left: 8px;
 }
 
 .cselectItemActive {
 	background: var(--c-primary-bg);
 	color: var(--c-primary);
 	font-weight: 500;
+	border-left-color: var(--c-border);
+	border-radius: 0 6px 6px 0;
+	margin-left: 0;
+	padding-left: 15px;
 }
 
 /* Толщина металла */
@@ -446,14 +459,13 @@
 	list-style: none;
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 8px;
 }
 
 .lockItem {
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
-	padding: 13px 17px;
+	padding: 12px 14px;
 	border-radius: var(--r-md);
 	border: 1px solid var(--c-border-subtle);
 	background: var(--c-white);
@@ -475,10 +487,11 @@
 
 
 .lockName {
-	font-size: 14px;
+	font-size: 13px;
 	font-weight: 400;
 	color: var(--c-text-dark);
-	line-height: 20px;
+	line-height: 18px;
+	word-break: break-word;
 }
 
 .lockItemActive .lockName {
@@ -599,31 +612,6 @@
 }
 
 
-.stepperField {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	border: none;
-	outline: none;
-	background: transparent;
-	font-family: var(--f-main);
-	font-size: 14px;
-	font-weight: 400;
-	color: var(--c-text-dark);
-	text-align: center;
-	padding: 11px 4px;
-	-moz-appearance: textfield;
-}
-
-.stepperFieldHidden {
-	opacity: 0;
-}
-
-.stepperField::-webkit-inner-spin-button,
-.stepperField::-webkit-outer-spin-button {
-	-webkit-appearance: none;
-	margin: 0;
-}
 
 .stepperHint {
 	font-size: 11px;
@@ -640,6 +628,11 @@
 	.cselectItem:hover {
 		background: var(--c-bg);
 		color: var(--c-text-dark);
+		padding-left: 18px;
+	}
+
+	.cselectItemActive:hover {
+		padding-left: 15px;
 	}
 
 	.toggleBtn:hover {

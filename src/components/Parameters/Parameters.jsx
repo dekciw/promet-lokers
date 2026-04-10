@@ -122,7 +122,12 @@ function CustomSelect({ id, value, onChange, options, placeholder, disabled, isO
               className={`${styles.cselectItem}${o.value === value ? ` ${styles.cselectItemActive}` : ''}`}
               onClick={() => handleSelect(o.value)}
             >
-              {o.label}
+              <span className={styles.cselectItemLabel}>{o.label}</span>
+              {o.value === value && (
+                <svg className={styles.cselectItemCheck} width='14' height='14' viewBox='0 0 14 14' fill='none'>
+                  <path d='M2.5 7l3 3 6-6' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round'/>
+                </svg>
+              )}
             </li>
           ))}
         </ul>
@@ -134,7 +139,6 @@ function CustomSelect({ id, value, onChange, options, placeholder, disabled, isO
 function StepperInput({ id, value, min, max, step = 50, onChange }) {
   const [limitSide, setLimitSide] = useState(null);
   const [direction, setDirection] = useState('none');
-  const [focused, setFocused] = useState(false);
   const timerRef = useRef(null);
 
   function triggerLimit(side) {
@@ -161,28 +165,8 @@ function StepperInput({ id, value, min, max, step = 50, onChange }) {
         <button className={styles.stepperBtn} type='button' onClick={() => handleStep(-1)}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ transform: 'rotate(180deg)' }}><path d="M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/></svg>
         </button>
-        <div className={styles.stepperDisplay}>
-          {!focused && value && (
-            <SlotCounter value={value} direction={direction} />
-          )}
-          <input
-            className={`${styles.stepperField}${focused ? '' : ` ${styles.stepperFieldHidden}`}`}
-            type='number'
-            id={id}
-            value={value}
-            min={min}
-            max={max}
-            step={step}
-            onChange={e => onChange(e.target.value)}
-            onFocus={() => setFocused(true)}
-            onBlur={e => {
-              setFocused(false);
-              setDirection('none');
-              if (min == null || max == null) return;
-              const val = Number(e.target.value);
-              if (!isNaN(val)) onChange(String(clamp(val, min, max)));
-            }}
-          />
+        <div className={styles.stepperDisplay} id={id}>
+          {value && <SlotCounter value={value} direction={direction} />}
         </div>
         <button className={styles.stepperBtn} type='button' onClick={() => handleStep(1)}>
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/></svg>
