@@ -19,6 +19,7 @@ dist-ssr
 .claude/
 .agents/
 skills-lock.json
+docs/gsd-encyclopedia.md
 
 # Локальное планирование (только для разработки)
 .planning/
