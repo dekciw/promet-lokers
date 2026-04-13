@@ -32,6 +32,12 @@
 	box-shadow: none;
 }
 
+.trigger:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: var(--r-sm);
+}
+
 .triggerSwatch {
 	width: 20px;
 	height: 20px;
