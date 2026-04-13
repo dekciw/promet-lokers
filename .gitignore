@@ -15,8 +15,10 @@ dist-ssr
 .env.*
 !.env.example
 
-# Claude Code
+# Claude Code и AI-инструменты
 .claude/
+.agents/
+skills-lock.json
 
 # Локальное планирование (только для разработки)
 .planning/
