@@ -260,7 +260,7 @@ export default function Configurator() {
 				</div>
 				<div className={styles.stickyActions}>
 					<button className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn}`} disabled={!model}>
-						НЗ
+						Бланк НЗ
 					</button>
 					<button className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`} disabled={!model}>
 						КП для клиента
