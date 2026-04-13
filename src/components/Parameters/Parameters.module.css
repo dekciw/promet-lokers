@@ -44,6 +44,12 @@
 	transform: translate(1px, 1px);
 }
 
+.resetBtn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: 50%;
+}
+
 .resetBtnSign {
 	width: 100%;
 	display: flex;
@@ -457,6 +463,12 @@
 	transition: transform 100ms ease-out;
 }
 
+.toggleBtn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: var(--r-sm);
+}
+
 .toggleBtnActive {
 	background: var(--c-white);
 	border-color: var(--c-orange);
@@ -496,6 +508,12 @@
 .lockItem:active {
 	transform: scale(0.98);
 	transition: transform 100ms ease-out;
+}
+
+.lockItem:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: var(--r-md);
 }
 
 .lockItemActive {
@@ -544,6 +562,12 @@
 	transition: transform 100ms ease-out;
 }
 
+.ventBtn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: var(--r-sm);
+}
+
 .ventBtnActive {
 	border-color: var(--c-orange);
 	color: var(--c-orange);
@@ -577,6 +601,12 @@
 	background: var(--c-orange-active);
 	transform: scale(0.97);
 	box-shadow: 0 2px 6px rgba(245, 130, 20, 0.2);
+}
+
+.nextBtn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: var(--r-sm);
 }
 
 /* ──────────── Stepper (кнопки ± для габаритов) ──────────── */
@@ -645,6 +675,12 @@
 	color: var(--c-primary);
 	transform: scale(0.92);
 	transition: transform 80ms ease-out;
+}
+
+.stepperBtn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	border-radius: var(--r-sm);
 }
 
 .stepperEditInput {
