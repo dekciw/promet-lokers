@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MotionConfig } from 'motion/react';
 import Header from './components/Header/Header';
 import Configurator from './components/Configurator/Configurator';
 import Parameters from './components/Parameters/Parameters';
@@ -44,13 +45,15 @@ export default function App() {
   const ctx = { config, setters, catalog, price, isResetting, resetKey };
 
   return (
-    <AppProvider value={ctx}>
-      <Header />
-      <div className='layout'>
-        <Configurator />
-        <Parameters />
-      </div>
-      <Footer />
-    </AppProvider>
+    <MotionConfig reducedMotion="user">
+      <AppProvider value={ctx}>
+        <Header />
+        <div className='layout'>
+          <Configurator />
+          <Parameters />
+        </div>
+        <Footer />
+      </AppProvider>
+    </MotionConfig>
   );
 }
