@@ -56,7 +56,7 @@
 	background: var(--c-white);
 	border: 1px solid var(--c-border);
 	border-radius: var(--r-sm);
-	padding: 9px 17px;
+	padding: 8px 16px;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
@@ -125,7 +125,7 @@
 /* Колонки */
 .configCol {
 	border-radius: var(--r-lg);
-	padding: 21px;
+	padding: 20px;
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
@@ -321,7 +321,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
-	padding: 0 0 9px 0;
+	padding: 0 0 8px 0;
 	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	min-height: 25px;
 	animation: itemIn 0.35s var(--ease-out) both;
@@ -670,7 +670,7 @@
 	position: absolute;
 	inset: 40px 8px 8px 8px;
 	border: 1px solid rgba(203, 213, 225, 0.5);
-	padding: 9px;
+	padding: 8px;
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
