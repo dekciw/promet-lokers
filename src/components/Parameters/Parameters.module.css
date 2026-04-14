@@ -444,6 +444,7 @@
 
 .toggleBtn {
 	padding: 10px 20px;
+	min-height: 44px; /* WCAG 2.1 AA touch target */
 	border-radius: var(--r-sm);
 	border: 1px solid var(--c-border-subtle);
 	background: var(--c-white);
@@ -543,6 +544,7 @@
 .ventBtn {
 	flex: 1;
 	padding: 9px 4px;
+	min-height: 44px; /* WCAG 2.1 AA touch target */
 	border-radius: var(--r-sm);
 	border: 1px solid var(--c-border-subtle);
 	background: var(--c-white);
@@ -584,7 +586,7 @@
 
 .nextBtn {
 	width: 100%;
-	height: 42px;
+	height: 44px; /* было 42px — WCAG 2.1 AA touch target */
 	background: var(--c-orange);
 	color: #fff;
 	border: none;
@@ -649,8 +651,8 @@
 
 .stepperBtn {
 	flex-shrink: 0;
-	width: 36px;
-	height: 42px;
+	min-width: 44px; /* было width: 36px — WCAG 2.1 AA touch target */
+	min-height: 44px; /* было height: 42px */
 	background: var(--c-white);
 	border: none;
 	border-right: 1px solid var(--c-border);
@@ -685,7 +687,7 @@
 
 .stepperEditInput {
 	flex: 1;
-	height: 42px;
+	height: 44px; /* было 42px — синхронизировано со .stepperBtn */
 	border: none;
 	outline: none;
 	background: transparent;
@@ -704,7 +706,7 @@
 	align-items: center;
 	justify-content: center;
 	overflow: hidden;
-	height: 42px;
+	height: 44px; /* было 42px — синхронизировано со .stepperBtn */
 	font-family: var(--f-main);
 	font-size: 14px;
 	font-weight: 400;
