@@ -377,13 +377,12 @@ export default function Parameters() {
 		onReset();
 	}
 
-	// ── auto-advance ───────────────────────────────────────────
-	useEffect(() => {
-		if (seriesId && stepperStepRef.current === 1) {
-			const t = setTimeout(() => goToStep(2), 350);
-			return () => clearTimeout(t);
-		}
-	}, [seriesId]); // eslint-disable-line
+	// ── series select handler ──────────────────────────────────
+	function handleSeriesSelect(newSeriesId) {
+		setSeriesId(newSeriesId, () => {
+			if (stepperStepRef.current === 1) goToStep(2);
+		});
+	}
 
 	// ── derived data ───────────────────────────────────────────
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
@@ -400,27 +399,11 @@ export default function Parameters() {
 	const maxDepth = defaultDepth !== null ? defaultDepth : undefined;
 
 	const specs = currentModel?.defaultSpecs;
-	const changesCount =
-		modelId && specs
-			? [
-					String(width) !== String(specs.width),
-					String(height) !== String(specs.height),
-					String(depth) !== String(specs.depth),
-					bodyThickness !== specs.bodyThickness,
-					doorThickness !== specs.doorThickness,
-					lockId !== (specs.lockId ?? 'key_basic'),
-					ventilation !== (specs.ventilation ?? false),
-					bodyColor !== null,
-					doorColor !== null,
-				].filter(Boolean).length
-			: 0;
 
 	// ── step status ────────────────────────────────────────────
 	function getStepStatus(step) {
 		if (step === stepperStep) return 'active';
-		if (step === 1 && seriesId) return 'complete';
-		if (step === 2 && modelId) return 'complete';
-		if (step === 3 && modelId) return 'complete';
+		if (step < stepperStep) return 'complete';
 		return 'inactive';
 	}
 
@@ -505,27 +488,14 @@ export default function Parameters() {
 										<span className={styles.stepNum}>{step}</span>
 									)}
 								</motion.div>
-								<AnimatePresence>
-									{step === 3 && changesCount > 0 && stepperStep !== 3 && (
-										<motion.span
-											className={styles.stepBadge}
-											initial={{ scale: 0, opacity: 0 }}
-											animate={{ scale: 1, opacity: 1 }}
-											exit={{ scale: 0, opacity: 0 }}
-											transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-										>
-											{changesCount}
-										</motion.span>
-									)}
-								</AnimatePresence>
 							</button>
 
 							{i < STEP_LABELS.length - 1 && (
 								<div className={styles.stepLineWrap}>
 									<motion.div
 										className={styles.stepLineFill}
-										initial={{ scaleX: (i === 0 ? !!seriesId : !!modelId) ? 1 : 0 }}
-										animate={{ scaleX: (i === 0 ? !!seriesId : !!modelId) ? 1 : 0 }}
+										initial={{ scaleX: stepperStep > i + 1 ? 1 : 0 }}
+										animate={{ scaleX: stepperStep > i + 1 ? 1 : 0 }}
 										transition={{ type: 'spring', stiffness: 100, damping: 15 }}
 									/>
 								</div>
@@ -558,7 +528,7 @@ export default function Parameters() {
 									<CustomSelect
 										id='series'
 										value={seriesId}
-										onChange={setSeriesId}
+										onChange={handleSeriesSelect}
 										placeholder='Выберите серию'
 										options={catalog.series.map(s => ({ value: s.id, label: s.name }))}
 										isOpen={openSelectId === 'series'}
