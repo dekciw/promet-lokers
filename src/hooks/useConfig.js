@@ -60,7 +60,8 @@ export function useConfig(catalog) {
     setDoorColor(null);
   }
 
-  function handleSeriesChange(newSeriesId) {
+  function handleSeriesChange(newSeriesId, onAdvance) {
+    if (onAdvance) onAdvance();
     setIsResetting(true);
     setTimeout(() => {
       setSeriesId(newSeriesId);
