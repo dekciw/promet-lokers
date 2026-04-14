@@ -115,8 +115,7 @@
 }
 
 .configGridLeaving .specItem,
-.configGridLeaving .diffItem,
-.configGridLeaving .finalItem {
+.configGridLeaving .diffItem {
 	animation: itemCollapse 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 	pointer-events: none;
 	overflow: hidden;
@@ -278,6 +277,10 @@
 	min-height: 16px;
 	padding: 8px 0;
 	border-bottom: 1px solid rgba(120, 53, 15, 0.15);
+}
+
+/* Анимация входа — только для новых элементов, не для уже присутствующих */
+.diffItemEntering {
 	animation: itemIn 0.35s var(--ease-out) both;
 }
 

@@ -66,6 +66,8 @@ export default function Configurator() {
 	// Отслеживаем элементы которые уходят из нестандартного заказа — держим их в DOM пока анимация не закончится
 	// Каждый элемент хранит modelId — чтобы при смене модели старые не появлялись в новой карточке
 	const [leavingItems, setLeavingItems] = useState([]);
+	// Лейблы элементов которые только что вошли в список — получают enter-анимацию
+	const [enteringLabels, setEnteringLabels] = useState(new Set());
 	const prevSpecsRef = useRef([]);
 	const prevModelIdRef = useRef(config.modelId);
 	const prevResetKeyRef = useRef(resetKey);
@@ -87,27 +89,39 @@ export default function Configurator() {
 
 		const prev = prevSpecsRef.current;
 		const removed = prev.filter(p => !changedSpecs.some(c => c.label === p.label));
+		// Новые элементы — те что появились в changedSpecs и не были в prev
+		const added = changedSpecs.filter(c => !prev.some(p => p.label === c.label));
 		prevSpecsRef.current = changedSpecs;
 
-		if (removed.length === 0) return;
+		if (removed.length > 0) {
+			const withModel = removed.map(r => ({ ...r, modelId: config.modelId, resetKey }));
+			setLeavingItems(curr => [...curr.filter(c => !removed.some(r => r.label === c.label)), ...withModel]);
 
-		const withModel = removed.map(r => ({ ...r, modelId: config.modelId, resetKey }));
+			const timer = setTimeout(() => {
+				setLeavingItems(curr => curr.filter(c => !removed.some(r => r.label === c.label)));
+			}, 400);
 
-		setLeavingItems(curr => [...curr.filter(c => !removed.some(r => r.label === c.label)), ...withModel]);
+			return () => clearTimeout(timer);
+		}
 
-		const timer = setTimeout(() => {
-			setLeavingItems(curr => curr.filter(c => !removed.some(r => r.label === c.label)));
-		}, 400);
+		if (added.length > 0) {
+			const addedLabels = new Set(added.map(a => a.label));
+			setEnteringLabels(addedLabels);
 
-		return () => clearTimeout(timer);
+			const timer = setTimeout(() => {
+				setEnteringLabels(new Set());
+			}, 400);
+
+			return () => clearTimeout(timer);
+		}
 	}, [changedSpecs, config.modelId, resetKey]);
 
 	// Для рендера: текущие + уходящие только текущей модели и текущего resetKey
 	const diffItemsToRender = [
-		...changedSpecs.map(item => ({ ...item, leaving: false })),
+		...changedSpecs.map(item => ({ ...item, leaving: false, entering: enteringLabels.has(item.label) })),
 		...leavingItems
 			.filter(l => l.modelId === config.modelId && l.resetKey === resetKey && !changedSpecs.some(c => c.label === l.label))
-			.map(item => ({ ...item, leaving: true })),
+			.map(item => ({ ...item, leaving: true, entering: false })),
 	];
 
 	const [copied, setCopied] = useState(false);
@@ -192,8 +206,12 @@ export default function Configurator() {
 							<p className={styles.noChanges}>Нет изменений</p>
 						) : (
 							<ul className={styles.diffList}>
-								{diffItemsToRender.map(({ label, value, leaving }, i) => (
-									<li key={label} className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}`} style={!leaving ? { animationDelay: `${i * 0.1}s` } : undefined}>
+								{diffItemsToRender.map(({ label, value, leaving, entering }, i) => (
+									<li
+										key={label}
+										className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}${entering ? ` ${styles.diffItemEntering}` : ''}`}
+										style={entering ? { animationDelay: `${i * 0.1}s` } : undefined}
+									>
 										<span className={styles.diffLabel}>{label}</span>
 										<span className={styles.diffValue}>{value}</span>
 									</li>
@@ -209,31 +227,33 @@ export default function Configurator() {
 								<br />
 								конфигурация
 							</span>
-							<ul className={styles.finalSpec} key={`${config.modelId}-${resetKey}`}>
-								{finalSpecsList.map(({ label, value, colorHex }, i) => (
-									<li key={label} className={styles.finalItem} style={{ animationDelay: `${i * 0.1}s` }}>
-										<span className={styles.finalLabel}>{label}</span>
-										<span className={styles.finalValue}>
-											{colorHex && (
-												<span
-													className={styles.colorSwatch}
-													style={{
-														background: colorHex,
-														border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
-													}}
-												/>
-											)}
-											{value}
+							{model && (
+								<ul className={styles.finalSpec} key={`${config.modelId}-${resetKey}`}>
+									{finalSpecsList.map(({ label, value, colorHex }, i) => (
+										<li key={label} className={styles.finalItem} style={{ animationDelay: `${i * 0.1}s` }}>
+											<span className={styles.finalLabel}>{label}</span>
+											<span className={styles.finalValue}>
+												{colorHex && (
+													<span
+														className={styles.colorSwatch}
+														style={{
+															background: colorHex,
+															border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
+														}}
+													/>
+												)}
+												{value}
+											</span>
+										</li>
+									))}
+									<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
+										<span className={styles.finalLabel}>Стоимость:</span>
+										<span key={priceDisplay} className={styles.finalValue}>
+											{priceDisplay}
 										</span>
 									</li>
-								))}
-								<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
-									<span className={styles.finalLabel}>Стоимость:</span>
-									<span key={priceDisplay} className={styles.finalValue}>
-										{priceDisplay}
-									</span>
-								</li>
-							</ul>
+								</ul>
+							)}
 						</div>
 
 						<div className={styles.actions}>
