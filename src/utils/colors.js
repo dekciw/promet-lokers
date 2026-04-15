@@ -28,7 +28,6 @@ export const COLORS = [
 	},
 ];
 
-// Поиск hex по имени цвета
 const colorMap = new Map(COLORS.flatMap(g => g.items.map(i => [i.name, i.color])));
 export function getColorHex(name) {
 	return colorMap.get(name) ?? null;

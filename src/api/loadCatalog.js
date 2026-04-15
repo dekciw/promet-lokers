@@ -35,7 +35,6 @@ function setCache(catalog) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data: catalog }));
   } catch {
-    // localStorage недоступен — игнорируем
   }
 }
 

@@ -15,12 +15,6 @@ export default function Header() {
 				<img className={styles.logo2} src='/img/logo2.svg' alt='' />
 			</div>
 
-			{/* Личный кабинет — временно скрыт (Этап 4)
-			<div className={styles.account}>
-				<img className={styles.accountIcon} src='/img/account.svg' alt='' />
-				<span className={styles.accountText}>Личный кабинет</span>
-			</div>
-			*/}
 		</header>
 	);
 }

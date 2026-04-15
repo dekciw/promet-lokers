@@ -22,7 +22,6 @@ export default function CatalogSkeleton() {
 	return (
 		<div className={styles.layout}>
 			<div className={styles.configurator}>
-				{/* Заголовок */}
 				<div className={styles.topRow}>
 					<div className={styles.titleBlock}>
 						<Bone width={140} height={28} />
@@ -31,8 +30,7 @@ export default function CatalogSkeleton() {
 					<Bone width={90} height={48} radius={8} />
 				</div>
 
-				{/* Три карточки */}
-				<div className={styles.grid}>
+			<div className={styles.grid}>
 					<div className={styles.card}>
 						<Bone width='60%' height={16} />
 						<CardRows count={7} />
@@ -50,7 +48,6 @@ export default function CatalogSkeleton() {
 				</div>
 			</div>
 
-			{/* Панель параметров */}
 			<div className={styles.parameters}>
 				<Bone width={100} height={24} />
 				{Array.from({ length: 5 }, (_, i) => (

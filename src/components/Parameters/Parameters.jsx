@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, Fragment } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence } from 'motion/react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAppContext } from '../../context/AppContext';
@@ -12,7 +12,6 @@ const WIDTH_RANGE = 50;
 const LIMIT_HINT_DURATION = 1500;
 const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 
-// ── Slot counter ──────────────────────────────────────────────
 const SLOT_SETS = 3;
 const SLOT_HIGH = 22;
 const SLOT_LOW = 8;
@@ -46,6 +45,7 @@ function SlotDigit({ digit, direction }) {
 			const snap = cur + adj;
 			const fin = snap + delta;
 			posRef.current = snap;
+			// eslint-disable-next-line react-hooks/set-state-in-effect -- double-rAF trick: snap без анимации → потом re-enable
 			setInstant(true);
 			setPos(snap);
 			requestAnimationFrame(() =>
@@ -92,7 +92,6 @@ function SlotCounter({ value, direction }) {
 		</span>
 	);
 }
-// ─────────────────────────────────────────────────────────────
 
 function CustomSelect({ id, value, onChange, options, placeholder, disabled, isOpen, onOpenChange }) {
 	const ref = useRef(null);
@@ -165,8 +164,8 @@ function StepperInput({ id, value, min, max, step = 50, onChange, modified, defa
 	const inputRef = useRef(null);
 	const timerRef = useRef(null);
 
-	// Синхронизируем inputVal когда value меняется извне (кнопки, сброс)
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- controlled input: синхронизация локального стейта с внешним value
 		if (!focused) setInputVal(value);
 	}, [value, focused]);
 
@@ -180,11 +179,10 @@ function StepperInput({ id, value, min, max, step = 50, onChange, modified, defa
 		const current = Number(value);
 		const base = defaultValue !== undefined ? Number(defaultValue) : current;
 
-		// Строим отсортированный список всех допустимых значений
 		const pts = new Set();
-		for (let v = base; v >= min; v -= step) pts.add(v); // сетка вниз
-		for (let v = base + step; v < max; v += step) pts.add(v); // сетка вверх
-		pts.add(max); // всегда включаем max
+		for (let v = base; v >= min; v -= step) pts.add(v);
+		for (let v = base + step; v < max; v += step) pts.add(v);
+		pts.add(max);
 		if (snaps)
 			snaps.forEach(s => {
 				if (s > min && s < max) pts.add(s);
@@ -194,7 +192,6 @@ function StepperInput({ id, value, min, max, step = 50, onChange, modified, defa
 
 		let idx = sorted.indexOf(current);
 		if (idx === -1) {
-			// Текущее значение не в списке — находим ближайший индекс
 			idx = sorted.reduce((best, v, i) => (Math.abs(v - current) < Math.abs(sorted[best] - current) ? i : best), 0);
 		}
 
@@ -303,7 +300,6 @@ function buildThicknessOptions(baseVal) {
 	return [baseVal, ...EXTRA_THICKNESS];
 }
 
-// ── Stepper ────────────────────────────────────────────────────
 const STEP_LABELS = ['Серия', 'Комплектация', 'Параметры'];
 
 const slideVariants = {
@@ -344,27 +340,51 @@ export default function Parameters() {
 		quantity,
 	} = config;
 
-	// ── stepper state ──────────────────────────────────────────
 	const [stepperStep, setStepperStep] = useState(() => (modelId ? 3 : seriesId ? 2 : 1));
+	const [displayStep, setDisplayStep] = useState(() => (modelId ? 3 : seriesId ? 2 : 1));
 	const [direction, setDirection] = useState(1);
 	const [isSliding, setIsSliding] = useState(false);
+	const backAnimTimersRef = useRef([]);
 
-	// ── dropdown mutual exclusion ──────────────────────────────
 	const [openSelectId, setOpenSelectId] = useState(null);
 	const handleSeriesOpen = useCallback(v => setOpenSelectId(v ? 'series' : null), []);
 	const handleModelOpen = useCallback(v => setOpenSelectId(v ? 'model' : null), []);
 
-	// ── navigation ────────────────────────────────────────────
 	const stepperStepRef = useRef(stepperStep);
+	// eslint-disable-next-line react-hooks/refs -- ref для актуального значения в таймерах goToStep, избегает stale closure
 	stepperStepRef.current = stepperStep;
 
 	function goToStep(newStep) {
 		if (newStep === stepperStepRef.current) return;
+		const prevStep = stepperStepRef.current;
 		setIsSliding(true);
 		setOpenSelectId(null);
-		setDirection(newStep > stepperStepRef.current ? 1 : -1);
+		setDirection(newStep > prevStep ? 1 : -1);
 		setStepperStep(newStep);
 		setTimeout(() => setIsSliding(false), 450);
+
+		backAnimTimersRef.current.forEach(id => clearTimeout(id));
+		backAnimTimersRef.current = [];
+
+		if (newStep < prevStep) {
+			const stepsBack = prevStep - newStep;
+			for (let i = 1; i <= stepsBack; i++) {
+				const intermediate = prevStep - i;
+				const timerId = setTimeout(() => {
+					setDisplayStep(intermediate);
+				}, i * 160);
+				backAnimTimersRef.current.push(timerId);
+			}
+		} else {
+			const stepsForward = newStep - prevStep;
+			for (let i = 1; i <= stepsForward; i++) {
+				const intermediate = prevStep + i;
+				const timerId = setTimeout(() => {
+					setDisplayStep(intermediate);
+				}, i * 160);
+				backAnimTimersRef.current.push(timerId);
+			}
+		}
 	}
 
 	function handleStepClick(step) {
@@ -377,14 +397,12 @@ export default function Parameters() {
 		onReset();
 	}
 
-	// ── series select handler ──────────────────────────────────
 	function handleSeriesSelect(newSeriesId) {
 		setSeriesId(newSeriesId, () => {
 			if (stepperStepRef.current === 1) goToStep(2);
 		});
 	}
 
-	// ── derived data ───────────────────────────────────────────
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
 	const lockEntries = Object.entries(catalog.locks).sort((a, b) => a[1].surcharge - b[1].surcharge);
 	const currentModel = modelId ? catalog.models[modelId] : null;
@@ -400,10 +418,9 @@ export default function Parameters() {
 
 	const specs = currentModel?.defaultSpecs;
 
-	// ── step status ────────────────────────────────────────────
 	function getStepStatus(step) {
-		if (step === stepperStep) return 'active';
-		if (step < stepperStep) return 'complete';
+		if (step === displayStep) return 'active';
+		if (step < displayStep) return 'complete';
 		return 'inactive';
 	}
 
@@ -427,10 +444,8 @@ export default function Parameters() {
 		};
 	}
 
-	// ── render ─────────────────────────────────────────────────
 	return (
 		<aside className={styles.parameters}>
-			{/* Title row */}
 			<div className={styles.titleRow}>
 				<h2 className={styles.title}>Параметры</h2>
 				{seriesId && (
@@ -445,7 +460,6 @@ export default function Parameters() {
 				)}
 			</div>
 
-			{/* Step indicators */}
 			<div className={styles.steps}>
 				{STEP_LABELS.map((label, i) => {
 					const step = i + 1;
@@ -494,8 +508,8 @@ export default function Parameters() {
 								<div className={styles.stepLineWrap}>
 									<motion.div
 										className={styles.stepLineFill}
-										initial={{ scaleX: stepperStep > i + 1 ? 1 : 0 }}
-										animate={{ scaleX: stepperStep > i + 1 ? 1 : 0 }}
+										initial={{ scaleX: displayStep > i + 1 ? 1 : 0 }}
+										animate={{ scaleX: displayStep > i + 1 ? 1 : 0 }}
 										transition={{ type: 'spring', stiffness: 100, damping: 15 }}
 									/>
 								</div>
@@ -505,7 +519,6 @@ export default function Parameters() {
 				})}
 			</div>
 
-			{/* Animated content */}
 			<div className={styles.stepContent} style={{ overflow: isSliding ? 'hidden' : 'visible' }}>
 				<AnimatePresence initial={false} custom={direction} mode='popLayout'>
 					<motion.div
@@ -518,7 +531,6 @@ export default function Parameters() {
 						transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
 						style={{ width: '100%' }}
 					>
-						{/* ── Step 1: Серия ── */}
 						{stepperStep === 1 && (
 							<div className={styles.stepPane}>
 								<div className={styles.paramGroup}>
@@ -539,7 +551,6 @@ export default function Parameters() {
 							</div>
 						)}
 
-						{/* ── Step 2: Модель ── */}
 						{stepperStep === 2 && (
 							<div className={styles.stepPane}>
 								<div className={styles.paramGroup}>
@@ -590,7 +601,6 @@ export default function Parameters() {
 							</div>
 						)}
 
-						{/* ── Step 3: Параметры ── */}
 						{stepperStep === 3 && (
 							<div className={styles.stepPane}>
 								<div className={styles.paramGroup}>

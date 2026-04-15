@@ -5,7 +5,6 @@ import { useAppContext } from '../../context/AppContext';
 import styles from './Configurator.module.css';
 
 function buildCurrentForDiff(config, lock) {
-	// width/height/depth → Number, чтобы '400' !== 400 не давало ложный диф
 	return {
 		width: config.width !== '' ? Number(config.width) : undefined,
 		height: config.height !== '' ? Number(config.height) : undefined,
@@ -63,24 +62,19 @@ export default function Configurator() {
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
 
-	// Отслеживаем элементы которые уходят из нестандартного заказа — держим их в DOM пока анимация не закончится
-	// Каждый элемент хранит modelId — чтобы при смене модели старые не появлялись в новой карточке
 	const [leavingItems, setLeavingItems] = useState([]);
-	// Лейблы элементов которые только что вошли в список — получают enter-анимацию
 	const [enteringLabels, setEnteringLabels] = useState(new Set());
 	const prevSpecsRef = useRef([]);
 	const prevModelIdRef = useRef(config.modelId);
 	const prevResetKeyRef = useRef(resetKey);
 
 	useLayoutEffect(() => {
-		// При сбросе — обновляем ref, leaving-элементы отфильтруются в рендере по resetKey
 		if (prevResetKeyRef.current !== resetKey) {
 			prevResetKeyRef.current = resetKey;
 			prevSpecsRef.current = changedSpecs;
 			return;
 		}
 
-		// При смене модели — обновляем ref и выходим без setState
 		if (prevModelIdRef.current !== config.modelId) {
 			prevModelIdRef.current = config.modelId;
 			prevSpecsRef.current = changedSpecs;
@@ -89,7 +83,6 @@ export default function Configurator() {
 
 		const prev = prevSpecsRef.current;
 		const removed = prev.filter(p => !changedSpecs.some(c => c.label === p.label));
-		// Новые элементы — те что появились в changedSpecs и не были в prev
 		const added = changedSpecs.filter(c => !prev.some(p => p.label === c.label));
 		prevSpecsRef.current = changedSpecs;
 
@@ -116,7 +109,6 @@ export default function Configurator() {
 		}
 	}, [changedSpecs, config.modelId, resetKey]);
 
-	// Для рендера: текущие + уходящие только текущей модели и текущего resetKey
 	const diffItemsToRender = [
 		...changedSpecs.map(item => ({ ...item, leaving: false, entering: enteringLabels.has(item.label) })),
 		...leavingItems
@@ -159,8 +151,6 @@ export default function Configurator() {
 						<span className={styles.badgeCode}>{model?.article ?? '—'}</span>
 					</button>
 				</div>
-
-				{/* 3D Предпросмотр — скрыт до реализации (Фаза 3) */}
 
 				<div className={`${styles.configGrid}${isResetting ? ` ${styles.configGridLeaving}` : ''}`}>
 					<div className={`${styles.configCol} ${styles.configColDefault}`}>
@@ -272,7 +262,6 @@ export default function Configurator() {
 				</div>
 			</div>
 
-			{/* Мобильная sticky-плашка */}
 			<div className={`${styles.stickyBar}${model ? ` ${styles.stickyBarVisible}` : ''}`}>
 				<div className={styles.stickyPrice}>
 					<span className={styles.stickyPriceLabel}>Итого</span>
