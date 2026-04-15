@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect, Fragment } from 'react';
-import { AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import ColorPicker from '../ColorPicker/ColorPicker';
 import { useClickOutside } from '../../hooks/useClickOutside';
 import { useAppContext } from '../../context/AppContext';
