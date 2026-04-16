@@ -1,7 +1,7 @@
 import { useState, useLayoutEffect, useRef } from 'react';
-import { calcDiff } from '../../utils/calcDiff';
-import { getColorHex } from '../../utils/colors';
-import { useAppContext } from '../../context/AppContext';
+import { calcDiff } from '../../../shared/utils/calcDiff';
+import { getColorHex } from '../../../shared/utils/colors';
+import { useAppContext } from '../../../shared/context/AppContext';
 import styles from './Configurator.module.css';
 
 function buildCurrentForDiff(config, lock) {

@@ -2,6 +2,16 @@
 /**
  * Синхронизация данных из Google Sheets → Firebase Firestore
  * Запуск: node scripts/sync-sheets.js
+ *
+ * Маппинг столбцов (0-based):
+ * A=0:п/п  B=1:Артикул  C=2:Наименование  D=3:ID   E=4:Серия
+ * F=5:Вес шкафа (=N+O, формула)          G=6:Высота  H=7:Ширина
+ * I=8:Глубина  J=9:Цена
+ * K=10:Толщина металла корпуса (мм)
+ * L=11:Толщина металла двери (мм)
+ * M=12:Кол-во замков
+ * N=13:Вес дверей (кг)
+ * O=14:Вес корпуса (кг)
  */
 
 import { readFileSync } from 'fs';
@@ -105,9 +115,15 @@ function parsePrice(s) {
   return parseInt(s.replace(/\s/g, ''), 10);
 }
 
-// Парсим толщину: "0,45" или "0.45" → "0.45"
+// Парсим толщину: "0,5" или "0.5" → "0.5"
 function parseThickness(s) {
-  return s.replace(',', '.').trim();
+  return (s || '').replace(',', '.').trim();
+}
+
+// Парсим вес: "12,5" или "12.5" → 12.5 (число)
+function parseWeight(s) {
+  const n = parseFloat((s || '').replace(/\s/g, '').replace(',', '.'));
+  return isNaN(n) ? null : n;
 }
 
 // ── 4. Конвертируем в Firestore-формат ──────────────────────────
@@ -145,23 +161,26 @@ async function main() {
   let updated = 0, added = 0;
 
   for (const cols of rows) {
-    // Колонки (0-based):
-    // 0:п/п  1:Артикул  2:Наименование  3:ID  4:Серия
-    // 5:Вес  6:Высота  7:Ширина  8:Глубина  9:Цена
-    // 10:Толщина корпуса(запятая)  11:Толщина двери(запятая)
-    // 12:Кол-во замков  13:Вес дверей  14:Вес корпуса
-    // 15:Толщина металла дверей(точка)  16:Толщина металла корпуса(точка)
+    // Столбцы (0-based):
+    // A=0:п/п   B=1:Артикул    C=2:Наименование   D=3:ID
+    // E=4:Серия  F=5:Вес шкафа  G=6:Высота         H=7:Ширина
+    // I=8:Глубина  J=9:Цена   K=10:Толщина корпуса  L=11:Толщина двери
+    // M=12:Кол-во замков   N=13:Вес дверей (кг)   O=14:Вес корпуса (кг)
 
-    const id           = cols[3]?.trim();
-    const article      = cols[1]?.trim();
-    const name         = cols[2]?.trim();
-    const seriesRaw    = cols[4]?.trim().toLowerCase(); // "ml" / "ls"
-    const height       = parseInt(cols[6], 10);
-    const width        = parseInt(cols[7], 10);
-    const depth        = parseInt(cols[8], 10);
-    const basePrice    = parsePrice(cols[9]);
-    const doorThickness = parseThickness(cols[15] || cols[11] || '');
-    const bodyThickness = parseThickness(cols[16] || cols[10] || '');
+    const id            = cols[3]?.trim();
+    const article       = cols[1]?.trim();
+    const name          = cols[2]?.trim();
+    const seriesRaw     = cols[4]?.trim().toLowerCase(); // "ml" / "ls"
+    const totalWeight   = parseWeight(cols[5]);      // F — вес шкафа
+    const height        = parseInt(cols[6], 10);
+    const width         = parseInt(cols[7], 10);
+    const depth         = parseInt(cols[8], 10);
+    const basePrice     = parsePrice(cols[9]);
+    const bodyThickness = parseThickness(cols[10]);  // K
+    const doorThickness = parseThickness(cols[11]);  // L
+    const lockCount     = parseWeight(cols[12]);     // M — кол-во замков
+    const doorWeight    = parseWeight(cols[13]);     // N — вес дверей
+    const bodyWeight    = parseWeight(cols[14]);     // O — вес корпуса
 
     if (!id || isNaN(height) || isNaN(basePrice)) continue;
 
@@ -175,6 +194,10 @@ async function main() {
       name,
       seriesId: seriesRaw,
       basePrice,
+      totalWeight,
+      lockCount,
+      doorWeight,
+      bodyWeight,
       defaultSpecs: {
         height,
         width,
@@ -186,7 +209,6 @@ async function main() {
         ventilation:   existingSpecs.ventilation   ?? false,
         bodyColorName: existingSpecs.bodyColorName ?? 'RAL 7038',
         doorColorName: existingSpecs.doorColorName ?? 'RAL 7038',
-        thickness:     bodyThickness, // legacy field
       },
     };
 

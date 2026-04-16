@@ -1,304 +1,16 @@
-import { useState, useRef, useCallback, useEffect, Fragment } from 'react';
+import { useState, useRef, useCallback, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import ColorPicker from '../ColorPicker/ColorPicker';
-import { useClickOutside } from '../../hooks/useClickOutside';
-import { useAppContext } from '../../context/AppContext';
+import ColorPicker from './ColorPicker/ColorPicker';
+import CustomSelect from './CustomSelect';
+import StepperInput from './StepperInput';
+import { useAppContext } from '../../../shared/context/AppContext';
 import styles from './Parameters.module.css';
 
 const HEIGHT_MIN = 1400;
 const HEIGHT_MAX = 1900;
 const DEPTH_MIN = 300;
 const WIDTH_RANGE = 50;
-const LIMIT_HINT_DURATION = 1500;
 const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
-
-const SLOT_SETS = 3;
-const SLOT_HIGH = 22;
-const SLOT_LOW = 8;
-const DIGIT_H = 20;
-
-function SlotDigit({ digit, direction }) {
-	const posRef = useRef(10 + digit);
-	const prevRef = useRef(digit);
-	const [pos, setPos] = useState(10 + digit);
-	const [instant, setInstant] = useState(false);
-
-	useEffect(() => {
-		if (prevRef.current === digit) return;
-		const prev = prevRef.current;
-		prevRef.current = digit;
-
-		const delta =
-			direction === 'up'
-				? digit >= prev
-					? digit - prev
-					: 10 - prev + digit
-				: digit <= prev
-					? digit - prev
-					: -(prev + 10 - digit);
-
-		const cur = posRef.current;
-		const next = cur + delta;
-
-		if (next >= SLOT_HIGH || next < SLOT_LOW) {
-			const adj = next >= SLOT_HIGH ? -10 : 10;
-			const snap = cur + adj;
-			const fin = snap + delta;
-			posRef.current = snap;
-			// eslint-disable-next-line react-hooks/set-state-in-effect -- double-rAF trick: snap без анимации → потом re-enable
-			setInstant(true);
-			setPos(snap);
-			requestAnimationFrame(() =>
-				requestAnimationFrame(() => {
-					posRef.current = fin;
-					setInstant(false);
-					setPos(fin);
-				}),
-			);
-		} else {
-			posRef.current = next;
-			setPos(next);
-		}
-	}, [digit]); // eslint-disable-line react-hooks/exhaustive-deps
-
-	return (
-		<span style={{ display: 'inline-block', overflow: 'hidden', height: DIGIT_H, width: '1ch', verticalAlign: 'top' }}>
-			<span
-				style={{
-					display: 'block',
-					transform: `translateY(${-pos * DIGIT_H}px)`,
-					transition: instant ? 'none' : 'transform 0.8s cubic-bezier(0.34, 1.2, 0.64, 1)',
-					willChange: 'transform',
-				}}
-			>
-				{Array.from({ length: SLOT_SETS * 10 }, (_, i) => (
-					<span key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: DIGIT_H }}>
-						{i % 10}
-					</span>
-				))}
-			</span>
-		</span>
-	);
-}
-
-function SlotCounter({ value, direction }) {
-	return (
-		<span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-			{String(value)
-				.split('')
-				.map((ch, i) => (
-					<SlotDigit key={i} digit={Number(ch)} direction={direction} />
-				))}
-		</span>
-	);
-}
-
-function CustomSelect({ id, value, onChange, options, placeholder, disabled, isOpen, onOpenChange }) {
-	const ref = useRef(null);
-	const closeDropdown = useCallback(() => onOpenChange(false), [onOpenChange]);
-	useClickOutside(ref, closeDropdown);
-
-	const selected = options.find(o => o.value === value);
-
-	function handleSelect(val) {
-		onChange(val);
-		onOpenChange(false);
-	}
-
-	return (
-		<div
-			className={`${styles.cselect}${isOpen ? ` ${styles.cselectOpen}` : ''}${disabled ? ` ${styles.cselectDisabled}` : ''}`}
-			ref={ref}
-		>
-			<button
-				type='button'
-				id={id}
-				className={styles.cselectTrigger}
-				onClick={e => {
-					if (disabled) return;
-					e.stopPropagation();
-					onOpenChange(!isOpen);
-				}}
-				aria-expanded={isOpen}
-				disabled={disabled}
-			>
-				<span className={`${styles.cselectText}${!selected ? ` ${styles.cselectTextPlaceholder}` : ''}`}>
-					{selected ? selected.label : placeholder}
-				</span>
-				<img className={styles.cselectArrow} src='/img/arrow-down.svg' alt='' />
-			</button>
-
-			{isOpen && (
-				<ul className={styles.cselectDropdown}>
-					{options.map(o => (
-						<li
-							key={o.value}
-							className={`${styles.cselectItem}${o.value === value ? ` ${styles.cselectItemActive}` : ''}`}
-							onClick={() => handleSelect(o.value)}
-						>
-							<span className={styles.cselectItemLabel}>{o.label}</span>
-							{o.value === value && (
-								<svg className={styles.cselectItemCheck} width='14' height='14' viewBox='0 0 14 14' fill='none'>
-									<path
-										d='M2.5 7l3 3 6-6'
-										stroke='currentColor'
-										strokeWidth='1.8'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-									/>
-								</svg>
-							)}
-						</li>
-					))}
-				</ul>
-			)}
-		</div>
-	);
-}
-
-function StepperInput({ id, value, min, max, step = 50, onChange, modified, defaultValue, snaps, editable }) {
-	const [limitSide, setLimitSide] = useState(null);
-	const [direction, setDirection] = useState('none');
-	const [inputVal, setInputVal] = useState(value);
-	const [focused, setFocused] = useState(false);
-	const inputRef = useRef(null);
-	const timerRef = useRef(null);
-
-	useEffect(() => {
-		// eslint-disable-next-line react-hooks/set-state-in-effect -- controlled input: синхронизация локального стейта с внешним value
-		if (!focused) setInputVal(value);
-	}, [value, focused]);
-
-	function triggerLimit(side) {
-		if (timerRef.current) clearTimeout(timerRef.current);
-		setLimitSide(side);
-		timerRef.current = setTimeout(() => setLimitSide(null), LIMIT_HINT_DURATION);
-	}
-
-	function handleStep(dir) {
-		const current = Number(value);
-		const base = defaultValue !== undefined ? Number(defaultValue) : current;
-
-		const pts = new Set();
-		for (let v = base; v >= min; v -= step) pts.add(v);
-		for (let v = base + step; v < max; v += step) pts.add(v);
-		pts.add(max);
-		if (snaps)
-			snaps.forEach(s => {
-				if (s > min && s < max) pts.add(s);
-			});
-
-		const sorted = [...pts].sort((a, b) => a - b);
-
-		let idx = sorted.indexOf(current);
-		if (idx === -1) {
-			idx = sorted.reduce((best, v, i) => (Math.abs(v - current) < Math.abs(sorted[best] - current) ? i : best), 0);
-		}
-
-		const nextIdx = idx + dir;
-		if (nextIdx < 0 || nextIdx >= sorted.length) {
-			triggerLimit(dir > 0 ? 'max' : 'min');
-			return;
-		}
-		setDirection(dir > 0 ? 'up' : 'down');
-		onChange(String(sorted[nextIdx]));
-	}
-
-	function handleInputChange(e) {
-		const raw = e.target.value.replace(/\D/g, '');
-		setInputVal(raw);
-	}
-
-	function handleInputBlur() {
-		setFocused(false);
-		const num = parseInt(inputVal, 10);
-		if (!inputVal || isNaN(num) || num < min) {
-			onChange(String(min));
-		} else if (num > max) {
-			onChange(String(max));
-		} else {
-			onChange(String(num));
-		}
-	}
-
-	function handleInputKeyDown(e) {
-		if (e.key === 'Enter') e.target.blur();
-	}
-
-	const hintText = limitSide === 'min' ? 'Минимальное значение' : limitSide === 'max' ? 'Максимальное значение' : null;
-
-	return (
-		<div className={`${styles.stepper}${limitSide ? ` ${styles.stepperLimit}` : ''}`}>
-			<div className={`${styles.stepperRow}${modified ? ` ${styles.stepperRowModified}` : ''}`}>
-				<button className={styles.stepperBtn} type='button' onClick={() => handleStep(-1)}>
-					<svg
-						width='15'
-						height='15'
-						viewBox='0 0 15 15'
-						fill='none'
-						xmlns='http://www.w3.org/2000/svg'
-						style={{ transform: 'rotate(180deg)' }}
-					>
-						<path
-							d='M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z'
-							fill='currentColor'
-							fillRule='evenodd'
-							clipRule='evenodd'
-						/>
-					</svg>
-				</button>
-				{editable && focused ? (
-					<input
-						ref={inputRef}
-						id={id}
-						className={styles.stepperEditInput}
-						type='text'
-						inputMode='numeric'
-						value={inputVal}
-						onChange={handleInputChange}
-						onBlur={handleInputBlur}
-						onKeyDown={handleInputKeyDown}
-					/>
-				) : (
-					<div
-						className={styles.stepperDisplay}
-						id={id}
-						onClick={
-							editable
-								? () => {
-										setFocused(true);
-										setInputVal(value);
-										setTimeout(() => {
-											inputRef.current?.select();
-										}, 0);
-									}
-								: undefined
-						}
-						style={editable ? { cursor: 'text' } : undefined}
-					>
-						{value && <SlotCounter value={value} direction={direction} />}
-					</div>
-				)}
-				<button className={styles.stepperBtn} type='button' onClick={() => handleStep(1)}>
-					<svg width='15' height='15' viewBox='0 0 15 15' fill='none' xmlns='http://www.w3.org/2000/svg'>
-						<path
-							d='M3.13523 8.84197C3.3241 9.04343 3.64052 9.05363 3.84197 8.86477L7.5 5.43536L11.158 8.86477C11.3595 9.05363 11.6759 9.04343 11.8648 8.84197C12.0536 8.64051 12.0434 8.32409 11.842 8.13523L7.84197 4.38523C7.64964 4.20492 7.35036 4.20492 7.15803 4.38523L3.15803 8.13523C2.95657 8.32409 2.94637 8.64051 3.13523 8.84197Z'
-							fill='currentColor'
-							fillRule='evenodd'
-							clipRule='evenodd'
-						/>
-					</svg>
-				</button>
-			</div>
-			{hintText && <span className={styles.stepperHint}>{hintText}</span>}
-		</div>
-	);
-}
-
-function buildThicknessOptions(baseVal) {
-	if (!baseVal || EXTRA_THICKNESS.includes(baseVal)) return EXTRA_THICKNESS;
-	return [baseVal, ...EXTRA_THICKNESS];
-}
 
 const STEP_LABELS = ['Серия', 'Комплектация', 'Параметры'];
 
@@ -307,6 +19,11 @@ const slideVariants = {
 	animate: { x: 0, opacity: 1 },
 	exit: dir => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0 }),
 };
+
+function buildThicknessOptions(baseVal) {
+	if (!baseVal || EXTRA_THICKNESS.includes(baseVal)) return EXTRA_THICKNESS;
+	return [baseVal, ...EXTRA_THICKNESS];
+}
 
 export default function Parameters() {
 	const { config, catalog, setters } = useAppContext();
@@ -370,18 +87,14 @@ export default function Parameters() {
 			const stepsBack = prevStep - newStep;
 			for (let i = 1; i <= stepsBack; i++) {
 				const intermediate = prevStep - i;
-				const timerId = setTimeout(() => {
-					setDisplayStep(intermediate);
-				}, i * 160);
+				const timerId = setTimeout(() => setDisplayStep(intermediate), i * 160);
 				backAnimTimersRef.current.push(timerId);
 			}
 		} else {
 			const stepsForward = newStep - prevStep;
 			for (let i = 1; i <= stepsForward; i++) {
 				const intermediate = prevStep + i;
-				const timerId = setTimeout(() => {
-					setDisplayStep(intermediate);
-				}, i * 160);
+				const timerId = setTimeout(() => setDisplayStep(intermediate), i * 160);
 				backAnimTimersRef.current.push(timerId);
 			}
 		}
@@ -391,10 +104,6 @@ export default function Parameters() {
 		if (step === 2 && !seriesId) return;
 		if (step === 3 && !modelId) return;
 		goToStep(step);
-	}
-
-	function handleReset() {
-		onReset();
 	}
 
 	function handleSeriesSelect(newSeriesId) {
@@ -425,23 +134,9 @@ export default function Parameters() {
 	}
 
 	function getCircleStyle(status) {
-		if (status === 'active')
-			return {
-				background: 'var(--c-primary)',
-				boxShadow: 'none',
-				transform: 'scale(1.1)',
-			};
-		if (status === 'complete')
-			return {
-				background: 'var(--c-primary)',
-				boxShadow: 'none',
-				transform: 'scale(1)',
-			};
-		return {
-			background: 'transparent',
-			boxShadow: 'none',
-			transform: 'scale(1)',
-		};
+		if (status === 'active') return { background: 'var(--c-primary)', boxShadow: 'none', transform: 'scale(1.1)' };
+		if (status === 'complete') return { background: 'var(--c-primary)', boxShadow: 'none', transform: 'scale(1)' };
+		return { background: 'transparent', boxShadow: 'none', transform: 'scale(1)' };
 	}
 
 	return (
@@ -449,7 +144,7 @@ export default function Parameters() {
 			<div className={styles.titleRow}>
 				<h2 className={styles.title}>Параметры</h2>
 				{seriesId && (
-					<button type='button' className={styles.resetBtn} onClick={handleReset}>
+					<button type='button' className={styles.resetBtn} onClick={onReset}>
 						<span className={styles.resetBtnSign}>
 							<svg width='12' height='12' viewBox='0 0 15 15' fill='none'>
 								<path d='M2 2l11 11M13 2L2 13' stroke='white' strokeWidth='2.5' strokeLinecap='round' />

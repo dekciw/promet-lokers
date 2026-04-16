@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
-import { useClickOutside } from '../../hooks/useClickOutside';
-import { COLORS } from '../../utils/colors';
+import { useClickOutside } from '../../../../shared/hooks/useClickOutside';
+import { COLORS } from '../../../../shared/utils/colors';
 import styles from './ColorPicker.module.css';
 
 export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
