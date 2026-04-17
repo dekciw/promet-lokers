@@ -1,6 +1,7 @@
 import { useState, useLayoutEffect, useRef } from 'react';
 import { calcDiff } from '../../../shared/utils/calcDiff';
 import { getColorHex } from '../../../shared/utils/colors';
+import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
 import styles from './Configurator.module.css';
 
@@ -142,7 +143,7 @@ export default function Configurator() {
 					</div>
 
 					<button
-						className={`${styles.articleBadge}${model?.article ? ` ${styles.articleBadgeClickable}` : ''}`}
+						className={cx(styles.articleBadge, model?.article && styles.articleBadgeClickable)}
 						onClick={handleCopyArticle}
 						disabled={!model?.article}
 						type='button'
@@ -152,7 +153,7 @@ export default function Configurator() {
 					</button>
 				</div>
 
-				<div className={`${styles.configGrid}${isResetting ? ` ${styles.configGridLeaving}` : ''}`}>
+				<div className={cx(styles.configGrid, isResetting && styles.configGridLeaving)}>
 					<div className={`${styles.configCol} ${styles.configColDefault}`}>
 						<span className={styles.colTitle}>
 							Стандартное
@@ -199,7 +200,7 @@ export default function Configurator() {
 								{diffItemsToRender.map(({ label, value, leaving, entering }, i) => (
 									<li
 										key={label}
-										className={`${styles.diffItem}${leaving ? ` ${styles.diffItemLeaving}` : ''}${entering ? ` ${styles.diffItemEntering}` : ''}`}
+										className={cx(styles.diffItem, leaving && styles.diffItemLeaving, entering && styles.diffItemEntering)}
 										style={entering ? { animationDelay: `${i * 0.1}s` } : undefined}
 									>
 										<span className={styles.diffLabel}>{label}</span>
@@ -262,7 +263,7 @@ export default function Configurator() {
 				</div>
 			</div>
 
-			<div className={`${styles.stickyBar}${model ? ` ${styles.stickyBarVisible}` : ''}`}>
+			<div className={cx(styles.stickyBar, model && styles.stickyBarVisible)}>
 				<div className={styles.stickyPrice}>
 					<span className={styles.stickyPriceLabel}>Итого</span>
 					<span className={styles.stickyPriceValue}>{priceDisplay}</span>

@@ -18,15 +18,18 @@ export function useConfig(catalog) {
   const [isResetting, setIsResetting] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
+  function applySpecs(specs) {
+    setWidth(String(specs.width));
+    setHeight(String(specs.height));
+    setDepth(String(specs.depth));
+    setBodyThickness(specs.bodyThickness);
+    setDoorThickness(specs.doorThickness);
+  }
+
   function applyModel(newModelId) {
     setModelId(newModelId);
     if (newModelId && catalog?.models[newModelId]) {
-      const specs = catalog.models[newModelId].defaultSpecs;
-      setWidth(String(specs.width));
-      setHeight(String(specs.height));
-      setDepth(String(specs.depth));
-      setBodyThickness(specs.bodyThickness);
-      setDoorThickness(specs.doorThickness);
+      applySpecs(catalog.models[newModelId].defaultSpecs);
     } else {
       setWidth('');
       setHeight('');
@@ -76,11 +79,7 @@ export function useConfig(catalog) {
     setTimeout(() => {
       if (modelId && catalog?.models[modelId]) {
         const specs = catalog.models[modelId].defaultSpecs;
-        setWidth(String(specs.width));
-        setHeight(String(specs.height));
-        setDepth(String(specs.depth));
-        setBodyThickness(specs.bodyThickness);
-        setDoorThickness(specs.doorThickness);
+        applySpecs(specs);
         setLockId(specs.lockId ?? 'key_basic');
         setVentilation(specs.ventilation ?? false);
       } else {

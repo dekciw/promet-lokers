@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import ColorPicker from './ColorPicker/ColorPicker';
 import CustomSelect from './CustomSelect';
 import StepperInput from './StepperInput';
+import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
 import styles from './Parameters.module.css';
 
@@ -354,7 +355,7 @@ export default function Parameters() {
 											{bodyThicknessOptions.map(t => (
 												<button
 													key={t}
-													className={`${styles.toggleBtn}${bodyThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
+													className={cx(styles.toggleBtn, bodyThickness === t && styles.toggleBtnActive)}
 													onClick={() => setBodyThickness(t)}
 												>
 													{t}
@@ -369,7 +370,7 @@ export default function Parameters() {
 											{doorThicknessOptions.map(t => (
 												<button
 													key={t}
-													className={`${styles.toggleBtn}${doorThickness === t ? ` ${styles.toggleBtnActive}` : ''}`}
+													className={cx(styles.toggleBtn, doorThickness === t && styles.toggleBtnActive)}
 													onClick={() => setDoorThickness(t)}
 												>
 													{t}
@@ -384,7 +385,7 @@ export default function Parameters() {
 											{lockEntries.map(([id, lock]) => (
 												<li key={id}>
 													<button
-														className={`${styles.lockItem}${lockId === id ? ` ${styles.lockItemActive}` : ''}`}
+														className={cx(styles.lockItem, lockId === id && styles.lockItemActive)}
 														onClick={() => setLockId(id)}
 													>
 														<span className={styles.lockName}>{lock.name}</span>
@@ -398,13 +399,13 @@ export default function Parameters() {
 										<span className={styles.groupLabel}>Дополнительная вентиляция шкафа</span>
 										<div className={styles.ventToggle}>
 											<button
-												className={`${styles.ventBtn}${ventilation ? ` ${styles.ventBtnActive}` : ''}`}
+												className={cx(styles.ventBtn, ventilation && styles.ventBtnActive)}
 												onClick={() => setVentilation(true)}
 											>
 												Да
 											</button>
 											<button
-												className={`${styles.ventBtn}${!ventilation ? ` ${styles.ventBtnActive}` : ''}`}
+												className={cx(styles.ventBtn, !ventilation && styles.ventBtnActive)}
 												onClick={() => setVentilation(false)}
 											>
 												Нет
