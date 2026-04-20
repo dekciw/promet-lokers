@@ -53,19 +53,15 @@ export default function ColorPicker({ placeholder, selected, onSelect, standardL
 					</li>
 				)}
 				{COLORS.map((group, groupIdx) => {
-					const available = isCatAvailable(groupIdx);
-					const minQty = catRules?.[groupIdx]?.minQty;
+					if (!isCatAvailable(groupIdx)) return null;
 					return (
 						<Fragment key={group.group}>
-							<li className={cx(styles.group, !available && styles.groupLocked)}>
-								{group.group}
-								{!available && minQty && <span className={styles.groupLockHint}>от {minQty} шт.</span>}
-							</li>
+							<li className={styles.group}>{group.group}</li>
 							{group.items.map(item => (
 								<li
 									key={item.name}
-									className={cx(styles.item, selected?.name === item.name && styles.itemActive, !available && styles.itemDisabled)}
-									onClick={available ? () => handleSelect(item) : undefined}
+									className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
+									onClick={() => handleSelect(item)}
 								>
 									<span className={styles.itemSwatch} style={{ background: item.color }} />
 									<span className={styles.itemName}>{item.name}</span>

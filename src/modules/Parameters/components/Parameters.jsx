@@ -121,6 +121,13 @@ export default function Parameters() {
 	const thicknessMinQty = priceRules.thickness?.minQty ?? 100;
 	const showThickness = quantity >= thicknessMinQty;
 
+	const doorColorMinQty = priceRules.color?.door
+		? Math.min(...Object.values(priceRules.color.door).map(c => c.minQty))
+		: 30;
+	const bodyColorMinQty = priceRules.color?.full
+		? Math.min(...Object.values(priceRules.color.full).map(c => c.minQty))
+		: 50;
+
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
 	const lockEntries = Object.entries(catalog.locks).sort((a, b) => a[1].surcharge - b[1].surcharge);
 	const currentModel = modelId ? catalog.models[modelId] : null;
@@ -445,27 +452,31 @@ export default function Parameters() {
 										</div>
 									</div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Изменение цвета двери</span>
-										<ColorPicker
-											placeholder='Стандартный цвет'
-											selected={doorColor}
-											onSelect={setDoorColor}
-											colorRule={priceRules.color?.door}
-											quantity={quantity}
-										/>
-									</div>
+									{quantity >= doorColorMinQty && (
+										<div className={styles.paramGroup}>
+											<span className={styles.groupLabel}>Изменение цвета двери</span>
+											<ColorPicker
+												placeholder='Стандартный цвет'
+												selected={doorColor}
+												onSelect={setDoorColor}
+												colorRule={priceRules.color?.door}
+												quantity={quantity}
+											/>
+										</div>
+									)}
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
-										<ColorPicker
-											placeholder='Стандартный цвет'
-											selected={bodyColor}
-											onSelect={setBodyColor}
-											colorRule={priceRules.color?.full}
-											quantity={quantity}
-										/>
-									</div>
+									{quantity >= bodyColorMinQty && (
+										<div className={styles.paramGroup}>
+											<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
+											<ColorPicker
+												placeholder='Стандартный цвет'
+												selected={bodyColor}
+												onSelect={setBodyColor}
+												colorRule={priceRules.color?.full}
+												quantity={quantity}
+											/>
+										</div>
+									)}
 								</div>
 							</div>
 						)}

@@ -259,12 +259,20 @@ function parsePriceRules(csvText) {
     heightLS[String(h)] = parsePercent(r(27 + i, 5));
   });
 
-  // ── Замки (строки 34-37, столбец B) ──
-  // Фиксированная стоимость за 1 замок в рублях
-  const lockKeys = ['d111x', 'praktik_el_code', 'euro_locks', 'praktik_el_mifare'];
+  // ── Замки (строки 34-37, столбец A=название, B=цена) ──
+  const lockDefs = [
+    { id: 'd111x',             row: 34 },
+    { id: 'praktik_el_code',   row: 35 },
+    { id: 'euro_locks',        row: 36 },
+    { id: 'praktik_el_mifare', row: 37 },
+  ];
   const lockPrices = {};
-  lockKeys.forEach((key, i) => {
-    lockPrices[key] = parseRubles(r(34 + i, 2));
+  const parsedLocks = {};
+  lockDefs.forEach(({ id, row }) => {
+    const name = r(row, 1).replace(/^"/, '').replace(/"$/, '').trim();
+    const price = parseRubles(r(row, 2));
+    lockPrices[id] = price;
+    parsedLocks[id] = { name, surcharge: price ?? 0 };
   });
 
   // ── Вентиляция патрубок в центре крыши (строка 41, столбцы A-D) ──
@@ -300,6 +308,7 @@ function parsePriceRules(csvText) {
   };
 
   return {
+    parsedLocks,
     thickness: {
       minQty: 100,
       body: bodyThickness,
@@ -350,8 +359,8 @@ function logPriceRules(rules) {
     console.log(`      ${h} мм → ML:${rules.height.ml[h] !== null ? `${(rules.height.ml[h]*100).toFixed(0)}%` : 'null'} / LS:${rules.height.ls[h] !== null ? `${(rules.height.ls[h]*100).toFixed(0)}%` : 'null'}`));
 
   console.log('\n   Замки (руб/шт):');
-  Object.entries(rules.lockPrices).forEach(([k, v]) =>
-    console.log(`      ${k} → ${v !== null ? `${v} ₽` : 'null'}`));
+  Object.entries(rules.parsedLocks ?? {}).forEach(([k, v]) =>
+    console.log(`      [${k}] ${v.name} → ${v.surcharge} ₽`));
 
   function fmtVent(rule) {
     const f = x => x !== null ? `${(x*100).toFixed(0)}%` : 'null';
@@ -392,17 +401,24 @@ async function main() {
   const priceRules = parsePriceRules(priceCsv);
   logPriceRules(priceRules);
 
+  // Строим catalog.locks: key_basic + 4 замка из таблицы
+  const updatedLocks = {
+    key_basic: currentCatalog.locks?.key_basic ?? { name: 'Ключевой (Базовый)', surcharge: 0 },
+    ...priceRules.parsedLocks,
+  };
+
   // Записываем в Firebase
   console.log('📤 Записываем в Firebase...');
   const body = {
     fields: {
       models:     toFirestore(updatedModels),
       priceRules: toFirestore(priceRules),
+      locks:      toFirestore(updatedLocks),
     },
   };
 
   const res = await fetch(
-    `${FIRESTORE_URL}?updateMask.fieldPaths=models&updateMask.fieldPaths=priceRules`,
+    `${FIRESTORE_URL}?updateMask.fieldPaths=models&updateMask.fieldPaths=priceRules&updateMask.fieldPaths=locks`,
     {
       method: 'PATCH',
       headers: {
