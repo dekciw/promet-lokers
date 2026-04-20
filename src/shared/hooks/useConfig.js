@@ -12,6 +12,7 @@ export function useConfig(catalog) {
   const [doorThickness, setDoorThickness] = useState(DEFAULT_THICKNESS);
   const [lockId, setLockId] = useState('key_basic');
   const [ventilation, setVentilation] = useState(false);
+  const [ventilationEach, setVentilationEach] = useState(false);
   const [bodyColor, setBodyColor] = useState(null);
   const [doorColor, setDoorColor] = useState(null);
   const [quantity, setQuantity] = useState(10);
@@ -51,6 +52,16 @@ export function useConfig(catalog) {
     }
   }
 
+  function handleSetVentilation(val) {
+    setVentilation(val);
+    if (val) setVentilationEach(false);
+  }
+
+  function handleSetVentilationEach(val) {
+    setVentilationEach(val);
+    if (val) setVentilation(false);
+  }
+
   function clearParams() {
     setWidth('');
     setHeight('');
@@ -59,6 +70,7 @@ export function useConfig(catalog) {
     setDoorThickness(DEFAULT_THICKNESS);
     setLockId('key_basic');
     setVentilation(false);
+    setVentilationEach(false);
     setBodyColor(null);
     setDoorColor(null);
   }
@@ -82,6 +94,7 @@ export function useConfig(catalog) {
         applySpecs(specs);
         setLockId(specs.lockId ?? 'key_basic');
         setVentilation(specs.ventilation ?? false);
+        setVentilationEach(false);
       } else {
         clearParams();
       }
@@ -103,6 +116,7 @@ export function useConfig(catalog) {
     doorThickness,
     lockId,
     ventilation,
+    ventilationEach,
     bodyColor,
     doorColor,
     quantity,
@@ -117,7 +131,8 @@ export function useConfig(catalog) {
     setBodyThickness,
     setDoorThickness,
     setLockId,
-    setVentilation,
+    setVentilation: handleSetVentilation,
+    setVentilationEach: handleSetVentilationEach,
     setBodyColor,
     setDoorColor,
     setQuantity,

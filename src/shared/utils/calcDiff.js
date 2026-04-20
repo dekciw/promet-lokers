@@ -5,7 +5,8 @@ const SPEC_FIELDS = [
   { key: 'bodyThickness', label: 'Толщина корпуса:', format: v => `${v} мм` },
   { key: 'doorThickness', label: 'Толщина двери:',   format: v => `${v} мм` },
   { key: 'lockName',      label: 'Замок:',           format: v => v },
-  { key: 'ventilation',   label: 'Вентиляция:',      format: v => (v ? 'Да' : 'Нет') },
+  { key: 'ventilation',     label: 'Вентиляция (центр):',   format: v => (v ? 'Да' : 'Нет') },
+  { key: 'ventilationEach', label: 'Вентиляция (секции):', format: v => (v ? 'Да' : 'Нет') },
   { key: 'bodyColorName', label: 'Цвет корпуса:',    format: v => v },
   { key: 'doorColorName', label: 'Цвет двери:',      format: v => v },
 ];

@@ -38,6 +38,7 @@ export default function Parameters() {
 		setDoorThickness,
 		setLockId,
 		setVentilation,
+		setVentilationEach,
 		setBodyColor,
 		setDoorColor,
 		setQuantity,
@@ -53,6 +54,7 @@ export default function Parameters() {
 		doorThickness,
 		lockId,
 		ventilation,
+		ventilationEach,
 		bodyColor,
 		doorColor,
 		quantity,
@@ -115,8 +117,8 @@ export default function Parameters() {
 
 	const priceRules = catalog.priceRules ?? {};
 	const depthMinQty = priceRules.depth?.minQty ?? 10;
+	const heightMinQty = priceRules.height?.minQty ?? 100;
 	const thicknessMinQty = priceRules.thickness?.minQty ?? 100;
-	const showDepth = quantity >= depthMinQty;
 	const showThickness = quantity >= thicknessMinQty;
 
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
@@ -335,24 +337,24 @@ export default function Parameters() {
 												modified={!!specs && String(height) !== String(specs.height)}
 												defaultValue={specs?.height}
 												snaps={[1860]}
+												blocked={quantity < heightMinQty}
 											/>
 										</div>
-										{showDepth && (
-											<div className={styles.paramGroup}>
-												<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='depth'>
-													Глубина (мм)
-												</label>
-												<StepperInput
-													id='depth'
-													value={depth}
-													min={minDepth}
-													max={maxDepth}
-													onChange={setDepth}
-													modified={!!specs && String(depth) !== String(specs.depth)}
-													defaultValue={specs?.depth}
-												/>
-											</div>
-										)}
+										<div className={styles.paramGroup}>
+											<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='depth'>
+												Глубина (мм)
+											</label>
+											<StepperInput
+												id='depth'
+												value={depth}
+												min={minDepth}
+												max={maxDepth}
+												onChange={setDepth}
+												modified={!!specs && String(depth) !== String(specs.depth)}
+												defaultValue={specs?.depth}
+												blocked={quantity < depthMinQty}
+											/>
+										</div>
 									</div>
 								</div>
 
@@ -419,6 +421,24 @@ export default function Parameters() {
 											<button
 												className={cx(styles.ventBtn, !ventilation && styles.ventBtnActive)}
 												onClick={() => setVentilation(false)}
+											>
+												Нет
+											</button>
+										</div>
+									</div>
+
+									<div className={styles.paramGroup}>
+										<span className={styles.groupLabel}>Вентиляционные отверстия + патрубок в каждой секции</span>
+										<div className={styles.ventToggle}>
+											<button
+												className={cx(styles.ventBtn, ventilationEach && styles.ventBtnActive)}
+												onClick={() => setVentilationEach(true)}
+											>
+												Да
+											</button>
+											<button
+												className={cx(styles.ventBtn, !ventilationEach && styles.ventBtnActive)}
+												onClick={() => setVentilationEach(false)}
 											>
 												Нет
 											</button>

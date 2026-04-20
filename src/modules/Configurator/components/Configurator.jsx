@@ -14,6 +14,7 @@ function buildCurrentForDiff(config, lock) {
 		doorThickness: config.doorThickness,
 		lockName: lock?.name,
 		ventilation: config.ventilation,
+		ventilationEach: config.ventilationEach,
 		bodyColorName: config.bodyColor?.name ?? undefined,
 		doorColorName: config.doorColor?.name ?? undefined,
 	};
@@ -45,7 +46,8 @@ function buildFinalSpecsList(config, defaults, lock) {
 		{ label: 'Толщина корпуса:', value: `${config.bodyThickness} мм` },
 		{ label: 'Толщина двери:', value: `${config.doorThickness} мм` },
 		{ label: 'Замок:', value: lock?.name ?? config.lockId },
-		{ label: 'Вентиляция:', value: config.ventilation ? 'Да' : 'Нет' },
+		{ label: 'Вентиляция (центр):', value: config.ventilation ? 'Да' : 'Нет' },
+		{ label: 'Вентиляция (секции):', value: config.ventilationEach ? 'Да' : 'Нет' },
 		...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name, colorHex: config.bodyColor.color }] : []),
 		...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name, colorHex: config.doorColor.color }] : []),
 	];

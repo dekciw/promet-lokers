@@ -267,12 +267,20 @@ function parsePriceRules(csvText) {
     lockPrices[key] = parseRubles(r(34 + i, 2));
   });
 
-  // ── Вентиляция (строка 41, столбцы A-D) ──
+  // ── Вентиляция патрубок в центре крыши (строка 41, столбцы A-D) ──
   const ventilation = {
     qty1:   parsePercent(r(41, 1)),   // партия < 10 шт
     qty10:  parsePercent(r(41, 2)),   // от 10 шт
     qty50:  parsePercent(r(41, 3)),   // от 50 шт
     qty100: parsePercent(r(41, 4)),   // от 100 шт
+  };
+
+  // ── Вентиляция патрубок в каждой секции (строка 45, столбцы A-D) ──
+  const ventilationEach = {
+    qty1:   parsePercent(r(45, 1)),   // партия < 10 шт
+    qty10:  parsePercent(r(45, 2)),   // от 10 шт
+    qty50:  parsePercent(r(45, 3)),   // от 50 шт
+    qty100: parsePercent(r(45, 4)),   // от 100 шт
   };
 
   // ── Цвет двери (строки 49, 51, 52 — столбец D) ──
@@ -309,6 +317,7 @@ function parsePriceRules(csvText) {
     },
     lockPrices,
     ventilation,
+    ventilationEach,
     color: {
       door: colorDoor,
       full: colorFull,
@@ -344,9 +353,14 @@ function logPriceRules(rules) {
   Object.entries(rules.lockPrices).forEach(([k, v]) =>
     console.log(`      ${k} → ${v !== null ? `${v} ₽` : 'null'}`));
 
-  console.log('\n   Вентиляция:');
-  const v = rules.ventilation;
-  console.log(`      <10шт:${v.qty1 !== null ? `${(v.qty1*100).toFixed(0)}%` : 'null'} / от10:${v.qty10 !== null ? `${(v.qty10*100).toFixed(0)}%` : 'null'} / от50:${v.qty50 !== null ? `${(v.qty50*100).toFixed(0)}%` : 'null'} / от100:${v.qty100 !== null ? `${(v.qty100*100).toFixed(0)}%` : 'null'}`);
+  function fmtVent(rule) {
+    const f = x => x !== null ? `${(x*100).toFixed(0)}%` : 'null';
+    return `<10шт:${f(rule.qty1)} / от10:${f(rule.qty10)} / от50:${f(rule.qty50)} / от100:${f(rule.qty100)}`;
+  }
+  console.log('\n   Вентиляция (центр крыши):');
+  console.log(`      ${fmtVent(rules.ventilation)}`);
+  console.log('\n   Вентиляция (каждая секция):');
+  console.log(`      ${fmtVent(rules.ventilationEach)}`);
 
   console.log('\n   Цвет двери:');
   Object.entries(rules.color.door).forEach(([cat, d]) =>
