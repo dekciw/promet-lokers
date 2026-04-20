@@ -113,6 +113,12 @@ export default function Parameters() {
 		});
 	}
 
+	const priceRules = catalog.priceRules ?? {};
+	const depthMinQty = priceRules.depth?.minQty ?? 10;
+	const thicknessMinQty = priceRules.thickness?.minQty ?? 100;
+	const showDepth = quantity >= depthMinQty;
+	const showThickness = quantity >= thicknessMinQty;
+
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
 	const lockEntries = Object.entries(catalog.locks).sort((a, b) => a[1].surcharge - b[1].surcharge);
 	const currentModel = modelId ? catalog.models[modelId] : null;
@@ -303,7 +309,7 @@ export default function Parameters() {
 									<span className={styles.groupLabel}>Изменение габаритов</span>
 									<div className={styles.dimFields}>
 										<div className={styles.paramGroup}>
-											<label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='width'>
+											<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='width'>
 												Ширина (мм)
 											</label>
 											<StepperInput
@@ -312,12 +318,12 @@ export default function Parameters() {
 												min={minWidth}
 												max={maxWidth}
 												onChange={setWidth}
-												modified={!!specs && String(width) !== String(specs.width)}
 												defaultValue={specs?.width}
+												blocked
 											/>
 										</div>
 										<div className={styles.paramGroup}>
-											<label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='height'>
+											<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='height'>
 												Высота (мм)
 											</label>
 											<StepperInput
@@ -331,53 +337,59 @@ export default function Parameters() {
 												snaps={[1860]}
 											/>
 										</div>
-										<div className={styles.paramGroup}>
-											<label className={`${styles.groupLabel} ${styles.groupLabelSm}`} htmlFor='depth'>
-												Глубина (мм)
-											</label>
-											<StepperInput
-												id='depth'
-												value={depth}
-												min={minDepth}
-												max={maxDepth}
-												onChange={setDepth}
-												modified={!!specs && String(depth) !== String(specs.depth)}
-												defaultValue={specs?.depth}
-											/>
-										</div>
+										{showDepth && (
+											<div className={styles.paramGroup}>
+												<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='depth'>
+													Глубина (мм)
+												</label>
+												<StepperInput
+													id='depth'
+													value={depth}
+													min={minDepth}
+													max={maxDepth}
+													onChange={setDepth}
+													modified={!!specs && String(depth) !== String(specs.depth)}
+													defaultValue={specs?.depth}
+												/>
+											</div>
+										)}
 									</div>
 								</div>
 
 								<div className={styles.paramsGrid}>
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
-										<div className={styles.toggleGroup}>
-											{bodyThicknessOptions.map(t => (
-												<button
-													key={t}
-													className={cx(styles.toggleBtn, bodyThickness === t && styles.toggleBtnActive)}
-													onClick={() => setBodyThickness(t)}
-												>
-													{t}
-												</button>
-											))}
-										</div>
-									</div>
+									{showThickness && (
+										<>
+											<div className={styles.paramGroup}>
+												<span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
+												<div className={styles.toggleGroup}>
+													{bodyThicknessOptions.map(t => (
+														<button
+															key={t}
+															className={cx(styles.toggleBtn, bodyThickness === t && styles.toggleBtnActive)}
+															onClick={() => setBodyThickness(t)}
+														>
+															{t}
+														</button>
+													))}
+												</div>
+											</div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Толщина металла двери (мм)</span>
-										<div className={styles.toggleGroup}>
-											{doorThicknessOptions.map(t => (
-												<button
-													key={t}
-													className={cx(styles.toggleBtn, doorThickness === t && styles.toggleBtnActive)}
-													onClick={() => setDoorThickness(t)}
-												>
-													{t}
-												</button>
-											))}
-										</div>
-									</div>
+											<div className={styles.paramGroup}>
+												<span className={styles.groupLabel}>Толщина металла двери (мм)</span>
+												<div className={styles.toggleGroup}>
+													{doorThicknessOptions.map(t => (
+														<button
+															key={t}
+															className={cx(styles.toggleBtn, doorThickness === t && styles.toggleBtnActive)}
+															onClick={() => setDoorThickness(t)}
+														>
+															{t}
+														</button>
+													))}
+												</div>
+											</div>
+										</>
+									)}
 
 									<div className={styles.paramGroup}>
 										<span className={styles.groupLabel}>Выбор замка</span>
@@ -396,7 +408,7 @@ export default function Parameters() {
 									</div>
 
 									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Дополнительная вентиляция шкафа</span>
+										<span className={styles.groupLabel}>Вентиляционные отверстия + патрубок в центре крыши</span>
 										<div className={styles.ventToggle}>
 											<button
 												className={cx(styles.ventBtn, ventilation && styles.ventBtnActive)}
@@ -414,13 +426,25 @@ export default function Parameters() {
 									</div>
 
 									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Изменение цвета корпуса</span>
-										<ColorPicker placeholder='Стандартный цвет' selected={bodyColor} onSelect={setBodyColor} />
+										<span className={styles.groupLabel}>Изменение цвета двери</span>
+										<ColorPicker
+											placeholder='Стандартный цвет'
+											selected={doorColor}
+											onSelect={setDoorColor}
+											colorRule={priceRules.color?.door}
+											quantity={quantity}
+										/>
 									</div>
 
 									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Изменение цвета двери</span>
-										<ColorPicker placeholder='Стандартный цвет' selected={doorColor} onSelect={setDoorColor} />
+										<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
+										<ColorPicker
+											placeholder='Стандартный цвет'
+											selected={bodyColor}
+											onSelect={setBodyColor}
+											colorRule={priceRules.color?.full}
+											quantity={quantity}
+										/>
 									</div>
 								</div>
 							</div>

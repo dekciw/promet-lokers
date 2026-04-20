@@ -1,9 +1,10 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
 import { useClickOutside } from '../../../../shared/hooks/useClickOutside';
 import { COLORS } from '../../../../shared/utils/colors';
+import { cx } from '../../../../shared/utils/cx';
 import styles from './ColorPicker.module.css';
 
-export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)' }) {
+export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)', colorRule, quantity }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 	const closeDropdown = useCallback(() => setOpen(false), []);
@@ -26,8 +27,16 @@ export default function ColorPicker({ placeholder, selected, onSelect, standardL
 
 	const swatchStyle = selected ? getSwatchStyle(selected.color) : {};
 
+	// Определяем какие категории доступны по количеству
+	const catRules = colorRule ? [colorRule.cat1, colorRule.cat2, colorRule.cat3] : null;
+	function isCatAvailable(groupIdx) {
+		if (!catRules || quantity === undefined) return true;
+		const rule = catRules[groupIdx];
+		return !rule || quantity >= rule.minQty;
+	}
+
 	return (
-		<div className={`${styles.colorPicker}${open ? ` ${styles.colorPickerOpen}` : ''}`} ref={ref}>
+		<div className={cx(styles.colorPicker, open && styles.colorPickerOpen)} ref={ref}>
 			<button type='button' className={styles.trigger} aria-expanded={open} onClick={handleTriggerClick}>
 				<span className={styles.triggerSwatch} style={swatchStyle} />
 				<span className={`${styles.triggerText}${selected ? ` ${styles.triggerTextSelected}` : ''}`}>
@@ -43,21 +52,28 @@ export default function ColorPicker({ placeholder, selected, onSelect, standardL
 						<span className={styles.itemName}>{standardLabel}</span>
 					</li>
 				)}
-				{COLORS.map(group => (
-					<Fragment key={group.group}>
-						<li className={styles.group}>{group.group}</li>
-						{group.items.map(item => (
-							<li
-								key={item.name}
-								className={`${styles.item}${selected?.name === item.name ? ` ${styles.itemActive}` : ''}`}
-								onClick={() => handleSelect(item)}
-							>
-								<span className={styles.itemSwatch} style={{ background: item.color }} />
-								<span className={styles.itemName}>{item.name}</span>
+				{COLORS.map((group, groupIdx) => {
+					const available = isCatAvailable(groupIdx);
+					const minQty = catRules?.[groupIdx]?.minQty;
+					return (
+						<Fragment key={group.group}>
+							<li className={cx(styles.group, !available && styles.groupLocked)}>
+								{group.group}
+								{!available && minQty && <span className={styles.groupLockHint}>от {minQty} шт.</span>}
 							</li>
-						))}
-					</Fragment>
-				))}
+							{group.items.map(item => (
+								<li
+									key={item.name}
+									className={cx(styles.item, selected?.name === item.name && styles.itemActive, !available && styles.itemDisabled)}
+									onClick={available ? () => handleSelect(item) : undefined}
+								>
+									<span className={styles.itemSwatch} style={{ background: item.color }} />
+									<span className={styles.itemName}>{item.name}</span>
+								</li>
+							))}
+						</Fragment>
+					);
+				})}
 			</ul>
 		</div>
 	);

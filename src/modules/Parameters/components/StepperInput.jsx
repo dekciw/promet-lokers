@@ -83,7 +83,7 @@ function SlotCounter({ value, direction }) {
 	);
 }
 
-export default function StepperInput({ id, value, min, max, step = 50, onChange, modified, defaultValue, snaps, editable }) {
+export default function StepperInput({ id, value, min, max, step = 50, onChange, modified, defaultValue, snaps, editable, blocked }) {
 	const [limitSide, setLimitSide] = useState(null);
 	const [direction, setDirection] = useState('none');
 	const [inputVal, setInputVal] = useState(value);
@@ -103,6 +103,10 @@ export default function StepperInput({ id, value, min, max, step = 50, onChange,
 	}
 
 	function handleStep(dir) {
+		if (blocked) {
+			triggerLimit('blocked');
+			return;
+		}
 		const current = Number(value);
 		const base = defaultValue !== undefined ? Number(defaultValue) : current;
 
@@ -152,7 +156,10 @@ export default function StepperInput({ id, value, min, max, step = 50, onChange,
 		if (e.key === 'Enter') e.target.blur();
 	}
 
-	const hintText = limitSide === 'min' ? 'Минимальное значение' : limitSide === 'max' ? 'Максимальное значение' : null;
+	const hintText =
+		limitSide === 'blocked' ? 'Требуется согласование с производством' :
+		limitSide === 'min' ? 'Минимальное значение' :
+		limitSide === 'max' ? 'Максимальное значение' : null;
 
 	return (
 		<div className={`${styles.stepper}${limitSide ? ` ${styles.stepperLimit}` : ''}`}>
