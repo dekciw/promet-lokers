@@ -3,15 +3,22 @@
  * Синхронизация данных из Google Sheets → Firebase Firestore
  * Запуск: node scripts/sync-sheets.js
  *
- * Маппинг столбцов (0-based):
+ * Лист 1 (gid=0) — модели шкафов:
  * A=0:п/п  B=1:Артикул  C=2:Наименование  D=3:ID   E=4:Серия
- * F=5:Вес шкафа (=N+O, формула)          G=6:Высота  H=7:Ширина
- * I=8:Глубина  J=9:Цена
- * K=10:Толщина металла корпуса (мм)
- * L=11:Толщина металла двери (мм)
- * M=12:Кол-во замков
- * N=13:Вес дверей (кг)
- * O=14:Вес корпуса (кг)
+ * F=5:Вес шкафа  G=6:Высота  H=7:Ширина  I=8:Глубина  J=9:Цена
+ * K=10:Толщина корпуса  L=11:Толщина двери  M=12:Кол-во замков
+ * N=13:Вес дверей  O=14:Вес корпуса
+ *
+ * Лист 2 (sheet=price) — коэффициенты цен:
+ * Строки 1-based (как в Google Sheets):
+ *  1-6   : Толщина металла корпуса
+ *  7-12  : Толщина металла двери
+ *  13-18 : Глубина ML
+ *  19-23 : Глубина LS
+ *  24-31 : Высота (ML и LS)
+ *  32-37 : Замки (фиксированная стоимость)
+ *  38-41 : Вентиляция
+ *  46-57 : Нестандартный RAL (цвет двери + корпуса полностью)
  */
 
 import { readFileSync } from 'fs';
@@ -22,11 +29,10 @@ const SHEET_ID   = '1KA88nZDnMX00kQ0RglYgan24Zl8LJV6lei5NM9X3auc';
 const PROJECT_ID = 'promet-f4543';
 const FIRESTORE_URL = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/catalog/main`;
 
-// Firebase CLI OAuth credentials (публичные, из open-source firebase-tools)
 const FIREBASE_CLIENT_ID     = '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com';
 const FIREBASE_CLIENT_SECRET = 'j9iVZfS8kkCEFUPaAeJV0sAi';
 
-// ── 1. Получаем access token через refresh token ─────────────────
+// ── 1. OAuth токен ────────────────────────────────────────────────
 async function getAccessToken() {
   const configPath = join(homedir(), '.config', 'configstore', 'firebase-tools.json');
   const config = JSON.parse(readFileSync(configPath, 'utf8'));
@@ -48,7 +54,7 @@ async function getAccessToken() {
   return data.access_token;
 }
 
-// ── 2. Читаем текущий каталог из Firestore ───────────────────────
+// ── 2. Firestore ──────────────────────────────────────────────────
 function fromFirestore(v) {
   if ('nullValue'    in v) return null;
   if ('booleanValue' in v) return v.booleanValue;
@@ -73,19 +79,25 @@ async function fetchCurrentCatalog() {
   return catalog;
 }
 
-// ── 3. Парсим CSV из Google Sheets ───────────────────────────────
-async function fetchSheetData() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Ошибка чтения Google Sheets: ${res.status}`);
-  return await res.text();
+function toFirestore(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === 'boolean') return { booleanValue: v };
+  if (typeof v === 'number' && Number.isInteger(v)) return { integerValue: String(v) };
+  if (typeof v === 'number') return { doubleValue: v };
+  if (typeof v === 'string') return { stringValue: v };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestore) } };
+  if (typeof v === 'object') {
+    const fields = {};
+    Object.entries(v).forEach(([k, val]) => { fields[k] = toFirestore(val); });
+    return { mapValue: { fields } };
+  }
+  return { nullValue: null };
 }
 
-// Полный RFC-4180 парсер (поддерживает переносы внутри кавычек)
+// ── 3. CSV парсер ─────────────────────────────────────────────────
 function parseCSVFull(text) {
   const rows = [];
   let row = [], field = '', inQuote = false;
-
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
     if (inQuote) {
@@ -104,107 +116,79 @@ function parseCSVFull(text) {
   return rows;
 }
 
-function parseCSV(text) {
-  const all = parseCSVFull(text);
-  // Данные начинаются со строки где первая колонка — число (п/п)
-  return all.filter(row => /^\d+$/.test((row[0] || '').trim()));
-}
-
-// Парсим цену: "2 409" → 2409 (пробел — разделитель тысяч)
+// ── 4. Вспомогательные парсеры ───────────────────────────────────
 function parsePrice(s) {
-  return parseInt(s.replace(/\s/g, ''), 10);
+  return parseInt((s || '').replace(/\s/g, ''), 10);
 }
 
-// Парсим толщину: "0,5" или "0.5" → "0.5"
 function parseThickness(s) {
   return (s || '').replace(',', '.').trim();
 }
 
-// Парсим вес: "12,5" или "12.5" → 12.5 (число)
 function parseWeight(s) {
   const n = parseFloat((s || '').replace(/\s/g, '').replace(',', '.'));
   return isNaN(n) ? null : n;
 }
 
-// ── 4. Конвертируем в Firestore-формат ──────────────────────────
-function toFirestore(v) {
-  if (v === null || v === undefined) return { nullValue: null };
-  if (typeof v === 'boolean') return { booleanValue: v };
-  if (typeof v === 'number' && Number.isInteger(v)) return { integerValue: String(v) };
-  if (typeof v === 'number') return { doubleValue: v };
-  if (typeof v === 'string') return { stringValue: v };
-  if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestore) } };
-  if (typeof v === 'object') {
-    const fields = {};
-    Object.entries(v).forEach(([k, val]) => { fields[k] = toFirestore(val); });
-    return { mapValue: { fields } };
-  }
-  return { nullValue: null };
+// "10%" или "10" или "10,5%" → 0.10 | "ПСС по запросу" или "" → null
+function parsePercent(s) {
+  const cleaned = (s || '').trim().replace('%', '').replace(',', '.');
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? null : Math.round(n) / 100;
 }
 
-// ── 5. Основная логика ────────────────────────────────────────────
-async function main() {
-  console.log('🔑 Получаем access token...');
-  const token = await getAccessToken();
+// "132" или "1 500" → 132 | "" → null
+function parseRubles(s) {
+  const n = parseInt((s || '').replace(/\s/g, ''), 10);
+  return isNaN(n) ? null : n;
+}
 
-  console.log('📥 Читаем текущий каталог из Firebase...');
-  const currentCatalog = await fetchCurrentCatalog();
+// Вспомогательная функция: rows — 0-based массив, row/col — 1-based (как в Sheets)
+function cell(rows, row, col) {
+  return (rows[row - 1]?.[col - 1] ?? '').trim();
+}
 
-  console.log('📊 Загружаем данные из Google Sheets...');
-  const csvText = await fetchSheetData();
-  const rows = parseCSV(csvText);
-  console.log(`   Найдено строк: ${rows.length}`);
+// ── 5. Парсинг листа с моделями ───────────────────────────────────
+async function fetchModelsSheet() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Ошибка чтения листа моделей: ${res.status}`);
+  return await res.text();
+}
 
-  // Строим новый объект моделей поверх существующих
-  const updatedModels = { ...currentCatalog.models };
+function parseModels(csvText, existingModels) {
+  const allRows = parseCSVFull(csvText);
+  const rows = allRows.filter(row => /^\d+$/.test((row[0] || '').trim()));
 
+  const updatedModels = { ...existingModels };
   let updated = 0, added = 0;
 
   for (const cols of rows) {
-    // Столбцы (0-based):
-    // A=0:п/п   B=1:Артикул    C=2:Наименование   D=3:ID
-    // E=4:Серия  F=5:Вес шкафа  G=6:Высота         H=7:Ширина
-    // I=8:Глубина  J=9:Цена   K=10:Толщина корпуса  L=11:Толщина двери
-    // M=12:Кол-во замков   N=13:Вес дверей (кг)   O=14:Вес корпуса (кг)
-
     const id            = cols[3]?.trim();
     const article       = cols[1]?.trim();
     const name          = cols[2]?.trim();
-    const seriesRaw     = cols[4]?.trim().toLowerCase(); // "ml" / "ls"
-    const totalWeight   = parseWeight(cols[5]);      // F — вес шкафа
+    const seriesRaw     = cols[4]?.trim().toLowerCase();
+    const totalWeight   = parseWeight(cols[5]);
     const height        = parseInt(cols[6], 10);
     const width         = parseInt(cols[7], 10);
     const depth         = parseInt(cols[8], 10);
     const basePrice     = parsePrice(cols[9]);
-    const bodyThickness = parseThickness(cols[10]);  // K
-    const doorThickness = parseThickness(cols[11]);  // L
-    const lockCount     = parseWeight(cols[12]);     // M — кол-во замков
-    const doorWeight    = parseWeight(cols[13]);     // N — вес дверей
-    const bodyWeight    = parseWeight(cols[14]);     // O — вес корпуса
+    const bodyThickness = parseThickness(cols[10]);
+    const doorThickness = parseThickness(cols[11]);
+    const lockCount     = parseWeight(cols[12]);
+    const doorWeight    = parseWeight(cols[13]);
+    const bodyWeight    = parseWeight(cols[14]);
 
     if (!id || isNaN(height) || isNaN(basePrice)) continue;
 
     const existing = updatedModels[id];
-
-    // Сохраняем поля которых нет в таблице (замок, вентиляция, цвета)
     const existingSpecs = existing?.defaultSpecs ?? {};
 
     updatedModels[id] = {
-      article,
-      name,
-      seriesId: seriesRaw,
-      basePrice,
-      totalWeight,
-      lockCount,
-      doorWeight,
-      bodyWeight,
+      article, name, seriesId: seriesRaw, basePrice,
+      totalWeight, lockCount, doorWeight, bodyWeight,
       defaultSpecs: {
-        height,
-        width,
-        depth,
-        bodyThickness,
-        doorThickness,
-        // Поля не из таблицы — берём из Firebase (или ставим дефолт)
+        height, width, depth, bodyThickness, doorThickness,
         lockId:        existingSpecs.lockId        ?? 'key_basic',
         ventilation:   existingSpecs.ventilation   ?? false,
         bodyColorName: existingSpecs.bodyColorName ?? 'RAL 7038',
@@ -212,28 +196,208 @@ async function main() {
       },
     };
 
-    if (existing) updated++;
-    else added++;
+    if (existing) updated++; else added++;
   }
 
-  console.log(`   Обновлено: ${updated}, добавлено: ${added}`);
+  console.log(`   Обновлено моделей: ${updated}, добавлено: ${added}`);
+  return updatedModels;
+}
 
-  // Строим тело PATCH-запроса — обновляем только поле models
+// ── 6. Парсинг листа price ────────────────────────────────────────
+async function fetchPriceSheet() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1504497578`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Ошибка чтения листа price: ${res.status}`);
+  return await res.text();
+}
+
+function parsePriceRules(csvText) {
+  const rows = parseCSVFull(csvText);
+  const r = (row, col) => cell(rows, row, col);
+
+  // ── Толщина корпуса (строки 4-6, столбец D) ──
+  // Партия от 100 шт: 0.5→10%, 0.6→25%, 0.7→85%
+  const bodyThickness = {
+    '0.5': parsePercent(r(4, 4)),
+    '0.6': parsePercent(r(5, 4)),
+    '0.7': parsePercent(r(6, 4)),
+  };
+
+  // ── Толщина двери (строки 10-12, столбец D) ──
+  const doorThickness = {
+    '0.5': parsePercent(r(10, 4)),
+    '0.6': parsePercent(r(11, 4)),
+    '0.7': parsePercent(r(12, 4)),
+  };
+
+  // ── Глубина ML (строки 16-18, столбцы C=от10, D=от50, E=от100) ──
+  const depthValues = [450, 400, 300];
+  const depthML = {};
+  depthValues.forEach((d, i) => {
+    depthML[String(d)] = {
+      qty10:  parsePercent(r(16 + i, 3)),
+      qty50:  parsePercent(r(16 + i, 4)),
+      qty100: parsePercent(r(16 + i, 5)),
+    };
+  });
+
+  // ── Глубина LS (строки 21-23, столбцы C=от10, D=от50, E=от100) ──
+  const depthLS = {};
+  depthValues.forEach((d, i) => {
+    depthLS[String(d)] = {
+      qty10:  parsePercent(r(21 + i, 3)),
+      qty50:  parsePercent(r(21 + i, 4)),
+      qty100: parsePercent(r(21 + i, 5)),
+    };
+  });
+
+  // ── Высота (строки 27-31, C=ML от100, E=LS от100) ──
+  const heightValues = [1800, 1850, 1860, 1900, 2000];
+  const heightML = {}, heightLS = {};
+  heightValues.forEach((h, i) => {
+    heightML[String(h)] = parsePercent(r(27 + i, 3));
+    heightLS[String(h)] = parsePercent(r(27 + i, 5));
+  });
+
+  // ── Замки (строки 34-37, столбец B) ──
+  // Фиксированная стоимость за 1 замок в рублях
+  const lockKeys = ['d111x', 'praktik_el_code', 'euro_locks', 'praktik_el_mifare'];
+  const lockPrices = {};
+  lockKeys.forEach((key, i) => {
+    lockPrices[key] = parseRubles(r(34 + i, 2));
+  });
+
+  // ── Вентиляция (строка 41, столбцы A-D) ──
+  const ventilation = {
+    qty1:   parsePercent(r(41, 1)),   // партия < 10 шт
+    qty10:  parsePercent(r(41, 2)),   // от 10 шт
+    qty50:  parsePercent(r(41, 3)),   // от 50 шт
+    qty100: parsePercent(r(41, 4)),   // от 100 шт
+  };
+
+  // ── Цвет двери (строки 49, 51, 52 — столбец D) ──
+  // Кат.1 от 30 шт, кат.2-3 от 50 шт
+  const colorDoor = {
+    cat1: { minQty: 30, rate: parsePercent(r(49, 4)) },
+    cat2: { minQty: 50, rate: parsePercent(r(51, 4)) },
+    cat3: { minQty: 50, rate: parsePercent(r(52, 4)) },
+  };
+
+  // ── Цвет корпуса полностью (строки 55-57, столбец D) ──
+  // Все категории от 50 шт
+  const colorFull = {
+    cat1: { minQty: 50, rate: parsePercent(r(55, 4)) },
+    cat2: { minQty: 50, rate: parsePercent(r(56, 4)) },
+    cat3: { minQty: 50, rate: parsePercent(r(57, 4)) },
+  };
+
+  return {
+    thickness: {
+      minQty: 100,
+      body: bodyThickness,
+      door: doorThickness,
+    },
+    depth: {
+      minQty: 10,
+      ml: depthML,
+      ls: depthLS,
+    },
+    height: {
+      minQty: 100,
+      ml: heightML,
+      ls: heightLS,
+    },
+    lockPrices,
+    ventilation,
+    color: {
+      door: colorDoor,
+      full: colorFull,
+    },
+  };
+}
+
+// ── 7. Лог для проверки результата ───────────────────────────────
+function logPriceRules(rules) {
+  console.log('\n   📋 Проверь коэффициенты перед записью:');
+
+  console.log('\n   Толщина корпуса (от 100 шт):');
+  Object.entries(rules.thickness.body).forEach(([k, v]) =>
+    console.log(`      ${k} мм → ${v !== null ? `${(v * 100).toFixed(0)}%` : 'null (не найдено)'}`));
+
+  console.log('\n   Толщина двери (от 100 шт):');
+  Object.entries(rules.thickness.door).forEach(([k, v]) =>
+    console.log(`      ${k} мм → ${v !== null ? `${(v * 100).toFixed(0)}%` : 'null'}`));
+
+  console.log('\n   Глубина ML (от 10 шт):');
+  Object.entries(rules.depth.ml).forEach(([d, t]) =>
+    console.log(`      ${d} мм → 10шт:${t.qty10 !== null ? `${(t.qty10*100).toFixed(0)}%` : 'null'} / 50шт:${t.qty50 !== null ? `${(t.qty50*100).toFixed(0)}%` : 'null'} / 100шт:${t.qty100 !== null ? `${(t.qty100*100).toFixed(0)}%` : 'null'}`));
+
+  console.log('\n   Глубина LS (от 10 шт):');
+  Object.entries(rules.depth.ls).forEach(([d, t]) =>
+    console.log(`      ${d} мм → 10шт:${t.qty10 !== null ? `${(t.qty10*100).toFixed(0)}%` : 'null'} / 50шт:${t.qty50 !== null ? `${(t.qty50*100).toFixed(0)}%` : 'null'} / 100шт:${t.qty100 !== null ? `${(t.qty100*100).toFixed(0)}%` : 'null'}`));
+
+  console.log('\n   Высота ML/LS (от 100 шт):');
+  Object.keys(rules.height.ml).forEach(h =>
+    console.log(`      ${h} мм → ML:${rules.height.ml[h] !== null ? `${(rules.height.ml[h]*100).toFixed(0)}%` : 'null'} / LS:${rules.height.ls[h] !== null ? `${(rules.height.ls[h]*100).toFixed(0)}%` : 'null'}`));
+
+  console.log('\n   Замки (руб/шт):');
+  Object.entries(rules.lockPrices).forEach(([k, v]) =>
+    console.log(`      ${k} → ${v !== null ? `${v} ₽` : 'null'}`));
+
+  console.log('\n   Вентиляция:');
+  const v = rules.ventilation;
+  console.log(`      <10шт:${v.qty1 !== null ? `${(v.qty1*100).toFixed(0)}%` : 'null'} / от10:${v.qty10 !== null ? `${(v.qty10*100).toFixed(0)}%` : 'null'} / от50:${v.qty50 !== null ? `${(v.qty50*100).toFixed(0)}%` : 'null'} / от100:${v.qty100 !== null ? `${(v.qty100*100).toFixed(0)}%` : 'null'}`);
+
+  console.log('\n   Цвет двери:');
+  Object.entries(rules.color.door).forEach(([cat, d]) =>
+    console.log(`      ${cat} (от ${d.minQty} шт) → ${d.rate !== null ? `${(d.rate*100).toFixed(0)}%` : 'null'}`));
+
+  console.log('\n   Цвет корпуса полностью:');
+  Object.entries(rules.color.full).forEach(([cat, d]) =>
+    console.log(`      ${cat} (от ${d.minQty} шт) → ${d.rate !== null ? `${(d.rate*100).toFixed(0)}%` : 'null'}`));
+
+  console.log('');
+}
+
+// ── 8. Основная логика ────────────────────────────────────────────
+async function main() {
+  console.log('🔑 Получаем access token...');
+  const token = await getAccessToken();
+
+  console.log('📥 Читаем текущий каталог из Firebase...');
+  const currentCatalog = await fetchCurrentCatalog();
+
+  // Лист 1 — модели
+  console.log('📊 Загружаем модели из Google Sheets...');
+  const modelsCsv = await fetchModelsSheet();
+  const updatedModels = parseModels(modelsCsv, currentCatalog.models ?? {});
+
+  // Лист 2 — коэффициенты цен
+  console.log('📊 Загружаем коэффициенты из листа price...');
+  const priceCsv = await fetchPriceSheet();
+  const priceRules = parsePriceRules(priceCsv);
+  logPriceRules(priceRules);
+
+  // Записываем в Firebase
+  console.log('📤 Записываем в Firebase...');
   const body = {
     fields: {
-      models: toFirestore(updatedModels),
+      models:     toFirestore(updatedModels),
+      priceRules: toFirestore(priceRules),
     },
   };
 
-  console.log('📤 Записываем в Firebase...');
-  const res = await fetch(`${FIRESTORE_URL}?updateMask.fieldPaths=models`, {
-    method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
+  const res = await fetch(
+    `${FIRESTORE_URL}?updateMask.fieldPaths=models&updateMask.fieldPaths=priceRules`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    }
+  );
 
   if (!res.ok) {
     const err = await res.text();
@@ -241,7 +405,7 @@ async function main() {
   }
 
   console.log('✅ Готово! Данные успешно синхронизированы.');
-  console.log(`   Всего моделей в каталоге: ${Object.keys(updatedModels).length}`);
+  console.log(`   Всего моделей: ${Object.keys(updatedModels).length}`);
 }
 
 main().catch(err => {
