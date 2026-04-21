@@ -37,11 +37,11 @@ export default function Parameters() {
 		setBodyThickness,
 		setDoorThickness,
 		setLockId,
-		setVentilation,
-		setVentilationEach,
+		setVentilationType,
 		setBodyColor,
 		setDoorColor,
 		setQuantity,
+		setDiscount,
 		onReset,
 	} = setters;
 	const {
@@ -53,11 +53,11 @@ export default function Parameters() {
 		bodyThickness,
 		doorThickness,
 		lockId,
-		ventilation,
-		ventilationEach,
+		ventilationType,
 		bodyColor,
 		doorColor,
 		quantity,
+		discount,
 	} = config;
 
 	const [stepperStep, setStepperStep] = useState(() => (modelId ? 3 : seriesId ? 2 : 1));
@@ -303,6 +303,21 @@ export default function Parameters() {
 													editable
 												/>
 											</div>
+											<div className={styles.paramGroup}>
+												<label className={styles.groupLabel} htmlFor='discount'>
+													Скидка (%)
+												</label>
+												<StepperInput
+													id='discount'
+													value={String(discount)}
+													min={0}
+													max={50}
+													step={1}
+													onChange={v => setDiscount(Number(v))}
+													defaultValue={0}
+													editable
+												/>
+											</div>
 											<button type='button' className={styles.nextBtn} onClick={() => goToStep(3)}>
 												Перейти к параметрам
 											</button>
@@ -417,39 +432,24 @@ export default function Parameters() {
 									</div>
 
 									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Вентиляционные отверстия + патрубок в центре крыши</span>
-										<div className={styles.ventToggle}>
-											<button
-												className={cx(styles.ventBtn, ventilation && styles.ventBtnActive)}
-												onClick={() => setVentilation(true)}
-											>
-												Да
-											</button>
-											<button
-												className={cx(styles.ventBtn, !ventilation && styles.ventBtnActive)}
-												onClick={() => setVentilation(false)}
-											>
-												Нет
-											</button>
-										</div>
-									</div>
-
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Вентиляционные отверстия + патрубок в каждой секции</span>
-										<div className={styles.ventToggle}>
-											<button
-												className={cx(styles.ventBtn, ventilationEach && styles.ventBtnActive)}
-												onClick={() => setVentilationEach(true)}
-											>
-												Да
-											</button>
-											<button
-												className={cx(styles.ventBtn, !ventilationEach && styles.ventBtnActive)}
-												onClick={() => setVentilationEach(false)}
-											>
-												Нет
-											</button>
-										</div>
+										<span className={styles.groupLabel}>Вентиляция</span>
+										<ul className={styles.lockList}>
+											{[
+												{ id: null, label: 'Нет' },
+												{ id: 'roof', label: 'Крыша' },
+												{ id: 'roofBottom', label: 'Крыша + дно' },
+												{ id: 'roofBottomPipe', label: 'Крыша + дно + труба' },
+											].map(opt => (
+												<li key={String(opt.id)}>
+													<button
+														className={cx(styles.lockItem, ventilationType === opt.id && styles.lockItemActive)}
+														onClick={() => setVentilationType(opt.id)}
+													>
+														<span className={styles.lockName}>{opt.label}</span>
+													</button>
+												</li>
+											))}
+										</ul>
 									</div>
 
 									{quantity >= doorColorMinQty && (

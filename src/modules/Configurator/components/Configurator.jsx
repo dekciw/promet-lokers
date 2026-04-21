@@ -13,8 +13,7 @@ function buildCurrentForDiff(config, lock) {
 		bodyThickness: config.bodyThickness,
 		doorThickness: config.doorThickness,
 		lockName: lock?.name,
-		ventilation: config.ventilation,
-		ventilationEach: config.ventilationEach,
+		ventilationType: config.ventilationType ?? undefined,
 		bodyColorName: config.bodyColor?.name ?? undefined,
 		doorColorName: config.doorColor?.name ?? undefined,
 	};
@@ -29,7 +28,6 @@ function buildDefaultSpecsList(defaults, catalog) {
 		{ label: 'Толщина корпуса:', value: `${defaults.bodyThickness} мм` },
 		{ label: 'Толщина двери:', value: `${defaults.doorThickness} мм` },
 		{ label: 'Замок:', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
-		{ label: 'Вентиляция:', value: defaults.ventilation ? 'Да' : 'Нет' },
 		{ label: 'Цвет корпуса:', value: defaults.bodyColorName, colorHex: getColorHex(defaults.bodyColorName) },
 		{ label: 'Цвет двери:', value: defaults.doorColorName, colorHex: getColorHex(defaults.doorColorName) },
 	];
@@ -46,8 +44,11 @@ function buildFinalSpecsList(config, defaults, lock) {
 		{ label: 'Толщина корпуса:', value: `${config.bodyThickness} мм` },
 		{ label: 'Толщина двери:', value: `${config.doorThickness} мм` },
 		{ label: 'Замок:', value: lock?.name ?? config.lockId },
-		{ label: 'Вентиляция (центр):', value: config.ventilation ? 'Да' : 'Нет' },
-		{ label: 'Вентиляция (секции):', value: config.ventilationEach ? 'Да' : 'Нет' },
+		...(config.ventilationType ? [{ label: 'Вентиляция:', value: {
+			roof: 'Крыша',
+			roofBottom: 'Крыша + дно',
+			roofBottomPipe: 'Крыша + дно + труба',
+		}[config.ventilationType] }] : []),
 		...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name, colorHex: config.bodyColor.color }] : []),
 		...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name, colorHex: config.doorColor.color }] : []),
 	];
@@ -129,7 +130,11 @@ export default function Configurator() {
 		});
 	}
 
-	const priceDisplay = price !== null ? `${price.toLocaleString('ru-RU')} ₽` : '—';
+	const priceDisplay = !price || !config.modelId
+		? '—'
+		: price.manual
+			? 'По согласованию'
+			: `${price.clientPrice.toLocaleString('ru-RU')} ₽`;
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : 'Модель не выбрана';
 
 	return (
@@ -239,12 +244,30 @@ export default function Configurator() {
 											</span>
 										</li>
 									))}
+									{price && !price.manual && (
+										<li className={styles.finalItem}>
+											<span className={styles.finalLabel}>Вес:</span>
+											<span className={styles.finalValue}>{price.weight} кг</span>
+										</li>
+									)}
+									{price && !price.manual && (
+										<li className={styles.finalItem}>
+											<span className={styles.finalLabel}>Цена заводская:</span>
+											<span className={styles.finalValue}>{price.factoryPrice.toLocaleString('ru-RU')} ₽</span>
+										</li>
+									)}
 									<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
 										<span className={styles.finalLabel}>Стоимость:</span>
 										<span key={priceDisplay} className={styles.finalValue}>
 											{priceDisplay}
 										</span>
 									</li>
+									{price && !price.manual && price.leadTime && (
+										<li className={styles.finalItem}>
+											<span className={styles.finalLabel}>Срок:</span>
+											<span className={styles.finalValue}>{price.leadTime}</span>
+										</li>
+									)}
 								</ul>
 							)}
 						</div>

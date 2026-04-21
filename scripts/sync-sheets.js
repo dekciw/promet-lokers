@@ -178,6 +178,8 @@ function parseModels(csvText, existingModels) {
     const lockCount     = parseWeight(cols[12]);
     const doorWeight    = parseWeight(cols[13]);
     const bodyWeight    = parseWeight(cols[14]);
+    const cpBezNDS      = parsePrice(cols[15]);
+    const doorCount     = parseInt((cols[16] || '').trim(), 10) || null;
 
     if (!id || isNaN(height) || isNaN(basePrice)) continue;
 
@@ -185,14 +187,11 @@ function parseModels(csvText, existingModels) {
     const existingSpecs = existing?.defaultSpecs ?? {};
 
     updatedModels[id] = {
-      article, name, seriesId: seriesRaw, basePrice,
-      totalWeight, lockCount, doorWeight, bodyWeight,
+      article, name, seriesId: seriesRaw, basePrice, cpBezNDS,
+      totalWeight, lockCount, doorWeight, bodyWeight, doorCount,
       defaultSpecs: {
         height, width, depth, bodyThickness, doorThickness,
-        lockId:        existingSpecs.lockId        ?? 'key_basic',
-        ventilation:   existingSpecs.ventilation   ?? false,
-        bodyColorName: existingSpecs.bodyColorName ?? 'RAL 7038',
-        doorColorName: existingSpecs.doorColorName ?? 'RAL 7038',
+        lockId: existingSpecs.lockId ?? 'key_basic',
       },
     };
 
@@ -215,169 +214,179 @@ function parsePriceRules(csvText) {
   const rows = parseCSVFull(csvText);
   const r = (row, col) => cell(rows, row, col);
 
-  // ── Толщина корпуса (строки 4-6, столбец D) ──
-  // Партия от 100 шт: 0.5→10%, 0.6→25%, 0.7→85%
-  const bodyThickness = {
-    '0.5': parsePercent(r(4, 4)),
-    '0.6': parsePercent(r(5, 4)),
-    '0.7': parsePercent(r(6, 4)),
+  // ── 1.1 Толщина корпуса (строки 4-6: col D = от100) ──
+  const thickness = {
+    '0.5': parsePercent(r(4, 4)),   // 10%
+    '0.6': parsePercent(r(5, 4)),   // 25%
+    '0.7': parsePercent(r(6, 4)),   // 85%
   };
 
-  // ── Толщина двери (строки 10-12, столбец D) ──
-  const doorThickness = {
-    '0.5': parsePercent(r(10, 4)),
-    '0.6': parsePercent(r(11, 4)),
-    '0.7': parsePercent(r(12, 4)),
-  };
-
-  // ── Глубина ML (строки 16-18, столбцы C=от10, D=от50, E=от100) ──
+  // ── 1.3 Глубина ML (строки 10-12: col C=от10, D=от50, E=от100) ──
   const depthValues = [450, 400, 300];
   const depthML = {};
   depthValues.forEach((d, i) => {
     depthML[String(d)] = {
-      qty10:  parsePercent(r(16 + i, 3)),
-      qty50:  parsePercent(r(16 + i, 4)),
-      qty100: parsePercent(r(16 + i, 5)),
+      qty10:  parsePercent(r(10 + i, 3)),
+      qty50:  parsePercent(r(10 + i, 4)),
+      qty100: parsePercent(r(10 + i, 5)),
     };
   });
 
-  // ── Глубина LS (строки 21-23, столбцы C=от10, D=от50, E=от100) ──
+  // ── 1.3 Глубина LS (строки 15-17: col C=от10, D=от50, E=от100) ──
   const depthLS = {};
   depthValues.forEach((d, i) => {
     depthLS[String(d)] = {
-      qty10:  parsePercent(r(21 + i, 3)),
-      qty50:  parsePercent(r(21 + i, 4)),
-      qty100: parsePercent(r(21 + i, 5)),
+      qty10:  parsePercent(r(15 + i, 3)),
+      qty50:  parsePercent(r(15 + i, 4)),
+      qty100: parsePercent(r(15 + i, 5)),
     };
   });
 
-  // ── Высота (строки 27-31, C=ML от100, E=LS от100) ──
+  // ── 1.4 Высота (строки 21-25: col C=ML от100, E=LS от100) ──
   const heightValues = [1800, 1850, 1860, 1900, 2000];
   const heightML = {}, heightLS = {};
   heightValues.forEach((h, i) => {
-    heightML[String(h)] = parsePercent(r(27 + i, 3));
-    heightLS[String(h)] = parsePercent(r(27 + i, 5));
+    heightML[String(h)] = parsePercent(r(21 + i, 3));
+    heightLS[String(h)] = parsePercent(r(21 + i, 5));
   });
 
-  // ── Замки (строки 34-37, столбец A=название, B=цена) ──
+  // ── 2.1 Замки (строки 28-31: col A=название, B=односекционные, D=двухсекционные) ──
   const lockDefs = [
-    { id: 'd111x',             row: 34 },
-    { id: 'praktik_el_code',   row: 35 },
-    { id: 'euro_locks',        row: 36 },
-    { id: 'praktik_el_mifare', row: 37 },
+    { id: 'd111x',             row: 28 },
+    { id: 'praktik_el_code',   row: 29 },
+    { id: 'euro_locks',        row: 30 },
+    { id: 'praktik_el_mifare', row: 31 },
   ];
-  const lockPrices = {};
   const parsedLocks = {};
   lockDefs.forEach(({ id, row }) => {
-    const name = r(row, 1).replace(/^"/, '').replace(/"$/, '').trim();
-    const price = parseRubles(r(row, 2));
-    lockPrices[id] = price;
-    parsedLocks[id] = { name, surcharge: price ?? 0 };
+    const name   = r(row, 1).trim();
+    const single = parseRubles(r(row, 2));
+    const dual   = parseRubles(r(row, 4));
+    parsedLocks[id] = { name, single: single ?? 0, dual: dual ?? 0 };
   });
 
-  // ── Вентиляция патрубок в центре крыши (строка 41, столбцы A-D) ──
-  const ventilation = {
-    qty1:   parsePercent(r(41, 1)),   // партия < 10 шт
-    qty10:  parsePercent(r(41, 2)),   // от 10 шт
-    qty50:  parsePercent(r(41, 3)),   // от 50 шт
-    qty100: parsePercent(r(41, 4)),   // от 100 шт
+  // ── 2.2 Вентиляция только крыша (строка 35: A=<10, B=от10, C=от50, D=от100) ──
+  const ventRoof = {
+    qty1:  parsePercent(r(35, 1)),
+    qty10: parsePercent(r(35, 2)),
+    qty50: parsePercent(r(35, 3)),
+    qty100: null,   // '-' в таблице — TBD
   };
 
-  // ── Вентиляция патрубок в каждой секции (строка 45, столбцы A-D) ──
-  const ventilationEach = {
-    qty1:   parsePercent(r(45, 1)),   // партия < 10 шт
-    qty10:  parsePercent(r(45, 2)),   // от 10 шт
-    qty50:  parsePercent(r(45, 3)),   // от 50 шт
-    qty100: parsePercent(r(45, 4)),   // от 100 шт
+  // ── 2.3 Вентиляция крыша + дно (строка 39) ──
+  const ventRoofBottom = {
+    qty1:  parsePercent(r(39, 1)),
+    qty10: parsePercent(r(39, 2)),
+    qty50: parsePercent(r(39, 3)),
+    qty100: null,
   };
 
-  // ── Цвет двери (строки 49, 51, 52 — столбец D) ──
-  // Кат.1 от 30 шт, кат.2-3 от 50 шт
+  // ── 2.3 Вентиляция крыша + дно + труба (строка 43) ──
+  const ventRoofBottomPipe = {
+    qty1:  parsePercent(r(43, 1)),
+    qty10: parsePercent(r(43, 2)),
+    qty50: parsePercent(r(43, 3)),
+    qty100: null,
+  };
+
+  // ── 3.1 RAL дверей ──
+  // cat1 (базовые): minQty=30, тиры: от30=5%, от51=6%, от101=20%
+  // cat2 (популярные): minQty=50, 6%
+  // cat3 (яркие): minQty=50, 8%
   const colorDoor = {
-    cat1: { minQty: 30, rate: parsePercent(r(49, 4)) },
-    cat2: { minQty: 50, rate: parsePercent(r(51, 4)) },
-    cat3: { minQty: 50, rate: parsePercent(r(52, 4)) },
+    cat1: {
+      minQty: 30,
+      tiers: [
+        { minQty: 30,  rate: parsePercent(r(47, 4)) },
+        { minQty: 51,  rate: parsePercent(r(47, 6)) },
+        { minQty: 101, rate: parsePercent(r(47, 8)) },
+      ],
+    },
+    cat2: {
+      minQty: 50,
+      tiers: [{ minQty: 50, rate: parsePercent(r(49, 4)) }],
+    },
+    cat3: {
+      minQty: 50,
+      tiers: [{ minQty: 50, rate: parsePercent(r(50, 4)) }],
+    },
   };
 
-  // ── Цвет корпуса полностью (строки 55-57, столбец D) ──
-  // Все категории от 50 шт
+  // ── 3.2 RAL корпуса полностью ──
+  // cat1: minQty=50, 20%; cat2: minQty=50, 20%; cat3: minQty=50, от50=30% / от51=20%
   const colorFull = {
-    cat1: { minQty: 50, rate: parsePercent(r(55, 4)) },
-    cat2: { minQty: 50, rate: parsePercent(r(56, 4)) },
-    cat3: { minQty: 50, rate: parsePercent(r(57, 4)) },
+    cat1: {
+      minQty: 50,
+      tiers: [{ minQty: 50, rate: parsePercent(r(53, 4)) }],
+    },
+    cat2: {
+      minQty: 50,
+      tiers: [{ minQty: 50, rate: parsePercent(r(54, 4)) }],
+    },
+    cat3: {
+      minQty: 50,
+      tiers: [
+        { minQty: 50, rate: parsePercent(r(55, 4)) },
+        { minQty: 51, rate: parsePercent(r(55, 6)) },
+      ],
+    },
   };
 
   return {
     parsedLocks,
-    thickness: {
-      minQty: 100,
-      body: bodyThickness,
-      door: doorThickness,
-    },
-    depth: {
-      minQty: 10,
-      ml: depthML,
-      ls: depthLS,
-    },
-    height: {
-      minQty: 100,
-      ml: heightML,
-      ls: heightLS,
-    },
-    lockPrices,
-    ventilation,
-    ventilationEach,
-    color: {
-      door: colorDoor,
-      full: colorFull,
-    },
+    thickness: { minQty: 100, rates: thickness },
+    depth:     { minQty: 10, ml: depthML, ls: depthLS },
+    height:    { minQty: 100, ml: heightML, ls: heightLS },
+    ventilation: { roof: ventRoof, roofBottom: ventRoofBottom, roofBottomPipe: ventRoofBottomPipe },
+    color: { door: colorDoor, full: colorFull },
   };
 }
 
 // ── 7. Лог для проверки результата ───────────────────────────────
 function logPriceRules(rules) {
+  const f  = x => x !== null ? `${(x * 100).toFixed(0)}%` : '—';
+  const fv = v => `<10шт:${f(v.qty1)} / от10:${f(v.qty10)} / от50:${f(v.qty50)} / от100:${f(v.qty100)}`;
+
   console.log('\n   📋 Проверь коэффициенты перед записью:');
 
-  console.log('\n   Толщина корпуса (от 100 шт):');
-  Object.entries(rules.thickness.body).forEach(([k, v]) =>
-    console.log(`      ${k} мм → ${v !== null ? `${(v * 100).toFixed(0)}%` : 'null (не найдено)'}`));
-
-  console.log('\n   Толщина двери (от 100 шт):');
-  Object.entries(rules.thickness.door).forEach(([k, v]) =>
-    console.log(`      ${k} мм → ${v !== null ? `${(v * 100).toFixed(0)}%` : 'null'}`));
+  console.log('\n   Толщина металла (от 100 шт):');
+  Object.entries(rules.thickness.rates).forEach(([k, v]) =>
+    console.log(`      ${k} мм → ${f(v)}`));
 
   console.log('\n   Глубина ML (от 10 шт):');
   Object.entries(rules.depth.ml).forEach(([d, t]) =>
-    console.log(`      ${d} мм → 10шт:${t.qty10 !== null ? `${(t.qty10*100).toFixed(0)}%` : 'null'} / 50шт:${t.qty50 !== null ? `${(t.qty50*100).toFixed(0)}%` : 'null'} / 100шт:${t.qty100 !== null ? `${(t.qty100*100).toFixed(0)}%` : 'null'}`));
+    console.log(`      ${d} мм → от10:${f(t.qty10)} / от50:${f(t.qty50)} / от100:${f(t.qty100)}`));
 
   console.log('\n   Глубина LS (от 10 шт):');
   Object.entries(rules.depth.ls).forEach(([d, t]) =>
-    console.log(`      ${d} мм → 10шт:${t.qty10 !== null ? `${(t.qty10*100).toFixed(0)}%` : 'null'} / 50шт:${t.qty50 !== null ? `${(t.qty50*100).toFixed(0)}%` : 'null'} / 100шт:${t.qty100 !== null ? `${(t.qty100*100).toFixed(0)}%` : 'null'}`));
+    console.log(`      ${d} мм → от10:${f(t.qty10)} / от50:${f(t.qty50)} / от100:${f(t.qty100)}`));
 
   console.log('\n   Высота ML/LS (от 100 шт):');
   Object.keys(rules.height.ml).forEach(h =>
-    console.log(`      ${h} мм → ML:${rules.height.ml[h] !== null ? `${(rules.height.ml[h]*100).toFixed(0)}%` : 'null'} / LS:${rules.height.ls[h] !== null ? `${(rules.height.ls[h]*100).toFixed(0)}%` : 'null'}`));
+    console.log(`      ${h} мм → ML:${f(rules.height.ml[h])} / LS:${f(rules.height.ls[h])}`));
 
   console.log('\n   Замки (руб/шт):');
-  Object.entries(rules.parsedLocks ?? {}).forEach(([k, v]) =>
-    console.log(`      [${k}] ${v.name} → ${v.surcharge} ₽`));
+  Object.entries(rules.parsedLocks).forEach(([k, v]) =>
+    console.log(`      [${k}] ${v.name} → 1-секц: ${v.single} ₽ / 2-секц: ${v.dual} ₽`));
 
-  function fmtVent(rule) {
-    const f = x => x !== null ? `${(x*100).toFixed(0)}%` : 'null';
-    return `<10шт:${f(rule.qty1)} / от10:${f(rule.qty10)} / от50:${f(rule.qty50)} / от100:${f(rule.qty100)}`;
-  }
-  console.log('\n   Вентиляция (центр крыши):');
-  console.log(`      ${fmtVent(rules.ventilation)}`);
-  console.log('\n   Вентиляция (каждая секция):');
-  console.log(`      ${fmtVent(rules.ventilationEach)}`);
+  console.log('\n   Вентиляция только крыша:');
+  console.log(`      ${fv(rules.ventilation.roof)}`);
+  console.log('\n   Вентиляция крыша + дно:');
+  console.log(`      ${fv(rules.ventilation.roofBottom)}`);
+  console.log('\n   Вентиляция крыша + дно + труба:');
+  console.log(`      ${fv(rules.ventilation.roofBottomPipe)}`);
 
-  console.log('\n   Цвет двери:');
-  Object.entries(rules.color.door).forEach(([cat, d]) =>
-    console.log(`      ${cat} (от ${d.minQty} шт) → ${d.rate !== null ? `${(d.rate*100).toFixed(0)}%` : 'null'}`));
+  console.log('\n   RAL дверей:');
+  Object.entries(rules.color.door).forEach(([cat, d]) => {
+    const tiers = d.tiers.map(t => `от${t.minQty}шт:${f(t.rate)}`).join(' / ');
+    console.log(`      ${cat} (min ${d.minQty} шт) → ${tiers}`);
+  });
 
-  console.log('\n   Цвет корпуса полностью:');
-  Object.entries(rules.color.full).forEach(([cat, d]) =>
-    console.log(`      ${cat} (от ${d.minQty} шт) → ${d.rate !== null ? `${(d.rate*100).toFixed(0)}%` : 'null'}`));
+  console.log('\n   RAL корпуса полностью:');
+  Object.entries(rules.color.full).forEach(([cat, d]) => {
+    const tiers = d.tiers.map(t => `от${t.minQty}шт:${f(t.rate)}`).join(' / ');
+    console.log(`      ${cat} (min ${d.minQty} шт) → ${tiers}`);
+  });
 
   console.log('');
 }
@@ -403,7 +412,7 @@ async function main() {
 
   // Строим catalog.locks: key_basic + 4 замка из таблицы
   const updatedLocks = {
-    key_basic: currentCatalog.locks?.key_basic ?? { name: 'Ключевой (Базовый)', surcharge: 0 },
+    key_basic: { name: 'Ключевой (Базовый)', single: 0, dual: 0 },
     ...priceRules.parsedLocks,
   };
 

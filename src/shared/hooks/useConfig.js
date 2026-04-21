@@ -11,11 +11,11 @@ export function useConfig(catalog) {
   const [bodyThickness, setBodyThickness] = useState(DEFAULT_THICKNESS);
   const [doorThickness, setDoorThickness] = useState(DEFAULT_THICKNESS);
   const [lockId, setLockId] = useState('key_basic');
-  const [ventilation, setVentilation] = useState(false);
-  const [ventilationEach, setVentilationEach] = useState(false);
+  const [ventilationType, setVentilationType] = useState(null); // null | 'roof' | 'roofBottom' | 'roofBottomPipe'
   const [bodyColor, setBodyColor] = useState(null);
   const [doorColor, setDoorColor] = useState(null);
   const [quantity, setQuantity] = useState(10);
+  const [discount, setDiscount] = useState(0);
   const [isResetting, setIsResetting] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
@@ -52,16 +52,6 @@ export function useConfig(catalog) {
     }
   }
 
-  function handleSetVentilation(val) {
-    setVentilation(val);
-    if (val) setVentilationEach(false);
-  }
-
-  function handleSetVentilationEach(val) {
-    setVentilationEach(val);
-    if (val) setVentilation(false);
-  }
-
   function clearParams() {
     setWidth('');
     setHeight('');
@@ -69,8 +59,7 @@ export function useConfig(catalog) {
     setBodyThickness(DEFAULT_THICKNESS);
     setDoorThickness(DEFAULT_THICKNESS);
     setLockId('key_basic');
-    setVentilation(false);
-    setVentilationEach(false);
+    setVentilationType(null);
     setBodyColor(null);
     setDoorColor(null);
   }
@@ -93,14 +82,14 @@ export function useConfig(catalog) {
         const specs = catalog.models[modelId].defaultSpecs;
         applySpecs(specs);
         setLockId(specs.lockId ?? 'key_basic');
-        setVentilation(specs.ventilation ?? false);
-        setVentilationEach(false);
       } else {
         clearParams();
       }
+      setVentilationType(null);
       setBodyColor(null);
       setDoorColor(null);
       setQuantity(10);
+      setDiscount(0);
       setResetKey(k => k + 1);
       setIsResetting(false);
     }, 330);
@@ -115,11 +104,11 @@ export function useConfig(catalog) {
     bodyThickness,
     doorThickness,
     lockId,
-    ventilation,
-    ventilationEach,
+    ventilationType,
     bodyColor,
     doorColor,
     quantity,
+    discount,
   };
 
   const setters = {
@@ -131,11 +120,11 @@ export function useConfig(catalog) {
     setBodyThickness,
     setDoorThickness,
     setLockId,
-    setVentilation: handleSetVentilation,
-    setVentilationEach: handleSetVentilationEach,
+    setVentilationType,
     setBodyColor,
     setDoorColor,
     setQuantity,
+    setDiscount,
     onReset: handleReset,
   };
 
