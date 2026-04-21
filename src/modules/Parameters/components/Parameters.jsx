@@ -13,7 +13,7 @@ const DEPTH_MIN = 300;
 const WIDTH_RANGE = 50;
 const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 
-const STEP_LABELS = ['Серия', 'Комплектация', 'Параметры'];
+const STEP_LABELS = ['Серия', 'Модель', 'Изменяемые параметры'];
 
 const slideVariants = {
 	initial: dir => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0 }),
