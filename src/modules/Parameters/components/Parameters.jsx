@@ -8,7 +8,8 @@ import { useAppContext } from '../../../shared/context/AppContext';
 import styles from './Parameters.module.css';
 
 const HEIGHT_MIN = 1400;
-const HEIGHT_MAX = 1900;
+const HEIGHT_MAX = 2000;
+const HEIGHT_SNAPS = [1800, 1850, 1860, 1900, 2000];
 const DEPTH_MIN = 300;
 const WIDTH_RANGE = 50;
 const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
@@ -355,10 +356,11 @@ export default function Parameters() {
 												value={height}
 												min={HEIGHT_MIN}
 												max={HEIGHT_MAX}
+												step={10000}
 												onChange={setHeight}
 												modified={!!specs && String(height) !== String(specs.height)}
 												defaultValue={specs?.height}
-												snaps={[1860]}
+												snaps={HEIGHT_SNAPS}
 												blocked={quantity < heightMinQty}
 											/>
 										</div>
