@@ -130,11 +130,15 @@ export default function Configurator() {
 		});
 	}
 
+	const qty = config.quantity ?? 10;
+	const totalClientPrice = price && !price.manual ? price.clientPrice * qty : null;
+	const totalFactoryPrice = price && !price.manual ? price.factoryPrice * qty : null;
+
 	const priceDisplay = !price || !config.modelId
 		? '—'
 		: price.manual
 			? 'По согласованию'
-			: `${price.clientPrice.toLocaleString('ru-RU')} ₽`;
+			: `${totalClientPrice.toLocaleString('ru-RU')} ₽`;
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : 'Модель не выбрана';
 
 	return (
@@ -252,16 +256,28 @@ export default function Configurator() {
 									)}
 									{price && !price.manual && (
 										<li className={styles.finalItem}>
-											<span className={styles.finalLabel}>Цена заводская:</span>
+											<span className={styles.finalLabel}>Цена за 1 шт.:</span>
+											<span className={styles.finalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
+										</li>
+									)}
+									{price && !price.manual && (
+										<li className={styles.finalItem}>
+											<span className={styles.finalLabel}>Завод за 1 шт.:</span>
 											<span className={styles.finalValue}>{price.factoryPrice.toLocaleString('ru-RU')} ₽</span>
 										</li>
 									)}
 									<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
-										<span className={styles.finalLabel}>Стоимость:</span>
+										<span className={styles.finalLabel}>Итого ({qty} шт.):</span>
 										<span key={priceDisplay} className={styles.finalValue}>
 											{priceDisplay}
 										</span>
 									</li>
+									{price && !price.manual && (
+										<li className={styles.finalItem}>
+											<span className={styles.finalLabel}>Завод итого:</span>
+											<span className={styles.finalValue}>{totalFactoryPrice.toLocaleString('ru-RU')} ₽</span>
+										</li>
+									)}
 									{price && !price.manual && price.leadTime && (
 										<li className={styles.finalItem}>
 											<span className={styles.finalLabel}>Срок:</span>
