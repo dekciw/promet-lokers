@@ -418,7 +418,7 @@ async function main() {
   const body = {
     fields: {
       models:     toFirestore(updatedModels),
-      priceRules: toFirestore(priceRules),
+      priceRules: toFirestore((({ parsedLocks: _p, ...clean }) => clean)(priceRules)),
       locks:      toFirestore(updatedLocks),
     },
   };
