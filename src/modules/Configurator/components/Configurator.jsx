@@ -53,7 +53,7 @@ function buildFinalSpecsList(config, defaults, lock, ventilation) {
 export default function Configurator() {
 	const { config, price, catalog, isResetting, resetKey } = useAppContext();
 	const model = config.modelId ? catalog.models[config.modelId] : null;
-	const series = model ? catalog.series.find(s => s.id === model.seriesId) : null;
+	const series = model ? (catalog.series ?? []).find(s => s.id === model.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
 

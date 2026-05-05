@@ -254,7 +254,7 @@ export default function Parameters() {
 										value={seriesId}
 										onChange={handleSeriesSelect}
 										placeholder='Выберите серию'
-										options={catalog.series.map(s => ({ value: s.id, label: s.name }))}
+										options={(catalog.series ?? []).map(s => ({ value: s.id, label: s.name }))}
 										isOpen={openSelectId === 'series'}
 										onOpenChange={handleSeriesOpen}
 									/>
