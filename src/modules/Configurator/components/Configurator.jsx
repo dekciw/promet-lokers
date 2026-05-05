@@ -33,7 +33,7 @@ function buildDefaultSpecsList(defaults, catalog) {
 	];
 }
 
-function buildFinalSpecsList(config, defaults, lock) {
+function buildFinalSpecsList(config, defaults, lock, ventilation) {
 	if (!defaults) return [];
 	return [
 		{ label: 'Количество:', value: `${config.quantity ?? 10} шт.` },
@@ -44,11 +44,7 @@ function buildFinalSpecsList(config, defaults, lock) {
 		{ label: 'Толщина корпуса:', value: `${config.bodyThickness} мм` },
 		{ label: 'Толщина двери:', value: `${config.doorThickness} мм` },
 		{ label: 'Замок:', value: lock?.name ?? config.lockId },
-		...(config.ventilationType ? [{ label: 'Вентиляция:', value: {
-			roof: 'Крыша',
-			roofBottom: 'Крыша + дно',
-			roofBottomPipe: 'Крыша + дно + труба',
-		}[config.ventilationType] }] : []),
+		...(config.ventilationType ? [{ label: 'Вентиляция:', value: ventilation?.[config.ventilationType]?.name ?? config.ventilationType }] : []),
 		...(config.bodyColor ? [{ label: 'Цвет корпуса:', value: config.bodyColor.name, colorHex: config.bodyColor.color }] : []),
 		...(config.doorColor ? [{ label: 'Цвет двери:', value: config.doorColor.name, colorHex: config.doorColor.color }] : []),
 	];
@@ -64,7 +60,7 @@ export default function Configurator() {
 	const defaultsForDiff = defaults ? { ...defaults, lockName: catalog.locks[defaults.lockId]?.name } : null;
 	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff);
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
-	const finalSpecsList = buildFinalSpecsList(config, defaults, lock);
+	const finalSpecsList = buildFinalSpecsList(config, defaults, lock, catalog.priceRules?.ventilation);
 
 	const [leavingItems, setLeavingItems] = useState([]);
 	const [enteringLabels, setEnteringLabels] = useState(new Set());

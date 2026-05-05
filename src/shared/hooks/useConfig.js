@@ -11,7 +11,7 @@ export function useConfig(catalog) {
   const [bodyThickness, setBodyThickness] = useState(DEFAULT_THICKNESS);
   const [doorThickness, setDoorThickness] = useState(DEFAULT_THICKNESS);
   const [lockId, setLockId] = useState('key_basic');
-  const [ventilationType, setVentilationType] = useState(null); // null | 'roof' | 'roofBottom' | 'roofBottomPipe'
+  const [ventilationType, setVentilationType] = useState(null); // null | 'roof' | 'roofBottom'
   const [bodyColor, setBodyColor] = useState(null);
   const [doorColor, setDoorColor] = useState(null);
   const [quantity, setQuantity] = useState(10);

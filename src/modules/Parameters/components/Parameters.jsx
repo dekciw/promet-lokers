@@ -438,9 +438,7 @@ export default function Parameters() {
 										<ul className={styles.lockList}>
 											{[
 												{ id: null, label: 'Нет' },
-												{ id: 'roof', label: 'Крыша' },
-												{ id: 'roofBottom', label: 'Крыша + дно' },
-												{ id: 'roofBottomPipe', label: 'Крыша + дно + труба' },
+												...Object.entries(priceRules.ventilation ?? {}).map(([id, v]) => ({ id, label: v.name || id })),
 											].map(opt => (
 												<li key={String(opt.id)}>
 													<button

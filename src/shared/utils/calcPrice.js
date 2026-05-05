@@ -8,6 +8,7 @@ const WEIGHT_MULT = {
 function getVentRate(ventilationType, qty, priceRules) {
   const rule = priceRules.ventilation?.[ventilationType];
   if (!rule) return null;
+  if (qty >= 100) return rule.qty100;
   if (qty >= 50) return rule.qty50;
   if (qty >= 10) return rule.qty10;
   return rule.qty1;
@@ -61,31 +62,42 @@ export function calcPrice(config, catalog) {
   const depthVal = config.depth !== '' ? Number(config.depth) : null;
   const depthChanged = depthVal !== null && depthVal !== Number(defaults.depth);
 
+  const widthVal = config.width !== '' ? Number(config.width) : null;
+  const widthChanged = widthVal !== null && widthVal !== Number(defaults.width);
+
   const lockChanged = !!config.lockId && config.lockId !== 'key_basic';
   const ventChanged = !!config.ventilationType;
   const doorColorChanged = !!config.doorColor;
   const bodyColorChanged = !!config.bodyColor;
 
   // Толщина = 1 исполнение даже если изменены оба компонента
+  // ВАЖНО: каждый новый параметр должен добавляться сюда, иначе changeCount будет занижен
   const changeCount = [
     thicknessChanged,
     heightChanged,
     depthChanged,
+    widthChanged,
     lockChanged,
     ventChanged,
     doorColorChanged,
     bodyColorChanged,
   ].filter(Boolean).length;
 
-  // ── 2. Лимит исполнений ─────────────────────────────────────────
+  // ── 2. Нестандартная ширина — всегда ПСС по запросу ─────────────
+  if (widthChanged) {
+    return { manual: true, changeCount };
+  }
+
+  // ── 3. Лимит исполнений ─────────────────────────────────────────
   if (changeCount > 2) {
     return { manual: true, changeCount };
   }
 
-  // ── 3. Суммарный процент наценки ────────────────────────────────
+  // ── 4. Суммарный процент наценки ────────────────────────────────
   let totalRate = 0;
   let anyManual = false;
 
+  // ВАЖНО: каждый параметр должен вызывать addRate() — null означает ПСС по запросу
   function addRate(rate) {
     if (rate === null || rate === undefined) anyManual = true;
     else totalRate += rate;
@@ -96,7 +108,9 @@ export function calcPrice(config, catalog) {
     if (qty < (priceRules.thickness?.minQty ?? 100)) {
       anyManual = true;
     } else {
-      const rates = priceRules.thickness?.rates ?? {};
+      const rates = series === 'ls'
+        ? priceRules.thickness?.ls ?? {}
+        : priceRules.thickness?.ml ?? {};
       if (bodyThickChanged && doorThickChanged && config.bodyThickness === config.doorThickness) {
         // Весь шкаф одинаково — полный процент
         addRate(rates[config.bodyThickness] ?? null);
@@ -143,34 +157,33 @@ export function calcPrice(config, catalog) {
     return { manual: true, changeCount };
   }
 
-  // ── 4. Наценка за нестандартный замок ───────────────────────────
+  // ── 5. Наценка за нестандартный замок ───────────────────────────
   let lockSurcharge = 0;
   if (lockChanged) {
     const lock = catalog.locks?.[config.lockId];
     const doorCount = model.doorCount ?? 2;
     if (lock) {
-      lockSurcharge = doorCount === 1
-        ? (lock.single ?? 0)
-        : (lock.dual ?? 0) * (doorCount / 2);
+      lockSurcharge = (lock.perSection ?? 0) * doorCount;
     }
   }
 
-  // ── 5. Цены ─────────────────────────────────────────────────────
+  // ── 6. Цены ─────────────────────────────────────────────────────
   const priceMin = model.basePrice ?? 0;
   const cpBezNDS = model.cpBezNDS ?? 0;
 
-  const clientRaw = priceMin * (1 + totalRate) + lockSurcharge;
-  const clientPrice = Math.round(clientRaw * (1 - discount / 100));
-  const factoryPrice = Math.round(cpBezNDS * (1 + totalRate) + lockSurcharge);
+  // Округление до целых рублей — до применения скидки (по методике)
+  const clientRounded = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
+  const clientPrice   = Math.round(clientRounded * (1 - discount / 100));
+  const factoryPrice  = Math.round(cpBezNDS * (1 + totalRate) + lockSurcharge);
 
-  // ── 6. Вес ──────────────────────────────────────────────────────
+  // ── 7. Вес ──────────────────────────────────────────────────────
   const effDoor = config.doorThickness || defaults.doorThickness || '0.5';
   const effBody = config.bodyThickness || defaults.bodyThickness || '0.5';
   const weight = Math.round(
     ((doorW * (WEIGHT_MULT[effDoor] ?? 1)) + (bodyW * (WEIGHT_MULT[effBody] ?? 1))) * 100,
   ) / 100;
 
-  // ── 7. Срок изготовления ────────────────────────────────────────
+  // ── 8. Срок изготовления ────────────────────────────────────────
   let leadTime = null;
   if (changeCount === 1) leadTime = '7–14 дней';
   else if (changeCount >= 2 && changeCount <= 4) leadTime = '14–21–30 дней';
