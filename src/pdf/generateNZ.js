@@ -1,25 +1,17 @@
 /**
- * Генерация и скачивание PDF «Бланк нестандартного заказа».
+ * Точка входа для скачивания бланка НЗ.
  *
- * Все импорты из @react-pdf/renderer — здесь и в NZDocument.jsx.
- * Этот файл НЕ должен импортироваться статически из src/modules или src/shared
- * — иначе initial bundle вырастет на ~500 kB (PERF_3).
+ * Загружает оригинальный /nz-template.pdf, заполняет поля через pdf-lib
+ * и инициирует скачивание без print-диалога.
  *
- * Использовать через динамический import:
- *   const { generateNZ } = await import('../pdf/generateNZ.js');
+ * Импортируется лениво из Configurator (PERF_3):
+ *   const { generateNZ } = await import('../../../pdf/generateNZ.js');
  */
-import { createElement } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import './fonts.js'; // side-effect: Font.register() — выполняется один раз
-import NZDocument from './NZDocument.jsx';
+import { fillNZTemplate } from './fillNZTemplate.js';
 
 /**
- * Чистая функция формирования имени файла.
- * Экспортируется отдельно для unit-тестов (DOC_5).
- *
- * @param {object|null} model — объект модели с полем article
- * @param {Date} date — дата (по умолчанию сегодня)
- * @returns {string} — имя файла вида {article}_{YYYY-MM-DD}.pdf
+ * Имя файла вида {артикул}_{YYYY-MM-DD}.pdf
+ * Экспортируется отдельно для unit-тестов.
  */
 export function getNZFilename(model, date = new Date()) {
   const article = model?.article ?? 'НЗ';
@@ -29,26 +21,14 @@ export function getNZFilename(model, date = new Date()) {
   return `${article}_${yyyy}-${mm}-${dd}.pdf`;
 }
 
-/**
- * Генерирует PDF и инициирует скачивание без print-диалога.
- *
- * @param {object} args
- * @param {object} args.config — текущая конфигурация
- * @param {object} args.catalog — каталог из Firebase
- * @param {string} args.managerName — Ф.И.О. менеджера (из popup)
- * @param {string} args.clientName — название клиента (из popup)
- * @returns {Promise<void>}
- */
 export async function generateNZ({ config, catalog, managerName, clientName }) {
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   const filename = getNZFilename(model, new Date());
 
-  const element = createElement(NZDocument, {
-    config, catalog, managerName, clientName,
-  });
+  const doc = await fillNZTemplate({ config, catalog, managerName, clientName });
+  const bytes = await doc.save();
 
-  const blob = await pdf(element).toBlob();
-
+  const blob = new Blob([bytes], { type: 'application/pdf' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -56,6 +36,5 @@ export async function generateNZ({ config, catalog, managerName, clientName }) {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  // Firefox требует задержку перед revoke
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }

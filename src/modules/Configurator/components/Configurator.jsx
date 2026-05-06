@@ -130,11 +130,14 @@ export default function Configurator() {
 	}
 
 	async function handleNZSubmit({ managerName, clientName }) {
-		// LAZY IMPORT — единственное место в app-коде, где грузится @react-pdf/renderer.
-		// Vite автоматически выделит в отдельный chunk (PERF_3).
-		const { generateNZ } = await import('../../../pdf/generateNZ.js');
-		await generateNZ({ config, catalog, managerName, clientName });
-		setIsNZOpen(false);
+		try {
+			const { generateNZ } = await import('../../../pdf/generateNZ.js');
+			await generateNZ({ config, catalog, managerName, clientName });
+			setIsNZOpen(false);
+		} catch (err) {
+			console.error('Ошибка генерации НЗ:', err);
+			alert(`Не удалось создать PDF: ${err?.message ?? err}`);
+		}
 	}
 
 	function handleCopyArticle() {
