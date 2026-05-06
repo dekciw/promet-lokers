@@ -157,12 +157,12 @@ _Ждут формулу от менеджеров:_
 
 **Status:** ⚙ In Progress — Plan 01 выполнен (2026-05-06)
 
-**Plans:** 3 plans (1/3 complete)
+**Plans:** 3/3 plans complete
 
 **Plans:**
 - [x] 03-01-PLAN.md — Wave 0: установить @react-pdf/renderer, создать public/img/logo.png, реализовать buildNZParams() через TDD ✅ 2026-05-06
-- [ ] 03-02-PLAN.md — Wave 1: PDF движок (NZDocument.jsx 2 страницы, fonts.js Roboto Cyrillic TTF, generateNZ.js с lazy-friendly изоляцией)
-- [ ] 03-03-PLAN.md — Wave 2: NZModal popup (react-hook-form), подключение двух кнопок «Бланк НЗ» к Configurator с динамическим импортом generateNZ
+- [x] 03-02-PLAN.md — Wave 1: PDF движок (NZDocument.jsx 2 страницы, fonts.js Roboto Cyrillic TTF, generateNZ.js с lazy-friendly изоляцией)
+- [x] 03-03-PLAN.md — Wave 2: NZModal popup (react-hook-form), подключение двух кнопок «Бланк НЗ» к Configurator с динамическим импортом generateNZ
 
 **Закрывает требования:** DOC_3, DOC_4, DOC_5, PERF_3 (lazy load PDF). DOC_6 уже закрыт.
 

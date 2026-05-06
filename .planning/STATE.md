@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: unknown
-last_updated: "2026-05-06T11:14:52.736Z"
+status: phase-complete
+last_updated: "2026-05-06T11:22:00Z"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -19,15 +19,17 @@ _GSD workflow state для Конфигуратор «Промет»_
 
 ## Current Phase
 
-**Phase 3 — PDF-документы (КП + Бланк НЗ)** · `in-progress`
+**Phase 3 — PDF-документы (КП + Бланк НЗ)** · `complete`
 
 Plan 03-01 завершён (2026-05-06): @react-pdf/renderer установлен, logo.png создан, buildNZParams() реализован (23 теста).
 
 Plan 03-02 завершён (2026-05-06): fonts.js (Roboto Cyrillic TTF jsDelivr), NZDocument.jsx (2 страницы), generateNZ.js (async download + getNZFilename 7 тестов DOC_5), PERF_3 соблюдён.
 
-Next action: выполнить plan 03-03 — NZModal + кнопка в Configurator
+Plan 03-03 завершён (2026-05-06): NZModal компонент (react-hook-form, accessibility), обе кнопки «Бланк НЗ» подключены, lazy import generateNZ, Vite chunk splitting. DOC_3, DOC_5, PERF_3 закрыты. 52 теста зелёных.
 
-Last session: 2026-05-06T11:14:52.733Z
+Next action: Phase 4 — авторизация + история конфигураций (после фокус-группы)
+
+Last session: 2026-05-06T11:22:00Z
 
 ---
 
@@ -37,7 +39,7 @@ Last session: 2026-05-06T11:14:52.733Z
 |-------|--------|-----------|-------|
 | Phase 1 | ✓ complete | 2026-04-01 | Каталог Firebase, степпер, diff, анимации, все параметры |
 | Phase 2 | ✓ complete | 2026-04-21 | Формула цены от экономистов, вентиляция enum, скидка, вес, срок, sync-sheets |
-| Phase 3 | in-progress | — | PDF НЗ. Plan 01 завершён (2026-05-06): react-pdf, logo.png, buildNZParams() |
+| Phase 3 | ✓ complete | 2026-05-06 | PDF НЗ. NZDocument, generateNZ, NZModal, lazy chunk PERF_3. DOC_3 DOC_4 DOC_5 DOC_6 закрыты |
 | Phase 4 | blocked | — | Авторизация + история конфигураций. После фокус-группы |
 
 ---
@@ -64,7 +66,7 @@ Last session: 2026-05-06T11:14:52.733Z
 
 | # | Требование | Статус |
 |---|-----------|--------|
-| PERF_3 | Бандл ≤ 250кБ, PDF lazy load | ⚠️ Phase 3 |
+| PERF_3 | Бандл ≤ 250кБ, PDF lazy load | ✅ index 124KB gzip, generateNZ chunk 482KB lazy |
 | MAIN_1 | Обновление каталога через Google Sheets | ✅ |
 | MAIN_2 | Компоненты в отдельных папках | ✅ |
 | USAB_1 | Освоение за 15 минут | ⚠️ Фокус-группа |
@@ -79,7 +81,7 @@ Last session: 2026-05-06T11:14:52.733Z
 | MAIN_3 | Бюджетный лимит Google Cloud | ❌ Вручную |
 | SEC_4 | Авто-завершение сессии | ❌ Phase 4 |
 
-### Should Have — 1/7
+### Should Have — 5/7
 
 | # | Требование | Статус |
 |---|-----------|--------|
@@ -218,6 +220,8 @@ Last session: 2026-05-06T11:14:52.733Z
 | 2026-05-06 | fonts.js — side-effect модуль без экспортов | Font.register один раз из generateNZ.js; вызов внутри компонента = многократная перерегистрация |
 | 2026-05-06 | getUTCFullYear/Month/Date в getNZFilename | Детерминированное форматирование даты в юнит-тестах независимо от часового пояса |
 | 2026-05-06 | generateNZ только через dynamic import | Initial bundle не включает @react-pdf/renderer ~500kB — PERF_3 соблюдён |
+| 2026-05-06 | disabled={!model || isNZOpen} на кнопках НЗ | Предотвращает повторное открытие модала при быстрых кликах — correctness + UX |
+| 2026-05-06 | NZModal mode: onSubmit | Валидация не дёргает форму на каждый keystroke — правильно для редкой формы |
 
 ---
 
