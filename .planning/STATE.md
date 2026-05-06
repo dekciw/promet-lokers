@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: unknown
+last_updated: "2026-05-06T11:14:52.736Z"
+progress:
+  total_phases: 4
+  completed_phases: 1
+  total_plans: 6
+  completed_plans: 5
+---
+
 # Project State
 
 _GSD workflow state для Конфигуратор «Промет»_
@@ -10,9 +23,11 @@ _GSD workflow state для Конфигуратор «Промет»_
 
 Plan 03-01 завершён (2026-05-06): @react-pdf/renderer установлен, logo.png создан, buildNZParams() реализован (23 теста).
 
-Next action: выполнить plan 03-02 — реализовать generateNZ.js + NZDocument.jsx + NZModal
+Plan 03-02 завершён (2026-05-06): fonts.js (Roboto Cyrillic TTF jsDelivr), NZDocument.jsx (2 страницы), generateNZ.js (async download + getNZFilename 7 тестов DOC_5), PERF_3 соблюдён.
 
-Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
+Next action: выполнить plan 03-03 — NZModal + кнопка в Configurator
+
+Last session: 2026-05-06T11:14:52.733Z
 
 ---
 
@@ -30,6 +45,7 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 ## Покрытие требований
 
 ### Must Have — 14/14 ✅
+
 Все CONF_1–CONF_14 реализованы в Phase 1.
 
 ### Нефункциональные — Must Have (5/7)
@@ -64,17 +80,19 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 | SEC_4 | Авто-завершение сессии | ❌ Phase 4 |
 
 ### Should Have — 1/7
+
 | # | Требование | Статус |
 |---|-----------|--------|
 | DOC_1 | PDF «Коммерческое предложение» | ❌ Phase 3 |
 | DOC_2 | Состав КП: логотип, таблица, цена, контакты, дата, срок | ❌ Phase 3 |
-| DOC_3 | PDF «Бланк нестандартного заказа» | ❌ Phase 3 |
+| DOC_3 | PDF «Бланк нестандартного заказа» | ✅ NZDocument.jsx 03-02 |
 | DOC_4 | Состав НЗ: артикул, серия, модель, параметры с выделением отклонений | ✅ buildNZParams() 03-01 |
-| DOC_5 | Имя файла = `{артикул}_{дата}.pdf` | ❌ Phase 3 |
+| DOC_5 | Имя файла = `{артикул}_{дата}.pdf` | ✅ getNZFilename() 03-02 |
 | DOC_6 | Кнопки PDF активны только при выбранной модели | ✅ |
 | AUTH_1 | Авторизация по email и паролю | ❌ Phase 4 |
 
 ### Nice to Have — 2/6
+
 | # | Требование | Статус |
 |---|-----------|--------|
 | HIST_1 | Сохранение конфигурации в личном кабинете | ❌ Phase 4 |
@@ -109,14 +127,17 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 ### Phase 2 UX-улучшения v2 (2026-04-09 — 2026-04-13)
 
 **Синхронизация данных:**
+
 - `loadCatalog.js` переключён с opensheet.elk.sh прокси на Firebase Firestore напрямую
 - Скрипт синхронизации Google Sheets → Firebase для обновления каталога
 
 **Количество шкафов:**
+
 - Поле «Количество шкафов» перенесено на шаг 2 (рядом с моделью)
 - Фикс степпера и кнопки сброса параметров
 
 **UX-улучшения:**
+
 - Копирование артикула по клику (toast-уведомление или визуальный фидбек)
 - Мобильная sticky-плашка с итоговой ценой и кнопками КП/НЗ
 - Оранжевая обводка полей при отклонении от дефолтных значений модели
@@ -127,6 +148,7 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 ### Phase 2 UX-улучшения (2026-04-07 — 2026-04-09)
 
 **Анимированный степпер навигации (Parameters.jsx):**
+
 - Библиотека `motion` v12 (`motion/react`) — AnimatePresence, motion.div, motion.path
 - 3 шага: Серия → Модель → Параметры; лейблы над кружками (absolute positioning)
 - Авто-переход между шагами через 350ms после выбора (seriesId → step 2, modelId → step 3)
@@ -137,10 +159,12 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 - `isSliding` state: `overflow: hidden` только во время анимации (450ms), затем `overflow: visible` для дропдаунов
 
 **Взаимная блокировка дропдаунов:**
+
 - `openSelectId` state в Parameters — только один дропдаун открыт одновременно
 - CustomSelect стал контролируемым: `isOpen` / `onOpenChange` props
 
 **Анимации (Emil Kowalski принципы):**
+
 - Все transitions только `transform` + `opacity` (GPU-свойства)
 - Enter: `ease-out`, hover только через `@media (hover: hover) and (pointer: fine)`
 - Все кнопки: `scale(0.97)` или `translate(1px, 1px)` на `:active`
@@ -150,14 +174,17 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 - Тултипы: `prefers-reduced-motion`, GPU-transform
 
 **Кнопка «Сбросить»:**
+
 - Uiverse-стиль: красный кружок (38px), при hover раскрывается в таблетку «Сбросить» (120px)
 - Иконка: крестик X с `strokeLinecap='round'` (жирный, скруглённые концы)
 - Всегда видима (красный фон), не скрыта за hover-триггером
 
 **Тонкий скроллбар в дропдаунах:**
+
 - `scrollbar-width: thin` + webkit custom scrollbar (8px, border-radius 4px)
 
 **Фикс оранжевой обводки активных кнопок:**
+
 - `.toggleBtnActive:hover`, `.lockItemActive:hover`, `.ventBtnActive:hover` — `border-color: var(--c-orange)` в hover media query
 
 ---
@@ -188,6 +215,9 @@ Last session: 2026-05-06 — Completed 03-pdf-export-01-PLAN.md
 | 2026-05-06 | sips для SVG→PNG конвертации logo | macOS native sips автоматизировал ручной шаг Task 2; PNG 5100x2300 RGBA |
 | 2026-05-06 | buildNZParams: isNonStandard замка vs 'key_basic' | Стандартный замок всегда key_basic по контракту; сравнение с defaults.lockId не нужно |
 | 2026-05-06 | Number() сравнение габаритов в buildNZParams | config хранит строки ('600'), defaults — числа (600); Number() устраняет ложные isNonStandard |
+| 2026-05-06 | fonts.js — side-effect модуль без экспортов | Font.register один раз из generateNZ.js; вызов внутри компонента = многократная перерегистрация |
+| 2026-05-06 | getUTCFullYear/Month/Date в getNZFilename | Детерминированное форматирование даты в юнит-тестах независимо от часового пояса |
+| 2026-05-06 | generateNZ только через dynamic import | Initial bundle не включает @react-pdf/renderer ~500kB — PERF_3 соблюдён |
 
 ---
 
@@ -239,6 +269,7 @@ _Все известные проблемы закрыты._
 - **Новые UX-фичи:** копирование артикула, sticky-плашка на мобильных, оранжевая обводка при изменениях, бейдж на шаге 3, количество шкафов на шаге 2
 
 **Инструменты разработки:**
+
 - `ui-ux-pro-max` — дизайн-решения (`.claude/skills/ui-ux-pro-max/`)
 - `context7-mcp` — документация библиотек (`~/.claude/skills/context7-mcp/`)
 - `debugging-strategies` — системная отладка (`~/.claude/skills/debugging-strategies/`)
