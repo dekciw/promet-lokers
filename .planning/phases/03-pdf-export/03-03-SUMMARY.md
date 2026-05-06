@@ -92,6 +92,8 @@ Main chunk не содержит `@react-pdf/renderer` — PERF_3 выполне
 2. **Task 2: Configurator + lazy import** — `6a27212` (feat)
 3. **Task 3: checkpoint human-verify** — auto-approved (auto_advance=true)
 
+**Plan metadata:** `aba8b6c` (docs: complete plan)
+
 ## Files Created/Modified
 
 - `src/shared/components/NZModal/NZModal.jsx` — Модальное окно с react-hook-form, валидация двух обязательных полей, accessibility, loading state
@@ -144,6 +146,19 @@ None — все поля формы реально валидируются и �
 - Phase 3 полностью завершена: DOC_3, DOC_4, DOC_5, DOC_6, PERF_3
 - Phase 4 (авторизация + история) может начинаться в любой момент
 - Открытые вопросы из STATE.md (толщина 0.5мм, контакты менеджера) остаются для будущих фаз
+
+## Self-Check: PASSED
+
+- [x] `src/shared/components/NZModal/NZModal.jsx` — FOUND (133 строки)
+- [x] `src/shared/components/NZModal/NZModal.module.css` — FOUND (150 строк)
+- [x] `.planning/phases/03-pdf-export/03-03-SUMMARY.md` — FOUND
+- [x] Commit 501c65e — FOUND
+- [x] Commit 6a27212 — FOUND
+- [x] Commit aba8b6c — FOUND
+- [x] Tests 52/52 passed
+- [x] isNZOpen in Configurator — FOUND
+- [x] Lazy import generateNZ — FOUND
+- [x] PERF_3: main chunk без @react-pdf, generateNZ chunk 482KB gzip
 
 ---
 *Phase: 03-pdf-export*
