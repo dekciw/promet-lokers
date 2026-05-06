@@ -3,6 +3,7 @@ import { calcDiff } from '../../../shared/utils/calcDiff';
 import { getColorHex } from '../../../shared/utils/colors';
 import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
+import NZModal from '../../../shared/components/NZModal/NZModal.jsx';
 import styles from './Configurator.module.css';
 
 function buildCurrentForDiff(config, lock) {
@@ -117,6 +118,24 @@ export default function Configurator() {
 	];
 
 	const [copied, setCopied] = useState(false);
+
+	const [isNZOpen, setIsNZOpen] = useState(false);
+
+	function openNZModal() {
+		setIsNZOpen(true);
+	}
+
+	function closeNZModal() {
+		setIsNZOpen(false);
+	}
+
+	async function handleNZSubmit({ managerName, clientName }) {
+		// LAZY IMPORT — единственное место в app-коде, где грузится @react-pdf/renderer.
+		// Vite автоматически выделит в отдельный chunk (PERF_3).
+		const { generateNZ } = await import('../../../pdf/generateNZ.js');
+		await generateNZ({ config, catalog, managerName, clientName });
+		setIsNZOpen(false);
+	}
 
 	function handleCopyArticle() {
 		if (!model?.article) return;
@@ -291,7 +310,12 @@ export default function Configurator() {
 								</button>
 							</div>
 							<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : undefined}>
-								<button className={`${styles.btn} ${styles.btnSecondary}`} disabled={!model}>
+								<button
+									className={`${styles.btn} ${styles.btnSecondary}`}
+									disabled={!model || isNZOpen}
+									onClick={openNZModal}
+									type='button'
+								>
 									Бланк НЗ
 								</button>
 							</div>
@@ -306,7 +330,12 @@ export default function Configurator() {
 					<span className={styles.stickyPriceValue}>{priceDisplay}</span>
 				</div>
 				<div className={styles.stickyActions}>
-					<button className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn}`} disabled={!model}>
+					<button
+						className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn}`}
+						disabled={!model || isNZOpen}
+						onClick={openNZModal}
+						type='button'
+					>
 						Бланк НЗ
 					</button>
 					<button className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`} disabled={!model}>
@@ -314,6 +343,7 @@ export default function Configurator() {
 					</button>
 				</div>
 			</div>
+			<NZModal isOpen={isNZOpen} onClose={closeNZModal} onSubmit={handleNZSubmit} />
 		</main>
 	);
 }
