@@ -129,10 +129,10 @@ export default function Configurator() {
 		setIsNZOpen(false);
 	}
 
-	async function handleNZSubmit({ managerName, clientName }) {
+	async function handleNZSubmit({ managerName, clientName, nzNumber, calcNumber }) {
 		try {
 			const { generateNZ } = await import('../../../pdf/generateNZ.js');
-			await generateNZ({ config, catalog, managerName, clientName, price });
+			await generateNZ({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
 			setIsNZOpen(false);
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);
@@ -268,20 +268,8 @@ export default function Configurator() {
 									))}
 									{price && !price.manual && (
 										<li className={styles.finalItem}>
-											<span className={styles.finalLabel}>Вес:</span>
-											<span className={styles.finalValue}>{price.weight} кг</span>
-										</li>
-									)}
-									{price && !price.manual && (
-										<li className={styles.finalItem}>
 											<span className={styles.finalLabel}>Цена за 1 шт.:</span>
 											<span className={styles.finalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
-										</li>
-									)}
-									{price && !price.manual && (
-										<li className={styles.finalItem}>
-											<span className={styles.finalLabel}>Завод за 1 шт.:</span>
-											<span className={styles.finalValue}>{price.factoryPrice.toLocaleString('ru-RU')} ₽</span>
 										</li>
 									)}
 									<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
@@ -290,12 +278,6 @@ export default function Configurator() {
 											{priceDisplay}
 										</span>
 									</li>
-									{price && !price.manual && (
-										<li className={styles.finalItem}>
-											<span className={styles.finalLabel}>Завод итого:</span>
-											<span className={styles.finalValue}>{totalFactoryPrice.toLocaleString('ru-RU')} ₽</span>
-										</li>
-									)}
 									{price && !price.manual && price.leadTime && (
 										<li className={styles.finalItem}>
 											<span className={styles.finalLabel}>Срок:</span>

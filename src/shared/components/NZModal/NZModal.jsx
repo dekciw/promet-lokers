@@ -23,7 +23,7 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
     formState: { errors, isSubmitting },
   } = useForm({
     mode: 'onSubmit',
-    defaultValues: { managerName: '', clientName: '' },
+    defaultValues: { managerName: '', clientName: '', nzNumber: '', calcNumber: '' },
   });
 
   // Сброс формы при закрытии
@@ -44,10 +44,11 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
   if (!isOpen) return null;
 
   async function handleFormSubmit(data) {
-    // Trim перед отправкой
     const payload = {
       managerName: data.managerName.trim(),
       clientName: data.clientName.trim(),
+      nzNumber: data.nzNumber.trim(),
+      calcNumber: data.calcNumber.trim(),
     };
     await onSubmit(payload);
   }
@@ -125,6 +126,32 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
             <span id='nz-client-err' className={styles.errorMsg}>
               {errors.clientName?.message ?? ''}
             </span>
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor='nz-number'>
+              Лист нестандартного заказа №
+            </label>
+            <input
+              id='nz-number'
+              type='text'
+              autoComplete='off'
+              className={styles.input}
+              {...register('nzNumber')}
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor='nz-calc'>
+              Расчёт №
+            </label>
+            <input
+              id='nz-calc'
+              type='text'
+              autoComplete='off'
+              className={styles.input}
+              {...register('calcNumber')}
+            />
           </div>
 
           <div className={styles.actions}>

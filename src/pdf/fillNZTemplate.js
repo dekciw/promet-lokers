@@ -9,7 +9,8 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 import { buildNZParams } from '../shared/utils/buildNZParams.js';
 
-const CDN = 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest';
+const CDN       = 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest';
+const CDN_ARIAL = 'https://cdn.jsdelivr.net/fontsource/fonts/arimo@latest';
 const BLACK = rgb(0, 0, 0);
 
 // ─── X-координаты (от левого края страницы) ───────────────────────────────
@@ -27,9 +28,13 @@ const X_NT_PRICE_PPS  = 305;  // ППС по согласованию
 const Y_NT_PRICE_PPS  = 423;  // ППС по согласованию — верхняя строка
 const Y_NT_PRICE_PPS2 = 413;  // ППС по согласованию — нижняя строка
 
+// ─── Номер листа НЗ и номер расчёта (заголовок бланка) ───────────────────
+const X_NZ_NUMBER   = 437;  // № листа НЗ
+const Y_NZ_NUMBER   = 599.5;  // № листа НЗ
+const X_CALC_NUMBER = 332;  // Расчёт №
+const Y_CALC_NUMBER = 587;  // Расчёт №
+
 // ─── Y-координаты (от нижнего края страницы) ──────────────────────────────
-// Итерация 5: Row1/Row2 — X исправлен до 300, Y без изменений
-// Row3: смещаем ниже строки заголовков колонок (были Y=449 — в заголовке)
 const Y_ROW1  = 543;  // Менеджер по продажам
 const Y_ROW2  = 526;  // Название Клиента
 const Y_NT_ART  = 418;  // Артикул и Кол-во по вертикали
@@ -101,7 +106,7 @@ function drawMixed(page, text, x, y, size, cyrFont, latFont) {
 
 // ─── Основная функция ─────────────────────────────────────────────────────
 
-export async function fillNZTemplate({ config, catalog, managerName, clientName, price }) {
+export async function fillNZTemplate({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
   // 1. Загружаем шаблон
   const templateBytes = await fetch('/nz-template.pdf').then(r => {
     if (!r.ok) throw new Error('Не удалось загрузить /nz-template.pdf');
@@ -111,21 +116,33 @@ export async function fillNZTemplate({ config, catalog, managerName, clientName,
   const doc = await PDFDocument.load(templateBytes);
   doc.registerFontkit(fontkit);
 
-  // 2. Шрифты — кириллица и латиница параллельно
-  const [cyrBytes, cyrBoldBytes, latBytes] = await Promise.all([
+  // 2. Шрифты — Roboto (основной) + Arimo (Arial-совместимый, для заголовков НЗ)
+  const [cyrBytes, cyrBoldBytes, latBytes, latBoldBytes, arimoBytes, arimoBoldBytes] = await Promise.all([
     fetchFont(`${CDN}/cyrillic-400-normal.ttf`),
     fetchFont(`${CDN}/cyrillic-700-normal.ttf`),
     fetchFont(`${CDN}/latin-400-normal.ttf`),
+    fetchFont(`${CDN}/latin-700-normal.ttf`),
+    fetchFont(`${CDN_ARIAL}/latin-400-normal.ttf`),
+    fetchFont(`${CDN_ARIAL}/latin-700-normal.ttf`),
   ]);
 
-  const [cyrFont, cyrBold, latFont] = await Promise.all([
+  const [cyrFont, cyrBold, latFont, latBold, arimoFont, arimoBold] = await Promise.all([
     doc.embedFont(cyrBytes),
     doc.embedFont(cyrBoldBytes),
     doc.embedFont(latBytes),
+    doc.embedFont(latBoldBytes),
+    doc.embedFont(arimoBytes),
+    doc.embedFont(arimoBoldBytes),
   ]);
 
   const draw = (text, x, y, size = 9, bold = false) =>
-    drawMixed(doc.getPages()[0], text, x, y, size, bold ? cyrBold : cyrFont, latFont);
+    drawMixed(doc.getPages()[0], text, x, y, size, bold ? cyrBold : cyrFont, bold ? latBold : latFont);
+
+  const drawArial = (text, x, y, size, bold = false) => {
+    const font = bold ? arimoBold : arimoFont;
+    if (!text && text !== 0) return;
+    doc.getPages()[0].drawText(String(text), { x, y, size, font, color: BLACK });
+  };
 
   // 3. Данные
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
@@ -133,6 +150,10 @@ export async function fillNZTemplate({ config, catalog, managerName, clientName,
   const qty = config.quantity ?? 1;
 
   // 4. Заполняем поля страницы 1
+  // Заголовок — Лист НЗ и Расчёт №
+  if (nzNumber) drawArial(nzNumber, X_NZ_NUMBER, Y_NZ_NUMBER, 15.5, true);
+  if (calcNumber) drawArial(calcNumber, X_CALC_NUMBER, Y_CALC_NUMBER, 10);
+
   // Строка 1 — Менеджер
   draw(managerName, X_VALUE, Y_ROW1);
 
@@ -155,7 +176,7 @@ export async function fillNZTemplate({ config, catalog, managerName, clientName,
   }
   draw(qty, X_NT_QTY, Y_NT_ART, 8);
   if (price && !price.manual) {
-    draw((price.clientPrice * qty).toLocaleString('ru-RU'), X_NT_PRICE, Y_NT_PRICE, 8);
+    draw(price.clientPrice.toLocaleString('ru-RU'), X_NT_PRICE, Y_NT_PRICE, 8);
     draw('руб.', X_NT_PRICE, Y_NT_PRICE_RUB, 8);
   } else {
     draw('ППС по', X_NT_PRICE_PPS, Y_NT_PRICE_PPS, 8);
@@ -171,7 +192,7 @@ export async function fillNZTemplate({ config, catalog, managerName, clientName,
   }
 
   // 5. DEBUG: сетка координат поверх данных
-  const DEBUG = true; // ← переключи в true для калибровки
+  const DEBUG = false; // ← переключи в true для калибровки
   if (DEBUG) {
     const page = doc.getPages()[0];
     const { height, width } = page.getSize();
