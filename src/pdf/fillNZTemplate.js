@@ -19,7 +19,13 @@ const X_VALUE   = 290;  // начало правой колонки данных
 // Вложенная таблица строки 3 (артикул/наименование/кол-во) — точно из DOCX XML
 const X_NT_ART  = 92;   // Артикул
 const X_NT_NAME = 160;  // Наименование
-const X_NT_QTY  = 279;  // Кол-во
+const X_NT_QTY   = 279;  // Кол-во
+const X_NT_PRICE      = 313;  // Итоговая цена клиента (число + руб.)
+const Y_NT_PRICE      = 422;  // Цена — число
+const Y_NT_PRICE_RUB  = 412;  // Цена — "руб."
+const X_NT_PRICE_PPS  = 305;  // ППС по согласованию
+const Y_NT_PRICE_PPS  = 423;  // ППС по согласованию — верхняя строка
+const Y_NT_PRICE_PPS2 = 413;  // ППС по согласованию — нижняя строка
 
 // ─── Y-координаты (от нижнего края страницы) ──────────────────────────────
 // Итерация 5: Row1/Row2 — X исправлен до 300, Y без изменений
@@ -95,7 +101,7 @@ function drawMixed(page, text, x, y, size, cyrFont, latFont) {
 
 // ─── Основная функция ─────────────────────────────────────────────────────
 
-export async function fillNZTemplate({ config, catalog, managerName, clientName }) {
+export async function fillNZTemplate({ config, catalog, managerName, clientName, price }) {
   // 1. Загружаем шаблон
   const templateBytes = await fetch('/nz-template.pdf').then(r => {
     if (!r.ok) throw new Error('Не удалось загрузить /nz-template.pdf');
@@ -148,6 +154,13 @@ export async function fillNZTemplate({ config, catalog, managerName, clientName 
     lines.forEach(line => { draw(line, X_NT_NAME, nameY, 8); nameY -= 10; });
   }
   draw(qty, X_NT_QTY, Y_NT_ART, 8);
+  if (price && !price.manual) {
+    draw((price.clientPrice * qty).toLocaleString('ru-RU'), X_NT_PRICE, Y_NT_PRICE, 8);
+    draw('руб.', X_NT_PRICE, Y_NT_PRICE_RUB, 8);
+  } else {
+    draw('ППС по', X_NT_PRICE_PPS, Y_NT_PRICE_PPS, 8);
+    draw('согласованию', X_NT_PRICE_PPS, Y_NT_PRICE_PPS2, 8);
+  }
 
   // Строка 6 — только нестандартные параметры
   const nzParams = params.filter(p => p.isNonStandard);

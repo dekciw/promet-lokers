@@ -132,7 +132,7 @@ export default function Configurator() {
 	async function handleNZSubmit({ managerName, clientName }) {
 		try {
 			const { generateNZ } = await import('../../../pdf/generateNZ.js');
-			await generateNZ({ config, catalog, managerName, clientName });
+			await generateNZ({ config, catalog, managerName, clientName, price });
 			setIsNZOpen(false);
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);

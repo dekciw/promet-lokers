@@ -21,11 +21,11 @@ export function getNZFilename(model, date = new Date()) {
   return `${article}_${yyyy}-${mm}-${dd}.pdf`;
 }
 
-export async function generateNZ({ config, catalog, managerName, clientName }) {
+export async function generateNZ({ config, catalog, managerName, clientName, price }) {
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   const filename = getNZFilename(model, new Date());
 
-  const doc = await fillNZTemplate({ config, catalog, managerName, clientName });
+  const doc = await fillNZTemplate({ config, catalog, managerName, clientName, price });
   const bytes = await doc.save();
 
   const blob = new Blob([bytes], { type: 'application/pdf' });
