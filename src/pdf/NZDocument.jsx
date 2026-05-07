@@ -1,254 +1,371 @@
 import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer';
 import { buildNZParams } from '../shared/utils/buildNZParams.js';
 
-// ВАЖНО про шрифты:
-// fontFamily: 'Roboto' — работает только если './fonts.js' уже был
-// импортирован (side-effect Font.register). generateNZ.js делает это.
+const BLUE = '#003087';
+const LGRAY = '#f0f0f0';
+const BRD = '0.5pt solid #000';
 
-const styles = StyleSheet.create({
+// Колонки строки 3: суммарно 100%
+// Менеджер: 15+20+8=43%  Экономист: 14+7+14=35%  Технолог: 11+11=22%
+const CW = ['15%', '20%', '8%', '14%', '7%', '14%', '11%', '11%'];
+
+const s = StyleSheet.create({
   page: {
     fontFamily: 'Roboto',
-    fontSize: 9,
-    padding: '15mm 12mm',
-    lineHeight: 1.3,
+    fontSize: 8,
+    padding: '7mm 10mm 10mm',
     color: '#000',
   },
-  // ── Шапка ────────────────────────────────────
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 6,
+  topRef: { textAlign: 'right', fontSize: 7, color: '#666', marginBottom: 2 },
+  // Header
+  headerRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 },
+  titleBlock: { flex: 1, paddingRight: 8 },
+  mainTitle: { fontSize: 11, fontWeight: 700, color: BLUE, textTransform: 'uppercase', lineHeight: 1.2 },
+  forService: { fontSize: 7.5, color: '#555', marginTop: 2 },
+  logo: { width: 72, height: 26, objectFit: 'contain' },
+  // Блоки подписей
+  sigRow: { flexDirection: 'row', justifyContent: 'flex-end', marginBottom: 2 },
+  sigBlock: { width: 148, marginLeft: 14, fontSize: 7.5 },
+  sigBold: { fontWeight: 700 },
+  sigLine: { borderBottom: BRD, height: 13, marginTop: 2, marginBottom: 1 },
+  sigDate: { fontSize: 7 },
+  // Чекбокс строка
+  chkRow: { flexDirection: 'row', alignItems: 'center', marginTop: 2, marginBottom: 2, fontSize: 8 },
+  chkBox: { width: 8, height: 8, border: BRD, marginLeft: 5, marginRight: 2 },
+  // Строка НЗ №
+  nzLine: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    borderTop: BRD, borderBottom: BRD,
+    padding: '2pt 0', marginBottom: 2,
+    fontSize: 8.5, fontWeight: 700,
   },
-  logo: { width: 80, height: 30, objectFit: 'contain' },
-  headerMeta: { fontSize: 7, textAlign: 'right' },
-  // ── Заголовок ───────────────────────────────
-  title: {
-    fontSize: 11,
-    fontWeight: 700,
-    textAlign: 'center',
-    marginVertical: 8,
-    textTransform: 'uppercase',
+  // Заголовок секции
+  secHdr: { backgroundColor: BLUE, color: '#fff', fontWeight: 700, fontSize: 7.5, padding: '2pt 4pt' },
+  // Основная таблица
+  tbl: { border: BRD },
+  tr: { flexDirection: 'row', borderBottom: BRD, minHeight: 14 },
+  trLast: { flexDirection: 'row', minHeight: 14 },
+  tdLbl: { width: '30%', borderRight: BRD, padding: '2pt 3pt', fontSize: 7.5 },
+  tdVal: { flex: 1, padding: '2pt 4pt', fontSize: 8 },
+  // Вложенная таблица строки 3
+  nt: { flex: 1 },
+  ntShRow: { flexDirection: 'row', borderBottom: BRD, backgroundColor: LGRAY },
+  ntColRow: { flexDirection: 'row', borderBottom: BRD, backgroundColor: '#f8f8f8' },
+  ntDataRow: { flexDirection: 'row' },
+  ntSh: { textAlign: 'center', fontWeight: 700, fontSize: 6.5, padding: '1pt 1pt', borderRight: BRD },
+  ntShLast: { textAlign: 'center', fontWeight: 700, fontSize: 6.5, padding: '1pt 1pt' },
+  ntCol: { textAlign: 'center', fontSize: 6, padding: '1pt 1pt', borderRight: BRD, color: '#444' },
+  ntColLast: { textAlign: 'center', fontSize: 6, padding: '1pt 1pt', color: '#444' },
+  ntData: { fontSize: 7.5, padding: '2pt 2pt', borderRight: BRD },
+  ntDataLast: { fontSize: 7.5, padding: '2pt 2pt' },
+  // Строка 6 параметры
+  paramsWrap: { flex: 1, padding: '2pt 3pt' },
+  paramRow: { flexDirection: 'row', marginBottom: 1 },
+  paramLbl: { fontSize: 7.5, width: 100 },
+  paramVal: { fontSize: 7.5, flex: 1 },
+  paramBold: { fontWeight: 700 },
+  // Нижняя часть страницы 1
+  sigDateLine: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 4, fontSize: 8 },
+  secIINote: { marginTop: 2, fontSize: 7.5, fontWeight: 700, color: BLUE, borderTop: '0.5pt solid ' + BLUE, paddingTop: 2 },
+  // Подвал
+  footer: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    borderTop: '0.3pt solid #aaa', paddingTop: 2,
+    marginTop: 6, fontSize: 7, color: '#666',
   },
-  // ── Approval block (правый верх) ────────────
-  approvalRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 4,
-    fontSize: 8,
-  },
-  approvalCol: { marginLeft: 12 },
-  // ── Section heading ─────────────────────────
-  sectionTitle: {
-    fontSize: 10,
-    fontWeight: 700,
-    backgroundColor: '#e8e8e8',
-    padding: '3pt 4pt',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  // ── Field rows (label + value подчёркнутое) ─
-  fieldRow: { flexDirection: 'row', marginBottom: 4, alignItems: 'flex-end' },
-  fieldLabel: { fontSize: 9, marginRight: 4 },
-  fieldValue: {
-    fontSize: 9,
-    fontWeight: 500,
-    flex: 1,
-    borderBottom: '0.5pt solid #000',
-    paddingBottom: 1,
-    minHeight: 12,
-  },
-  // ── Table (Row 3) ───────────────────────────
-  // border-collapse через negative margin
-  table: { flexDirection: 'column', marginTop: 4 },
-  row: { flexDirection: 'row', marginTop: -0.5 },
-  cell: {
-    border: '0.5pt solid #000',
-    padding: '3pt 4pt',
-    fontSize: 8,
-    marginLeft: -0.5,
-  },
-  cellHeader: { fontWeight: 700, backgroundColor: '#f0f0f0' },
-  // Колонки таблицы строки 3 (8 колонок)
-  colArticle:  { width: '14%' },
-  colName:     { width: '20%' },
-  colQty:      { width: '8%',  textAlign: 'center' },
-  colPrice:    { width: '12%' },
-  colExec:     { width: '8%' },
-  colTransfer: { width: '14%' },
-  colWeight:   { width: '12%' },
-  colVolume:   { width: '12%' },
-  // ── Row 6 — список параметров ──────────────
-  paramsBlock: { marginTop: 6 },
-  paramRow: { flexDirection: 'row', marginBottom: 2 },
-  paramLabel: { fontSize: 9, width: 110 },
-  paramValue: { fontSize: 9, flex: 1 },
-  paramValueNonStd: { fontWeight: 700 },
-  nonStdMark: { fontSize: 8, color: '#000', marginLeft: 4, fontWeight: 700 },
-  // ── Empty signature block ───────────────────
-  emptyLine: {
-    borderBottom: '0.5pt solid #000',
-    height: 14,
-    marginBottom: 6,
-  },
+  // Страница 2
+  p2SecTitle: { backgroundColor: BLUE, color: '#fff', fontWeight: 700, fontSize: 8, padding: '3pt 4pt', marginTop: 6, marginBottom: 2 },
+  p2SubTitle: { fontWeight: 700, fontSize: 7.5, backgroundColor: LGRAY, padding: '2pt 4pt', marginTop: 4, marginBottom: 2 },
+  p2RowTitle: { fontSize: 7.5, fontWeight: 700, marginTop: 4, marginBottom: 2 },
+  p2FieldText: { fontSize: 7.5, marginBottom: 4 },
+  // Строка подписи: ФИО / подпись / дата
+  p2SigWrap: { marginBottom: 6, marginTop: 2 },
+  p2SigLine: { flexDirection: 'row', fontSize: 7.5 },
+  p2SigCell: { flex: 1, borderBottom: BRD, paddingBottom: 1, marginRight: 6 },
+  p2SigCellLast: { flex: 1, borderBottom: BRD, paddingBottom: 1 },
+  p2SigLabelRow: { flexDirection: 'row', marginTop: 1 },
+  p2SigLabel: { flex: 1, textAlign: 'center', fontSize: 6.5, color: '#555', marginRight: 6 },
+  p2SigLabelLast: { flex: 1, textAlign: 'center', fontSize: 6.5, color: '#555' },
 });
 
 function fmtDate(d = new Date()) {
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  return `${day}.${month}.${d.getFullYear()}`;
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+}
+
+function SigBlock() {
+  return (
+    <View style={s.p2SigWrap}>
+      <View style={s.p2SigLine}>
+        <View style={s.p2SigCell} />
+        <View style={s.p2SigCell} />
+        <View style={s.p2SigCellLast} />
+      </View>
+      <View style={s.p2SigLabelRow}>
+        <Text style={s.p2SigLabel}>ФИО</Text>
+        <Text style={s.p2SigLabel}>подпись</Text>
+        <Text style={s.p2SigLabelLast}>дата</Text>
+      </View>
+    </View>
+  );
 }
 
 export default function NZDocument({ config, catalog, managerName, clientName }) {
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   const params = buildNZParams(config, catalog);
-  const qty = config.quantity ?? 10;
+  const qty = config.quantity ?? 1;
   const today = fmtDate();
 
   return (
     <Document title='Сопроводительный лист НЗ'>
+
       {/* ════════ СТРАНИЦА 1 ════════ */}
-      <Page size='A4' style={styles.page}>
-        <View style={styles.headerRow}>
-          <Image src='/img/logo.png' style={styles.logo} />
-          <View style={styles.headerMeta}>
-            <Text>UZTF 42009.1-2</Text>
-            <Text>Редакция 6</Text>
-            <Text>09.01.2025</Text>
+      <Page size='A4' style={s.page}>
+
+        {/* UZTF ref */}
+        <Text style={s.topRef}>UZTF 42009.1-2 / Редакция 6 / 09.01.2025</Text>
+
+        {/* Header: название слева, логотип справа */}
+        <View style={s.headerRow}>
+          <View style={s.titleBlock}>
+            <Text style={s.mainTitle}>Сопроводительный лист нестандартного заказа</Text>
+            <Text style={s.forService}>ДЛЯ СЛУЖЕБНОГО ПОЛЬЗОВАНИЯ</Text>
+          </View>
+          <Image src='/img/logo.png' style={s.logo} />
+        </View>
+
+        {/* Блоки подписей */}
+        <View style={s.sigRow}>
+          <View style={s.sigBlock}>
+            <Text style={s.sigBold}>«Согласовано»</Text>
+            <Text>Продукт-менеджер</Text>
+            <View style={s.sigLine} />
+            <Text style={s.sigDate}>«__»________20__г.</Text>
+          </View>
+          <View style={s.sigBlock}>
+            <Text style={s.sigBold}>«Утверждаю»</Text>
+            <Text>Директор завода</Text>
+            <View style={s.sigLine} />
+            <Text style={s.sigDate}>«__»________20__г.</Text>
           </View>
         </View>
 
-        <View style={styles.approvalRow}>
-          <Text style={styles.approvalCol}>Согласовано: ____________</Text>
-          <Text style={styles.approvalCol}>Утверждаю: ____________</Text>
-        </View>
-        <View style={styles.approvalRow}>
-          <Text style={styles.approvalCol}>Лист НЗ № ____</Text>
-          <Text style={styles.approvalCol}>Расчёт № ____</Text>
+        {/* Требуется приемка */}
+        <View style={s.chkRow}>
+          <Text>Требуется приемка заказа:</Text>
+          <View style={{ width: 8, height: 8, border: BRD, marginRight: 2 }} />
+          <Text>НЕТ</Text>
+          <View style={s.chkBox} />
+          <Text>ДА:</Text>
+          <View style={s.chkBox} />
+          <Text>Продукт-менеджером</Text>
+          <View style={s.chkBox} />
+          <Text>Заказчиком</Text>
         </View>
 
-        <Text style={styles.title}>
-          Сопроводительный лист нестандартного заказа
+        {/* Номер НЗ и расчёта */}
+        <View style={s.nzLine}>
+          <Text>Лист нестандартного заказа №_____</Text>
+          <Text>Расчёт №_____</Text>
+        </View>
+
+        {/* Секция I */}
+        <Text style={s.secHdr}>I. Заполняется Менеджером по продажам:</Text>
+
+        <View style={s.tbl}>
+
+          {/* Строка 1 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}><Text>1. Менеджер по продажам (Ф.И.О.)</Text></View>
+            <View style={s.tdVal}><Text>{managerName ?? ''}</Text></View>
+          </View>
+
+          {/* Строка 2 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}><Text>2. Название Клиента (страна)</Text></View>
+            <View style={s.tdVal}><Text>{clientName ?? ''}</Text></View>
+          </View>
+
+          {/* Строка 3 — вложенная таблица изделия */}
+          <View style={[s.tr, { minHeight: 40, alignItems: 'stretch' }]}>
+            <View style={s.tdLbl}>
+              <Text>3</Text>
+              <Text style={{ marginTop: 2, fontSize: 7 }}>3.1 Наименование и количество продукции</Text>
+              <Text style={{ marginTop: 2, fontSize: 7 }}>3.2. Вес и объём продукции</Text>
+            </View>
+            <View style={s.nt}>
+              {/* Подшапки: Менеджер / Экономист / Технолог */}
+              <View style={s.ntShRow}>
+                <Text style={[s.ntSh, { width: '43%' }]}>Менеджер</Text>
+                <Text style={[s.ntSh, { width: '35%' }]}>Экономист</Text>
+                <Text style={[s.ntShLast, { width: '22%' }]}>Технолог</Text>
+              </View>
+              {/* Заголовки колонок */}
+              <View style={s.ntColRow}>
+                <Text style={[s.ntCol, { width: CW[0] }]}>Артикул</Text>
+                <Text style={[s.ntCol, { width: CW[1] }]}>Наименование</Text>
+                <Text style={[s.ntCol, { width: CW[2] }]}>Кол-во</Text>
+                <Text style={[s.ntCol, { width: CW[3] }]}>Цена Таргет без НДС</Text>
+                <Text style={[s.ntCol, { width: CW[4] }]}>Исп.</Text>
+                <Text style={[s.ntCol, { width: CW[5] }]}>Цена передачи</Text>
+                <Text style={[s.ntCol, { width: CW[6] }]}>Вес изд. в упак., кг</Text>
+                <Text style={[s.ntColLast, { width: CW[7] }]}>Объём изд. в упак., м³</Text>
+              </View>
+              {/* Данные */}
+              <View style={s.ntDataRow}>
+                <Text style={[s.ntData, { width: CW[0] }]}>{model?.article ?? ''}</Text>
+                <Text style={[s.ntData, { width: CW[1] }]}>{model?.name ?? ''}</Text>
+                <Text style={[s.ntData, { width: CW[2], textAlign: 'center' }]}>{qty}</Text>
+                <Text style={[s.ntData, { width: CW[3] }]}> </Text>
+                <Text style={[s.ntData, { width: CW[4] }]}> </Text>
+                <Text style={[s.ntData, { width: CW[5] }]}> </Text>
+                <Text style={[s.ntData, { width: CW[6] }]}> </Text>
+                <Text style={[s.ntDataLast, { width: CW[7] }]}> </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Строка 4 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}><Text>4. Срок поставки Клиенту</Text></View>
+            <View style={s.tdVal} />
+          </View>
+
+          {/* Строка 5 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}>
+              <Text>5. Штрафные санкции</Text>
+              <Text style={{ fontSize: 6.5, color: '#555', marginTop: 1 }}>(если поставка по не типовому договору)</Text>
+            </View>
+            <View style={s.tdVal} />
+          </View>
+
+          {/* Строка 5.1 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}><Text>5.1. Национальный проект</Text></View>
+            <View style={[s.tdVal, { flexDirection: 'row', alignItems: 'center' }]}>
+              <View style={{ width: 8, height: 8, border: BRD, marginRight: 2 }} />
+              <Text style={{ marginRight: 8 }}>ДА</Text>
+              <View style={{ width: 8, height: 8, border: BRD, marginRight: 2 }} />
+              <Text>НЕТ</Text>
+            </View>
+          </View>
+
+          {/* Строка 6 — параметры */}
+          <View style={[s.tr, { alignItems: 'flex-start' }]}>
+            <View style={s.tdLbl}>
+              <Text>6. Отличия от серийной продукции</Text>
+              <Text style={{ fontSize: 6.5, color: '#555', marginTop: 1 }}>(габариты, функциональность, цвет, замки и т.п.)</Text>
+            </View>
+            <View style={s.paramsWrap}>
+              {params.map(p => (
+                <View key={p.label} style={s.paramRow}>
+                  <Text style={s.paramLbl}>{p.label}:</Text>
+                  <Text style={[s.paramVal, p.isNonStandard && s.paramBold]}>
+                    {p.value}{p.isNonStandard ? ' ★' : ''}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Строка 7 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}>
+              <Text>7. Собственность Потребителя</Text>
+              <Text style={{ fontSize: 6.5, color: '#555', marginTop: 1 }}>(комплектующие и материалы Заказчика)</Text>
+            </View>
+            <View style={s.tdVal} />
+          </View>
+
+          {/* Строка 8 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}><Text>8. Дополнительная маркировка</Text></View>
+            <View style={s.tdVal} />
+          </View>
+
+          {/* Строка 9 */}
+          <View style={s.tr}>
+            <View style={s.tdLbl}><Text>9. Новый артикул (при необходимости)</Text></View>
+            <View style={[s.tdVal, { flexDirection: 'row', alignItems: 'center' }]}>
+              <View style={{ width: 8, height: 8, border: BRD, marginRight: 2 }} />
+              <Text style={{ marginRight: 8 }}>ДА</Text>
+              <View style={{ width: 8, height: 8, border: BRD, marginRight: 2 }} />
+              <Text>НЕТ</Text>
+            </View>
+          </View>
+
+          {/* Строка 10 */}
+          <View style={s.trLast}>
+            <View style={s.tdLbl}><Text>10. Цена передачи (подпись Экономиста)</Text></View>
+            <View style={s.tdVal} />
+          </View>
+
+        </View>
+
+        {/* Подпись менеджера + дата */}
+        <View style={s.sigDateLine}>
+          <Text>Подпись менеджера: ____________</Text>
+          <Text>Дата: {today}</Text>
+        </View>
+
+        {/* Секция II — заголовок на 1-й странице */}
+        <Text style={s.secIINote}>
+          II. Заполняется Конструктором, Технологом, Отделом закупок и Производством:
         </Text>
 
-        <Text style={styles.sectionTitle}>I. Менеджер по продажам</Text>
-
-        {/* Строка 1 */}
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>1. Менеджер по продажам (Ф.И.О.):</Text>
-          <Text style={styles.fieldValue}>{managerName ?? ''}</Text>
-        </View>
-
-        {/* Строка 2 */}
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>2. Название Клиента (страна):</Text>
-          <Text style={styles.fieldValue}>{clientName ?? ''}</Text>
-        </View>
-
-        {/* Строка 3 — таблица */}
-        <View style={styles.table}>
-          <View style={styles.row}>
-            <Text style={[styles.cell, styles.cellHeader, styles.colArticle]}>Артикул</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colName]}>Наименование</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colQty]}>Кол-во</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colPrice]}>Цена Таргет</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colExec]}>Исп.</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colTransfer]}>Цена передачи</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colWeight]}>Вес</Text>
-            <Text style={[styles.cell, styles.cellHeader, styles.colVolume]}>Объём</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={[styles.cell, styles.colArticle]}>{model?.article ?? ''}</Text>
-            <Text style={[styles.cell, styles.colName]}>{model?.name ?? ''}</Text>
-            <Text style={[styles.cell, styles.colQty]}>{qty}</Text>
-            <Text style={[styles.cell, styles.colPrice]}> </Text>
-            <Text style={[styles.cell, styles.colExec]}> </Text>
-            <Text style={[styles.cell, styles.colTransfer]}> </Text>
-            <Text style={[styles.cell, styles.colWeight]}> </Text>
-            <Text style={[styles.cell, styles.colVolume]}> </Text>
-          </View>
-        </View>
-
-        {/* Строки 4, 5, 5.1 — пустые поля */}
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>4. Адрес доставки:</Text>
-          <Text style={styles.fieldValue}> </Text>
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>5. Сроки изготовления:</Text>
-          <Text style={styles.fieldValue}> </Text>
-        </View>
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>5.1. Условия отгрузки:</Text>
-          <Text style={styles.fieldValue}> </Text>
-        </View>
-
-        {/* Строка 6 — отличия от серийной продукции */}
-        <Text style={styles.sectionTitle}>6. Отличия от серийной продукции</Text>
-        <View style={styles.paramsBlock}>
-          {params.map(p => (
-            <View key={p.label} style={styles.paramRow}>
-              <Text style={styles.paramLabel}>{p.label}:</Text>
-              <Text style={[styles.paramValue, p.isNonStandard && styles.paramValueNonStd]}>
-                {p.value}
-                {p.isNonStandard ? <Text style={styles.nonStdMark}> (нестандарт)</Text> : null}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        {/* Строки 7, 8 — пустые */}
-        <View style={styles.fieldRow}>
-          <Text style={styles.fieldLabel}>7. Дополнительные требования:</Text>
-          <Text style={styles.fieldValue}> </Text>
-        </View>
-        <View style={[styles.fieldRow, { marginTop: 8 }]}>
-          <Text style={styles.fieldLabel}>8. Подпись менеджера: ____________</Text>
-          <Text style={styles.fieldLabel}>Дата: {today}</Text>
+        {/* Подвал */}
+        <View style={s.footer}>
+          <Text>UZTF 42009.1-2 / Редакция 6 / Дата: 09.01.2025</Text>
+          <Text>Страница 1 из 2</Text>
         </View>
       </Page>
 
       {/* ════════ СТРАНИЦА 2 ════════ */}
-      <Page size='A4' style={styles.page}>
-        <Text style={styles.sectionTitle}>II. Конструкторская группа</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+      <Page size='A4' style={s.page}>
 
-        <Text style={styles.sectionTitle}>II.1. Технологический отдел</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+        <Text style={s.p2SecTitle}>
+          II. Заполняется Конструктором, Технологом, Отделом закупок и Производством:
+        </Text>
 
-        <Text style={styles.sectionTitle}>II.2. Отдел закупок</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+        <Text style={s.p2RowTitle}>11. Анализ возможности исполнения заказа с решением</Text>
 
-        <Text style={styles.sectionTitle}>II.3. Начальник участка</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+        <Text style={s.p2SubTitle}>КОНСТРУКТОРСКАЯ ГРУППА:</Text>
+        <Text style={s.p2FieldText}>Наличие КД или сроки разработки: ________________________________</Text>
+        <SigBlock />
 
-        <Text style={styles.sectionTitle}>III. Начальник производства</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+        <Text style={s.p2SubTitle}>ТЕХНОЛОГИЧЕСКИЙ ОТДЕЛ:</Text>
+        <Text style={s.p2FieldText}>Наличие ТД и необходимости тех. подготовки (оснастка, упаковка, инструмент и т.д.): ________</Text>
+        <SigBlock />
 
-        <Text style={styles.sectionTitle}>IV. Служба качества</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+        <Text style={s.p2SubTitle}>ОТДЕЛ ЗАКУПОК:</Text>
+        <Text style={s.p2FieldText}>Наличие материалов/комплектующих или сроки поставки: _______________</Text>
+        <SigBlock />
 
-        <Text style={styles.sectionTitle}>V. Ведущий специалист ПО</Text>
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
-        <View style={styles.emptyLine} />
+        <Text style={s.p2SubTitle}>НАЧАЛЬНИК УЧАСТКА:</Text>
+        <Text style={s.p2FieldText}>Планируемая дата выполнения: _______________________________________</Text>
+        <SigBlock />
+
+        <Text style={[s.p2SecTitle, { marginTop: 8 }]}>III. Заполняется Начальником производства:</Text>
+        <Text style={s.p2FieldText}>12. Номер заказа MOZI: ___________________</Text>
+        <Text style={s.p2FieldText}>13. Планируемая дата сдачи заказа на склад: ___________________</Text>
+        <SigBlock />
+
+        <Text style={s.p2SecTitle}>IV. Заполняется Службой Качества:</Text>
+        <Text style={s.p2FieldText}>14. Информация по объёму контроля:</Text>
+        <View style={{ borderBottom: BRD, height: 14, marginBottom: 2 }} />
+        <SigBlock />
+
+        <Text style={s.p2SecTitle}>V. Заполняется Ведущим специалистом по сопровождению ПО:</Text>
+        <Text style={s.p2FieldText}>15. Цена передачи внесена в счёт: ___________________________________</Text>
+        <SigBlock />
+
+        {/* Подвал */}
+        <View style={s.footer}>
+          <Text>UZTF 42009.1-2 / Редакция 6 / Дата: 09.01.2025</Text>
+          <Text>Страница 2 из 2</Text>
+        </View>
       </Page>
+
     </Document>
   );
 }

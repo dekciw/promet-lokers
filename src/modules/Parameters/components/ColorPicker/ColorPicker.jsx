@@ -4,7 +4,14 @@ import { COLORS } from '../../../../shared/utils/colors';
 import { cx } from '../../../../shared/utils/cx';
 import styles from './ColorPicker.module.css';
 
-export default function ColorPicker({ placeholder, selected, onSelect, standardLabel = 'Стандарт (без изменений)', colorRule, quantity }) {
+export default function ColorPicker({
+	placeholder,
+	selected,
+	onSelect,
+	standardLabel = 'Стандарт (без изменений)',
+	colorRule,
+	quantity,
+}) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
 	const closeDropdown = useCallback(() => setOpen(false), []);
