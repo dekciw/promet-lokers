@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Toaster } from 'sonner';
 import { LoginScreen } from './modules/Auth';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
 import './index.css';
@@ -8,5 +9,10 @@ export default function App() {
 
   if (!isAuth) return <LoginScreen onAuth={() => setIsAuth(true)} />;
 
-  return <ConfiguratorPage />;
+  return (
+    <>
+      <ConfiguratorPage />
+      <Toaster position="bottom-right" richColors duration={4000} />
+    </>
+  );
 }

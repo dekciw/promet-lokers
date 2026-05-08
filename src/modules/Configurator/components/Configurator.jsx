@@ -1,4 +1,5 @@
 import { useState, useLayoutEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { calcDiff } from '../../../shared/utils/calcDiff';
 import { getColorHex } from '../../../shared/utils/colors';
 import { cx } from '../../../shared/utils/cx';
@@ -134,9 +135,10 @@ export default function Configurator() {
 			const { generateNZ } = await import('../../../pdf/generateNZ.js');
 			await generateNZ({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
 			setIsNZOpen(false);
+			toast.success('Бланк НЗ скачан');
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);
-			alert(`Не удалось создать PDF: ${err?.message ?? err}`);
+			toast.error('Не удалось создать PDF', { description: err?.message ?? String(err) });
 		}
 	}
 
