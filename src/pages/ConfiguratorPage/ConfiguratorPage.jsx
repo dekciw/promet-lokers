@@ -9,7 +9,7 @@ import { useCatalog } from '../../shared/hooks/useCatalog';
 import { useConfig } from '../../shared/hooks/useConfig';
 import { calcPrice } from '../../shared/utils/calcPrice';
 
-export default function ConfiguratorPage() {
+export default function ConfiguratorPage({ onLogout }) {
   const { catalog, catalogError, retry } = useCatalog();
   const { config, setters, isResetting, resetKey } = useConfig(catalog);
 
@@ -27,7 +27,7 @@ export default function ConfiguratorPage() {
   if (!catalog) {
     return (
       <>
-        <Header />
+        <Header onLogout={onLogout} />
         <CatalogSkeleton />
       </>
     );
@@ -39,7 +39,7 @@ export default function ConfiguratorPage() {
   return (
     <MotionConfig reducedMotion="user">
       <AppProvider value={ctx}>
-        <Header />
+        <Header onLogout={onLogout} />
         <div className='layout'>
           <Configurator />
           <Parameters />

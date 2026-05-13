@@ -159,20 +159,13 @@ export default function Parameters() {
 	return (
 		<aside className={styles.parameters}>
 			<div className={styles.titleRow}>
-				<h2 className={styles.title}>Параметры</h2>
-				{seriesId && (
-					<button type='button' className={styles.resetBtn} onClick={onReset}>
-						<span className={styles.resetBtnSign}>
-							<svg width='12' height='12' viewBox='0 0 15 15' fill='none'>
-								<path d='M2 2l11 11M13 2L2 13' stroke='white' strokeWidth='2.5' strokeLinecap='round' />
-							</svg>
-						</span>
-						<span className={styles.resetBtnText}>Сбросить</span>
-					</button>
-				)}
+				<div className={styles.titleGroup}>
+					<img className={styles.titleIcon} src='/img/mekanizm.svg' alt='' width='24' height='24' />
+					<h2 className={styles.title}>Параметры</h2>
+				</div>
 			</div>
 
-			<div className={styles.steps}>
+			<div className={styles.breadcrumbs}>
 				{STEP_LABELS.map((label, i) => {
 					const step = i + 1;
 					const status = getStepStatus(step);
@@ -180,52 +173,26 @@ export default function Parameters() {
 
 					return (
 						<Fragment key={step}>
+							{i > 0 && (
+								<img className={styles.breadcrumbArrow} src='/img/strelka.svg' alt='' />
+							)}
 							<button
 								type='button'
-								className={styles.stepBtn}
+								className={cx(
+									styles.breadcrumbBadge,
+									status === 'active' && styles.breadcrumbBadgeActive,
+									status === 'complete' && styles.breadcrumbBadgeComplete,
+								)}
 								onClick={() => handleStepClick(step)}
 								disabled={!canClick || isSliding}
 							>
-								<span className={styles.stepLabel} data-status={status}>
-									{label}
-								</span>
-								<motion.div
-									className={styles.stepCircle}
-									animate={getCircleStyle(status)}
-									transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-									style={{ border: status === 'inactive' ? '1.5px solid var(--c-border)' : 'none' }}
-								>
-									{status === 'complete' ? (
-										<svg width='12' height='12' viewBox='0 0 24 24' fill='none'>
-											<motion.path
-												d='M5 13l4 4L19 7'
-												stroke='white'
-												strokeWidth={2.5}
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												initial={{ pathLength: 0, opacity: 0 }}
-												animate={{ pathLength: 1, opacity: 1 }}
-												transition={{ duration: 0.35, ease: 'easeOut' }}
-											/>
-										</svg>
-									) : status === 'active' ? (
-										<div className={styles.stepDot} />
-									) : (
-										<span className={styles.stepNum}>{step}</span>
-									)}
-								</motion.div>
+								{status === 'complete' && (
+									<svg width='9' height='9' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'>
+										<path d='M5 13l4 4L19 7' />
+									</svg>
+								)}
+								{label}
 							</button>
-
-							{i < STEP_LABELS.length - 1 && (
-								<div className={styles.stepLineWrap}>
-									<motion.div
-										className={styles.stepLineFill}
-										initial={{ scaleX: displayStep > i + 1 ? 1 : 0 }}
-										animate={{ scaleX: displayStep > i + 1 ? 1 : 0 }}
-										transition={{ type: 'spring', stiffness: 100, damping: 15 }}
-									/>
-								</div>
-							)}
 						</Fragment>
 					);
 				})}

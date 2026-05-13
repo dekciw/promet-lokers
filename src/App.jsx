@@ -9,9 +9,14 @@ export default function App() {
 
   if (!isAuth) return <LoginScreen onAuth={() => setIsAuth(true)} />;
 
+  function handleLogout() {
+    localStorage.removeItem('promet_auth');
+    setIsAuth(false);
+  }
+
   return (
     <>
-      <ConfiguratorPage />
+      <ConfiguratorPage onLogout={handleLogout} />
       <Toaster position="bottom-right" richColors duration={4000} />
     </>
   );
