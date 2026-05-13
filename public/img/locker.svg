@@ -1,0 +1,139 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 490" fill="none">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#d6dde4"/>
+      <stop offset="100%" stop-color="#bec8d0"/>
+    </linearGradient>
+    <linearGradient id="doorGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ccd5dc"/>
+      <stop offset="100%" stop-color="#b6c2ca"/>
+    </linearGradient>
+    <linearGradient id="sideGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9ca6ae"/>
+      <stop offset="100%" stop-color="#8a949c"/>
+    </linearGradient>
+    <linearGradient id="topGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e2e9ee"/>
+      <stop offset="100%" stop-color="#d4dce3"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ground shadow -->
+  <ellipse cx="185" cy="482" rx="148" ry="7" fill="rgba(0,0,0,0.09)"/>
+
+  <!-- TOP FACE (3D) -->
+  <polygon points="42,32 282,32 322,12 82,12" fill="url(#topGrad)"/>
+  <!-- Top face edge highlight -->
+  <line x1="82" y1="12" x2="322" y2="12" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+
+  <!-- RIGHT SIDE FACE (3D) -->
+  <polygon points="282,32 322,12 322,418 282,438" fill="url(#sideGrad)"/>
+  <!-- Right side inner shadow -->
+  <polygon points="282,32 286,34 286,436 282,438" fill="rgba(0,0,0,0.08)"/>
+
+  <!-- MAIN FRONT FACE -->
+  <rect x="42" y="32" width="240" height="406" fill="url(#bodyGrad)"/>
+
+  <!-- Left edge highlight -->
+  <rect x="42" y="32" width="2.5" height="406" fill="rgba(255,255,255,0.22)"/>
+
+  <!-- Top edge highlight on front -->
+  <rect x="42" y="32" width="240" height="2" fill="rgba(255,255,255,0.18)"/>
+
+  <!-- PLINTH (base) front -->
+  <rect x="42" y="418" width="240" height="18" rx="1" fill="#b0bcc4"/>
+  <!-- Plinth top edge -->
+  <rect x="42" y="418" width="240" height="1.5" fill="rgba(255,255,255,0.15)"/>
+  <!-- PLINTH right side -->
+  <polygon points="282,418 322,398 322,416 282,436" fill="#8a959e"/>
+
+  <!-- Red brand sticker top-left -->
+  <rect x="47" y="35" width="20" height="7" rx="1.5" fill="#c42020"/>
+
+  <!-- ======== DOOR 1 (left) x: 47–121 ======== -->
+  <rect x="47" y="46" width="74" height="366" rx="1" fill="url(#doorGrad)" stroke="#aebac2" stroke-width="0.75"/>
+  <!-- Door 1 inner shadow (top) -->
+  <rect x="47" y="46" width="74" height="3" rx="1" fill="rgba(0,0,0,0.06)"/>
+  <!-- Door 1 top vents -->
+  <rect x="61" y="56" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="63" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="70" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="77" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <!-- Vent slot highlights -->
+  <rect x="61" y="56" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="61" y="63" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="61" y="70" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="61" y="77" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <!-- Door 1 lock -->
+  <circle cx="84" cy="232" r="9.5" fill="#cdd7de" stroke="#98a4ac" stroke-width="1.5"/>
+  <circle cx="84" cy="232" r="9.5" fill="url(#topGrad)" opacity="0.6"/>
+  <circle cx="84" cy="232" r="4.5" fill="#a8b4bc"/>
+  <rect x="82.3" y="230" width="3.4" height="7.5" rx="1.4" fill="#88949c"/>
+  <!-- Door 1 bottom vents -->
+  <rect x="61" y="374" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="381" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="388" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="395" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="61" y="374" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="61" y="381" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="61" y="388" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="61" y="395" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+
+  <!-- ======== DOOR 2 (middle) x: 124–198 ======== -->
+  <rect x="124" y="46" width="74" height="366" rx="1" fill="url(#doorGrad)" stroke="#aebac2" stroke-width="0.75"/>
+  <rect x="124" y="46" width="74" height="3" rx="1" fill="rgba(0,0,0,0.06)"/>
+  <!-- Door 2 top vents -->
+  <rect x="138" y="56" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="63" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="70" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="77" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="56" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="138" y="63" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="138" y="70" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="138" y="77" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <!-- Door 2 lock -->
+  <circle cx="161" cy="232" r="9.5" fill="#cdd7de" stroke="#98a4ac" stroke-width="1.5"/>
+  <circle cx="161" cy="232" r="9.5" fill="url(#topGrad)" opacity="0.6"/>
+  <circle cx="161" cy="232" r="4.5" fill="#a8b4bc"/>
+  <rect x="159.3" y="230" width="3.4" height="7.5" rx="1.4" fill="#88949c"/>
+  <!-- Door 2 bottom vents -->
+  <rect x="138" y="374" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="381" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="388" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="395" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="138" y="374" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="138" y="381" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="138" y="388" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="138" y="395" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+
+  <!-- ======== DOOR 3 (right) x: 201–275 ======== -->
+  <rect x="201" y="46" width="74" height="366" rx="1" fill="url(#doorGrad)" stroke="#aebac2" stroke-width="0.75"/>
+  <rect x="201" y="46" width="74" height="3" rx="1" fill="rgba(0,0,0,0.06)"/>
+  <!-- Door 3 top vents -->
+  <rect x="215" y="56" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="63" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="70" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="77" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="56" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="215" y="63" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="215" y="70" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="215" y="77" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <!-- Door 3 lock -->
+  <circle cx="238" cy="232" r="9.5" fill="#cdd7de" stroke="#98a4ac" stroke-width="1.5"/>
+  <circle cx="238" cy="232" r="9.5" fill="url(#topGrad)" opacity="0.6"/>
+  <circle cx="238" cy="232" r="4.5" fill="#a8b4bc"/>
+  <rect x="236.3" y="230" width="3.4" height="7.5" rx="1.4" fill="#88949c"/>
+  <!-- Door 3 bottom vents -->
+  <rect x="215" y="374" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="381" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="388" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="395" width="46" height="4" rx="2" fill="#94a0a8"/>
+  <rect x="215" y="374" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="215" y="381" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="215" y="388" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+  <rect x="215" y="395" width="46" height="1" rx="1" fill="rgba(255,255,255,0.2)"/>
+
+  <!-- Screw holes on left frame (like ref image) -->
+  <circle cx="45" cy="68" r="2.5" fill="#b4bec6" stroke="#9aa4ac" stroke-width="0.75"/>
+  <circle cx="45" cy="250" r="2.5" fill="#b4bec6" stroke="#9aa4ac" stroke-width="0.75"/>
+</svg>

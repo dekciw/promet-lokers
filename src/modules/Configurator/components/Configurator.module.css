@@ -1,9 +1,9 @@
 /* Внешний контейнер конфигуратора */
 .configurator {
-	padding: 32px;
+	padding: 14px 32px 28px;
 	display: flex;
 	flex-direction: column;
-	gap: 32px;
+	gap: 15px;
 	width: 100%;
 }
 
@@ -22,33 +22,34 @@
 	gap: 4px;
 }
 
-.title {
-	font-size: 30px;
-	font-weight: 900;
-	color: var(--c-brand);
-	letter-spacing: -0.75px;
-	line-height: 36px;
-}
-
-.model {
+.titleLine {
 	display: flex;
-	align-items: center;
-	gap: 8px;
-	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 12px;
 }
 
-.modelLabel {
-	font-size: 16px;
+.title {
+	font-size: 32px;
+	font-weight: 700;
+	color: var(--c-brand);
+	letter-spacing: -0.5px;
+	line-height: 38px;
+	font-family: var(--f-display);
+	text-transform: uppercase;
+}
+
+.date {
+	font-size: 12px;
 	font-weight: 400;
-	color: var(--c-text-muted);
-	line-height: 24px;
+	color: var(--c-text-faint);
+	line-height: 18px;
 }
 
 .modelValue {
-	font-size: 16px;
-	font-weight: 600;
-	color: var(--c-text-mid);
-	line-height: 24px;
+	font-size: 13px;
+	font-weight: 400;
+	color: #000;
+	line-height: 18px;
 }
 
 /* Бейдж артикула */
@@ -63,6 +64,7 @@
 	flex-shrink: 0;
 	cursor: default;
 	transition: border-color 0.15s, background 0.15s;
+	box-shadow: var(--s-primary);
 }
 
 .articleBadgeClickable {
@@ -80,26 +82,94 @@
 
 .badgeLabel {
 	font-size: 10px;
-	font-weight: 700;
+	font-weight: 600;
 	color: var(--c-text-faint);
 	letter-spacing: 1px;
 	text-transform: uppercase;
-	line-height: 15px;
+	line-height: 14px;
 }
 
 .badgeCode {
 	font-family: var(--f-mono);
 	font-weight: 700;
 	font-size: 14px;
-	color: var(--c-brand);
+	color: var(--c-primary);
 	line-height: 20px;
+}
+
+/* Фото продукта */
+.productImage {
+	width: 100%;
+	flex-shrink: 0;
+}
+
+.productImg {
+	width: 100%;
+	height: 210px;
+	object-fit: cover;
+	object-position: center 40%;
+	display: block;
+}
+
+.currentModel {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+	flex-shrink: 0;
+	text-align: right;
+}
+
+.currentModelLabel {
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--c-text-faint);
+	line-height: 18px;
+	white-space: nowrap;
+}
+
+.currentModelValue {
+	font-size: 13px;
+	font-weight: 600;
+	color: #000;
+	line-height: 18px;
+}
+
+/* Пустое состояние — модель не выбрана */
+.emptyState {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	padding: 64px 40px;
+	text-align: center;
+}
+
+.emptyIcon {
+	color: var(--c-text-faint);
+	opacity: 0.85;
+}
+
+.emptyTitle {
+	font-size: 17px;
+	font-weight: 600;
+	color: var(--c-text-mid);
+	line-height: 24px;
+}
+
+.emptyHint {
+	font-size: 13px;
+	color: var(--c-text-muted);
+	line-height: 20px;
+	max-width: 280px;
 }
 
 /* Сетка трёх колонок */
 .configGrid {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 24px;
+	gap: 20px;
 }
 
 /* При сбросе — элементы плавно сворачиваются */
@@ -123,63 +193,105 @@
 
 /* Колонки */
 .configCol {
-	border-radius: var(--r-lg);
-	padding: 20px;
+	border-radius: 6px;
+	overflow: hidden;
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	flex: 1;
+	background: var(--card-bg);
+	backdrop-filter: blur(11.5px);
+	-webkit-backdrop-filter: blur(11.5px);
+	border: 1px solid var(--card-border);
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
 }
 
 .configColDefault {
-	background: var(--card-default-bg);
-	border: 1px solid var(--card-default-border);
+	background: #F0F0F0;
 }
 
 .configColChanged {
-	background: var(--card-changed-bg);
-	border: 1px solid var(--card-changed-border);
+	background: #DBDBDB;
 }
 
 .configColFinal {
-	background: var(--card-final-bg);
-	border: 1px solid var(--card-final-border);
-	padding: 24px;
-	justify-content: space-between;
-	box-shadow: var(--s-primary);
+	background: rgba(51, 162, 88, 0.2);
+}
+
+/* Заголовок колонки с иконкой */
+.configColWrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 13px;
+	padding-top: 30px;
+}
+
+.colHeader {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+.colIcon {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	color: var(--c-text-muted);
+	margin-top: 1px;
 }
 
 .colTitle {
-	display: block;
-	font-size: 16px;
+	font-size: 19px;
 	font-weight: 400;
-	color: var(--card-default-title);
-	letter-spacing: 1.2px;
-	text-transform: uppercase;
-	line-height: 24px;
+	color: rgba(0, 0, 0, 0.85);
+	line-height: 21px;
 }
 
-.configColChanged .colTitle {
-	color: var(--card-changed-title);
+/* Обёртка таблицы */
+.tableWrap {
+	display: flex;
+	flex-direction: column;
 }
 
-.configColFinal .colTitle {
-	font-weight: 700;
-	color: var(--card-final-text);
+/* Строка заголовка таблицы */
+.tableHead {
+	display: flex;
+	justify-content: space-between;
+	padding: 0 20px;
+	position: relative;
+}
+
+.tableHead::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 10px;
+	right: 10px;
+	height: 1px;
+	background: rgba(0, 0, 0, 0.6);
+}
+
+.tableHead span {
+	font-size: 13px;
+	font-weight: 500;
+	color: #302F2F;
+	line-height: 36px;
 }
 
 .colTop {
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	flex: 1;
 }
 
 .actions {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	padding: 14px 18px 18px;
+	border-top: 1px solid var(--card-border);
 }
 
-/* Появление строки: fade + slide вверх (только GPU-свойства) */
+/* Анимации строк */
 @keyframes itemIn {
 	from {
 		opacity: 0;
@@ -191,7 +303,6 @@
 	}
 }
 
-/* Исчезновение строки: сворачивается обратно */
 @keyframes itemOut {
 	from {
 		opacity: 1;
@@ -208,39 +319,35 @@
 	list-style: none;
 	display: flex;
 	flex-direction: column;
+	padding: 0 20px;
 }
 
 .specItem {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	min-height: 16px;
-	padding: 8px 0;
-	border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+	min-height: 32px;
+	padding: 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 	animation: itemIn 0.35s var(--ease-out) both;
-}
-
-.specItem:first-child {
-	padding-top: 0;
 }
 
 .specItem:last-child {
 	border-bottom: none;
-	padding-bottom: 0;
 }
 
 .specLabel {
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: 400;
-	color: var(--card-default-title);
-	line-height: 16px;
+	color: var(--card-label);
+	line-height: 32px;
 }
 
 .specValue {
-	font-size: 12px;
-	font-weight: 500;
-	color: var(--card-default-text);
-	line-height: 16px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--card-text);
+	line-height: 32px;
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -254,32 +361,24 @@
 	flex-shrink: 0;
 }
 
-/* Плейсхолдер при отсутствии данных / изменений */
-.noChanges {
-	font-size: 12px;
-	font-weight: 400;
-	color: var(--c-text-faint);
-	font-style: italic;
-	margin: 0;
-}
 
-/* Список нестандартного исполнения */
+/* Нестандартное исполнение */
 .diffList {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
+	padding: 0 20px;
 }
 
 .diffItem {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	min-height: 16px;
-	padding: 8px 0;
-	border-bottom: 1px solid rgba(120, 53, 15, 0.15);
+	min-height: 32px;
+	padding: 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Анимация входа — только для новых элементов, не для уже присутствующих */
 .diffItemEntering {
 	animation: itemIn 0.35s var(--ease-out) both;
 }
@@ -289,28 +388,22 @@
 	pointer-events: none;
 }
 
-.diffItem:first-child {
-	padding-top: 0;
-}
-
 .diffItem:last-child {
 	border-bottom: none;
-	padding-bottom: 0;
 }
 
 .diffLabel {
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: 400;
-	color: var(--card-changed-title);
-	opacity: 0.7;
-	line-height: 16px;
+	color: var(--card-label);
+	line-height: 32px;
 }
 
 .diffValue {
-	font-size: 12px;
-	font-weight: 500;
-	color: var(--card-changed-text);
-	line-height: 16px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--card-text);
+	line-height: 32px;
 }
 
 /* Итоговая колонка */
@@ -318,62 +411,58 @@
 	list-style: none;
 	display: flex;
 	flex-direction: column;
+	padding: 0 20px;
 }
 
 .finalItem {
 	display: flex;
 	justify-content: space-between;
-	align-items: flex-start;
-	padding: 0 0 8px 0;
-	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-	min-height: 25px;
+	align-items: center;
+	padding: 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+	min-height: 32px;
 	animation: itemIn 0.35s var(--ease-out) both;
-}
-
-.finalItem + .finalItem {
-	padding-top: 8px;
 }
 
 .finalItem:last-child {
 	border-bottom: none;
-	padding-bottom: 0;
-	padding-top: 8px;
-	align-items: center;
 }
 
 .finalLabel {
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: 400;
-	color: var(--card-final-label);
-	line-height: 16px;
+	color: var(--card-label);
+	line-height: 32px;
 }
 
 .finalValue {
-	font-size: 12px;
-	font-weight: 500;
-	color: var(--card-final-text);
-	line-height: 16px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--card-text);
+	line-height: 32px;
 	display: flex;
 	align-items: center;
 	gap: 6px;
 }
 
 .finalItemPrice .finalLabel {
-	font-size: 14px;
-	color: var(--card-final-label);
+	font-size: 13px;
+	color: var(--c-text-mid);
+	font-weight: 500;
 	line-height: 20px;
 }
 
 @keyframes priceUpdate {
 	0%   { opacity: 1; transform: scale(1); }
-	40%  { opacity: 0.7; transform: scale(1.03); }
+	40%  { opacity: 0.7; transform: scale(1.04); }
 	100% { opacity: 1; transform: scale(1); }
 }
 
 .finalItemPrice .finalValue {
 	font-size: 18px;
 	font-weight: 700;
-	line-height: 28px;
+	line-height: 26px;
+	color: var(--c-primary);
 	display: inline-block;
 	animation: priceUpdate 0.3s var(--ease-spring);
 }
@@ -383,25 +472,24 @@
 	display: block;
 	width: 100%;
 	border: none;
-	border-radius: var(--r-md);
-	padding: 12px;
+	border-radius: 6px;
+	padding: 10px 12px;
 	text-align: center;
 	font-family: var(--f-main);
-	font-size: 14px;
-	font-weight: 700;
+	font-size: 13px;
+	font-weight: 600;
 	cursor: pointer;
 	line-height: 20px;
 	transition:
 		background 0.2s ease,
 		box-shadow 0.2s ease,
 		transform 0.1s ease,
-		border-color 0.2s ease,
-		color 0.2s ease;
+		border-color 0.2s ease;
 }
 
 .btn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 3px rgba(245, 130, 20, 0.4);
+	box-shadow: 0 0 0 3px rgba(0, 53, 158, 0.35);
 }
 
 .btn:active {
@@ -409,35 +497,68 @@
 }
 
 .btnPrimary {
-	background: var(--c-orange);
+	background: var(--c-primary);
 	color: #fff;
 	border: none;
-	box-shadow: 0 4px 12px rgba(245, 130, 20, 0.35);
+	box-shadow: var(--s-primary-btn);
 }
 
 .btnPrimary:active {
-	background: var(--c-orange-active);
-	box-shadow: 0 2px 6px rgba(245, 130, 20, 0.25);
+	background: #002d8a;
 	transform: scale(0.97);
 }
 
 .btnSecondary {
-	background: rgba(255, 255, 255, 0.1);
-	color: #fff;
-	border: 1px solid rgba(255, 255, 255, 0.4);
+	background: rgba(255, 255, 255, 0.7);
+	color: var(--c-primary);
+	border: 1.5px solid var(--c-primary);
 }
 
 .btnSecondary:active {
-	background: rgba(255, 255, 255, 0.28);
+	background: rgba(0, 53, 158, 0.08);
 	transform: scale(0.97);
 }
 
 @media (hover: hover) and (pointer: fine) {
 	.btnPrimary:hover {
-		background: var(--c-orange-hover);
+		background: #0040bb;
+		box-shadow: 0 6px 16px rgba(0, 53, 158, 0.35);
 	}
 	.btnSecondary:hover {
-		background: rgba(255, 255, 255, 0.2);
+		background: rgba(0, 53, 158, 0.06);
+	}
+}
+
+.btnKP {
+	background: #f0f0f0;
+	color: #4b5565;
+	border: none;
+}
+
+.btnKP:active {
+	background: #d8d8d8;
+	transform: scale(0.97);
+}
+
+.btnNZ {
+	background: #f79009;
+	color: #fff;
+	border: none;
+	box-shadow: 0 2px 8px rgba(247, 144, 9, 0.35);
+}
+
+.btnNZ:active {
+	background: #d97d06;
+	transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.btnKP:hover {
+		background: #e2e2e2;
+	}
+	.btnNZ:hover {
+		background: #e08500;
+		box-shadow: 0 4px 12px rgba(247, 144, 9, 0.45);
 	}
 }
 
@@ -450,15 +571,13 @@
 
 /* ──────────── АДАПТИВ ──────────── */
 
-/* Ноутбук (≤1279px) — чуть меньше падинги */
 @media (max-width: 1279px) {
 	.configurator {
-		padding: 24px;
-		gap: 24px;
+		padding: 14px 24px 22px;
+		gap: 20px;
 	}
 }
 
-/* Планшет (≤1023px) — сетка 2 колонки, итоговая карточка на всю ширину */
 @media (max-width: 1023px) {
 	.configGrid {
 		grid-template-columns: 1fr 1fr;
@@ -469,7 +588,6 @@
 	}
 }
 
-/* Мобильный (≤767px) — одна колонка */
 @media (max-width: 767px) {
 	.configurator {
 		padding: 16px;
@@ -481,18 +599,9 @@
 		gap: 12px;
 	}
 
-	.configColFinal {
-		grid-column: unset;
-	}
-
 	.title {
-		font-size: 22px;
-		line-height: 28px;
-	}
-
-	.modelLabel,
-	.modelValue {
-		font-size: 14px;
+		font-size: 24px;
+		line-height: 30px;
 	}
 
 	.topRow {
@@ -505,7 +614,11 @@
 	}
 
 	.btn {
-		padding: 14px 12px;
+		padding: 12px;
+	}
+
+	.productImg {
+		height: 150px;
 	}
 }
 
@@ -557,7 +670,7 @@
 	.stickyPriceValue {
 		font-size: 18px;
 		font-weight: 700;
-		color: var(--c-brand);
+		color: var(--c-primary);
 		line-height: 24px;
 	}
 
@@ -573,115 +686,7 @@
 		font-size: 13px;
 	}
 
-	/* Отступ снизу чтобы контент не перекрывался плашкой */
 	.configurator {
 		padding-bottom: 88px;
 	}
 }
-
-/* 3D Предпросмотр — скрыт до реализации
-.preview {
-	aspect-ratio: 16 / 9;
-	background: var(--c-white);
-	border: 1px solid var(--c-border);
-	border-radius: var(--r-lg);
-	box-shadow: var(--s-xs);
-	position: relative;
-	overflow: hidden;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-}
-
-.previewGradient {
-	position: absolute;
-	inset: 0;
-	background: linear-gradient(150.69deg, rgba(19, 127, 236, 0.05) 0%, rgba(19, 127, 236, 0) 100%);
-	pointer-events: none;
-}
-
-.previewControls {
-	position: absolute;
-	bottom: 16px;
-	right: 16px;
-	display: flex;
-	gap: 8px;
-}
-
-.previewBtn {
-	background: var(--c-white);
-	border: 1px solid var(--c-border-light);
-	border-radius: var(--r-full);
-	width: 38px;
-	height: 38px;
-	cursor: pointer;
-	box-shadow: var(--s-lg);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	transition: background 0.15s;
-}
-
-.previewBtn img {
-	width: 18px;
-	height: 18px;
-	display: block;
-}
-
-.previewBtn:hover {
-	background: var(--c-bg);
-}
-
-.previewBody {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	position: relative;
-	z-index: 1;
-}
-
-.previewCaption {
-	font-size: 14px;
-	font-weight: 500;
-	color: var(--c-text-faint);
-	margin-top: 24px;
-	line-height: 20px;
-}
-
-.lockerCabinet {
-	width: 128px;
-	height: 256px;
-	background: #e2e8f0;
-	border: 2px solid #cbd5e1;
-	border-radius: 2px;
-	position: relative;
-	box-shadow: var(--s-xl);
-}
-
-.lockerHandle {
-	position: absolute;
-	top: 16px;
-	right: 8px;
-	width: 4px;
-	height: 16px;
-	background: #94a3b8;
-	border-radius: var(--r-full);
-}
-
-.lockerShelf {
-	position: absolute;
-	inset: 40px 8px 8px 8px;
-	border: 1px solid rgba(203, 213, 225, 0.5);
-	padding: 8px;
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
-.lockerLine {
-	height: 4px;
-	background: rgba(203, 213, 225, 0.3);
-	width: 100%;
-}
-*/
