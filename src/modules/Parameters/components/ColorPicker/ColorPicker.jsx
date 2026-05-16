@@ -1,16 +1,20 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useClickOutside } from '../../../../shared/hooks/useClickOutside';
 import { COLORS } from '../../../../shared/utils/colors';
 import { cx } from '../../../../shared/utils/cx';
 import styles from './ColorPicker.module.css';
+
+const dropdownVariants = {
+	hidden: { opacity: 0, scaleY: 0.95, y: 4 },
+	visible: { opacity: 1, scaleY: 1, y: 0 },
+};
 
 export default function ColorPicker({
 	placeholder,
 	selected,
 	onSelect,
 	standardLabel = 'Стандарт (без изменений)',
-	colorRule,
-	quantity,
 }) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
@@ -34,14 +38,6 @@ export default function ColorPicker({
 
 	const swatchStyle = selected ? getSwatchStyle(selected.color) : {};
 
-	// Определяем какие категории доступны по количеству
-	const catRules = colorRule ? [colorRule.cat1, colorRule.cat2, colorRule.cat3] : null;
-	function isCatAvailable(groupIdx) {
-		if (!catRules || quantity === undefined) return true;
-		const rule = catRules[groupIdx];
-		return !rule || quantity >= rule.minQty;
-	}
-
 	return (
 		<div className={cx(styles.colorPicker, open && styles.colorPickerOpen)} ref={ref}>
 			<button type='button' className={styles.trigger} aria-expanded={open} onClick={handleTriggerClick}>
@@ -49,35 +45,46 @@ export default function ColorPicker({
 				<span className={`${styles.triggerText}${selected ? ` ${styles.triggerTextSelected}` : ''}`}>
 					{selected ? selected.name : placeholder}
 				</span>
-				<img className={styles.triggerArrow} src='/img/arrow-down.svg' alt='' />
+				<img className={styles.triggerArrow} src='/img/icons/icon-arrow-down.svg' alt='' />
 			</button>
 
-			<ul className={styles.dropdown}>
-				{selected && (
-					<li className={`${styles.item} ${styles.itemReset}`} onClick={() => handleSelect(null)}>
-						<span className={`${styles.itemSwatch} ${styles.itemSwatchStandard}`} />
-						<span className={styles.itemName}>{standardLabel}</span>
-					</li>
+			<AnimatePresence>
+				{open && (
+					<motion.ul
+						className={styles.dropdown}
+						variants={dropdownVariants}
+						initial='hidden'
+						animate='visible'
+						exit='hidden'
+						transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
+						style={{ transformOrigin: 'bottom center' }}
+					>
+						{selected && (
+							<li className={`${styles.item} ${styles.itemReset}`} onClick={() => handleSelect(null)}>
+								<span className={`${styles.itemSwatch} ${styles.itemSwatchStandard}`} />
+								<span className={styles.itemName}>{standardLabel}</span>
+							</li>
+						)}
+						{COLORS.map((group) => {
+							return (
+								<Fragment key={group.group}>
+									<li className={styles.group}>{group.group}</li>
+									{group.items.map(item => (
+										<li
+											key={item.name}
+											className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
+											onClick={() => handleSelect(item)}
+										>
+											<span className={styles.itemSwatch} style={{ background: item.color }} />
+											<span className={styles.itemName}>{item.name}</span>
+										</li>
+									))}
+								</Fragment>
+							);
+						})}
+					</motion.ul>
 				)}
-				{COLORS.map((group, groupIdx) => {
-					if (!isCatAvailable(groupIdx)) return null;
-					return (
-						<Fragment key={group.group}>
-							<li className={styles.group}>{group.group}</li>
-							{group.items.map(item => (
-								<li
-									key={item.name}
-									className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
-									onClick={() => handleSelect(item)}
-								>
-									<span className={styles.itemSwatch} style={{ background: item.color }} />
-									<span className={styles.itemName}>{item.name}</span>
-								</li>
-							))}
-						</Fragment>
-					);
-				})}
-			</ul>
+			</AnimatePresence>
 		</div>
 	);
 }

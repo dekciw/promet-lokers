@@ -1,13 +1,13 @@
 /* Внешний контейнер конфигуратора */
 .configurator {
-	padding: 14px 32px 28px;
+	padding: 24px 32px 28px;
 	display: flex;
 	flex-direction: column;
-	gap: 15px;
+	gap: 16px;
 	width: 100%;
 }
 
-/* Верхняя строка: заголовок слева, артикул справа */
+/* Верхняя строка: заголовок слева, текущая модель справа */
 .topRow {
 	display: flex;
 	align-items: flex-end;
@@ -38,79 +38,6 @@
 	text-transform: uppercase;
 }
 
-.date {
-	font-size: 12px;
-	font-weight: 400;
-	color: var(--c-text-faint);
-	line-height: 18px;
-}
-
-.modelValue {
-	font-size: 13px;
-	font-weight: 400;
-	color: #000;
-	line-height: 18px;
-}
-
-/* Бейдж артикула */
-.articleBadge {
-	background: var(--c-white);
-	border: 1px solid var(--c-border);
-	border-radius: var(--r-sm);
-	padding: 8px 16px;
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	flex-shrink: 0;
-	cursor: default;
-	transition: border-color 0.15s, background 0.15s;
-	box-shadow: var(--s-primary);
-}
-
-.articleBadgeClickable {
-	cursor: pointer;
-}
-
-.articleBadgeClickable:hover {
-	background: var(--c-bg);
-	border-color: var(--c-primary);
-}
-
-.articleBadgeClickable:active {
-	transform: scale(0.98);
-}
-
-.badgeLabel {
-	font-size: 10px;
-	font-weight: 600;
-	color: var(--c-text-faint);
-	letter-spacing: 1px;
-	text-transform: uppercase;
-	line-height: 14px;
-}
-
-.badgeCode {
-	font-family: var(--f-mono);
-	font-weight: 700;
-	font-size: 14px;
-	color: var(--c-primary);
-	line-height: 20px;
-}
-
-/* Фото продукта */
-.productImage {
-	width: 100%;
-	flex-shrink: 0;
-}
-
-.productImg {
-	width: 100%;
-	height: 210px;
-	object-fit: cover;
-	object-position: center 40%;
-	display: block;
-}
-
 .currentModel {
 	display: flex;
 	align-items: baseline;
@@ -132,6 +59,20 @@
 	font-weight: 600;
 	color: #000;
 	line-height: 18px;
+}
+
+/* Фото продукта */
+.productImage {
+	width: 100%;
+	flex-shrink: 0;
+}
+
+.productImg {
+	width: 100%;
+	height: 210px;
+	object-fit: cover;
+	object-position: center 40%;
+	display: block;
 }
 
 /* Пустое состояние — модель не выбрана */
@@ -221,8 +162,8 @@
 .configColWrapper {
 	display: flex;
 	flex-direction: column;
-	gap: 13px;
-	padding-top: 30px;
+	gap: 12px;
+	padding-top: 24px;
 }
 
 .colHeader {
@@ -287,8 +228,7 @@
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	padding: 14px 18px 18px;
-	border-top: 1px solid var(--card-border);
+	padding: 14px 20px 20px;
 }
 
 /* Анимации строк */
@@ -303,47 +243,46 @@
 	}
 }
 
-@keyframes itemOut {
-	from {
-		opacity: 1;
-		transform: translateY(0);
-	}
-	to {
-		opacity: 0;
-		transform: translateY(-4px);
-	}
-}
-
-/* Список стандартного исполнения */
-.specList {
+/* ── Общие стили для всех трёх списков ── */
+.specList,
+.diffList,
+.finalSpec {
 	list-style: none;
 	display: flex;
 	flex-direction: column;
 	padding: 0 20px;
 }
 
-.specItem {
+/* Базовые стили строк (общие для всех трёх таблиц) */
+.specItem,
+.diffItem,
+.finalItem {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	min-height: 32px;
 	padding: 0;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-	animation: itemIn 0.35s var(--ease-out) both;
 }
 
-.specItem:last-child {
+.specItem:last-child,
+.diffItem:last-child,
+.finalItem:last-child {
 	border-bottom: none;
 }
 
-.specLabel {
+/* Метки и значения (общие) */
+.specLabel,
+.diffLabel,
+.finalLabel {
 	font-size: 13px;
 	font-weight: 400;
 	color: var(--card-label);
 	line-height: 32px;
 }
 
-.specValue {
+.specValue,
+.diffValue {
 	font-size: 13px;
 	font-weight: 400;
 	color: var(--card-text);
@@ -353,6 +292,16 @@
 	gap: 6px;
 }
 
+/* Анимация появления строк */
+.specItem {
+	animation: itemIn 0.35s var(--ease-out) both;
+}
+
+.finalItem {
+	animation: itemIn 0.35s var(--ease-out) both;
+}
+
+/* Цветовой кружок */
 .colorSwatch {
 	display: inline-block;
 	width: 12px;
@@ -361,80 +310,7 @@
 	flex-shrink: 0;
 }
 
-
-/* Нестандартное исполнение */
-.diffList {
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	padding: 0 20px;
-}
-
-.diffItem {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	min-height: 32px;
-	padding: 0;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.diffItemEntering {
-	animation: itemIn 0.35s var(--ease-out) both;
-}
-
-.diffItemLeaving {
-	animation: itemOut 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-	pointer-events: none;
-}
-
-.diffItem:last-child {
-	border-bottom: none;
-}
-
-.diffLabel {
-	font-size: 13px;
-	font-weight: 400;
-	color: var(--card-label);
-	line-height: 32px;
-}
-
-.diffValue {
-	font-size: 13px;
-	font-weight: 400;
-	color: var(--card-text);
-	line-height: 32px;
-}
-
-/* Итоговая колонка */
-.finalSpec {
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	padding: 0 20px;
-}
-
-.finalItem {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 0;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-	min-height: 32px;
-	animation: itemIn 0.35s var(--ease-out) both;
-}
-
-.finalItem:last-child {
-	border-bottom: none;
-}
-
-.finalLabel {
-	font-size: 13px;
-	font-weight: 400;
-	color: var(--card-label);
-	line-height: 32px;
-}
-
+/* Итоговая колонка — значения */
 .finalValue {
 	font-size: 13px;
 	font-weight: 400;
@@ -489,7 +365,7 @@
 
 .btn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 3px rgba(0, 53, 158, 0.35);
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #304FFE;
 }
 
 .btn:active {
@@ -497,15 +373,27 @@
 }
 
 .btnPrimary {
-	background: var(--c-primary);
+	background: #304FFE;
 	color: #fff;
-	border: none;
-	box-shadow: var(--s-primary-btn);
+	border: 1px solid transparent;
+	box-shadow: none;
 }
 
 .btnPrimary:active {
-	background: #002d8a;
-	transform: scale(0.97);
+	background: #7A7CFF;
+	box-shadow:
+		0 8px 5px rgba(122, 124, 255, 0.14),
+		0 3px 7px rgba(122, 124, 255, 0.12),
+		0 4px 2.5px rgba(122, 124, 255, 0.20);
+	transform: none;
+}
+
+.btnPrimary:disabled {
+	background: #fff;
+	border-color: #C9CFDA;
+	color: #C9CFDA;
+	opacity: 1;
+	box-shadow: none;
 }
 
 .btnSecondary {
@@ -519,46 +407,48 @@
 	transform: scale(0.97);
 }
 
+.btnKP {
+	background: #FFAA1D;
+	color: #fff;
+	border: 1px solid transparent;
+	box-shadow: none;
+}
+
+.btnKP:active {
+	background: #FFECAA;
+	color: #997000;
+	box-shadow:
+		0 8px 10px rgba(255, 211, 66, 0.14),
+		0 3px 14px rgba(255, 235, 122, 0.12),
+		0 4px 5px rgba(255, 228, 122, 0.20);
+	transform: none;
+}
+
+.btnKP:disabled {
+	background: #fff;
+	border-color: #C9CFDA;
+	color: #C9CFDA;
+	opacity: 1;
+	box-shadow: none;
+}
+
 @media (hover: hover) and (pointer: fine) {
-	.btnPrimary:hover {
-		background: #0040bb;
-		box-shadow: 0 6px 16px rgba(0, 53, 158, 0.35);
+	.btnPrimary:hover:not(:disabled) {
+		background: #0026CA;
+		box-shadow:
+			0 8px 5px rgba(48, 79, 254, 0.14),
+			0 3px 7px rgba(48, 79, 254, 0.12),
+			0 4px 2.5px rgba(48, 79, 254, 0.20);
 	}
 	.btnSecondary:hover {
 		background: rgba(0, 53, 158, 0.06);
 	}
-}
-
-.btnKP {
-	background: #f0f0f0;
-	color: #4b5565;
-	border: none;
-}
-
-.btnKP:active {
-	background: #d8d8d8;
-	transform: scale(0.97);
-}
-
-.btnNZ {
-	background: #f79009;
-	color: #fff;
-	border: none;
-	box-shadow: 0 2px 8px rgba(247, 144, 9, 0.35);
-}
-
-.btnNZ:active {
-	background: #d97d06;
-	transform: scale(0.97);
-}
-
-@media (hover: hover) and (pointer: fine) {
-	.btnKP:hover {
-		background: #e2e2e2;
-	}
-	.btnNZ:hover {
-		background: #e08500;
-		box-shadow: 0 4px 12px rgba(247, 144, 9, 0.45);
+	.btnKP:hover:not(:disabled) {
+		background: #C25000;
+		box-shadow:
+			0 8px 10px rgba(255, 89, 0, 0.14),
+			0 3px 14px rgba(255, 192, 75, 0.12),
+			0 4px 5px rgba(254, 175, 48, 0.20);
 	}
 }
 
@@ -573,8 +463,8 @@
 
 @media (max-width: 1279px) {
 	.configurator {
-		padding: 14px 24px 22px;
-		gap: 20px;
+		padding: 24px 24px 22px;
+		gap: 16px;
 	}
 }
 
@@ -609,10 +499,6 @@
 		align-items: flex-start;
 	}
 
-	.articleBadge {
-		display: none;
-	}
-
 	.btn {
 		padding: 12px;
 	}
@@ -643,12 +529,6 @@
 		padding-bottom: calc(12px + env(safe-area-inset-bottom));
 		box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
 		z-index: 100;
-		transform: translateY(100%);
-		transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-	}
-
-	.stickyBarVisible {
-		transform: translateY(0);
 	}
 
 	.stickyPrice {

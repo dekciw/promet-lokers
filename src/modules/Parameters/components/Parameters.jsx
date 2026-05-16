@@ -1,11 +1,20 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import ColorPicker from './ColorPicker/ColorPicker';
+import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import CustomSelect from './CustomSelect';
 import StepperInput from './StepperInput';
 import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
+import { COLORS } from '../../../shared/utils/colors';
 import styles from './Parameters.module.css';
+
+const COLOR_OPTIONS = [
+	{ value: null, label: 'Стандарт (без изменений)' },
+	...COLORS.flatMap(g => g.items.map(item => ({ value: item.name, label: item.name, swatch: item.color }))),
+];
+
+const COLOR_MAP = new Map(COLORS.flatMap(g => g.items.map(i => [i.name, i])));
+
+
 
 const HEIGHT_MIN = 1400;
 const HEIGHT_MAX = 2000;
@@ -28,7 +37,7 @@ function buildThicknessOptions(baseVal) {
 }
 
 export default function Parameters() {
-	const { config, catalog, setters } = useAppContext();
+	const { config, catalog, setters, setParametersUnlocked } = useAppContext();
 	const {
 		setSeriesId,
 		onModelChange,
@@ -67,9 +76,21 @@ export default function Parameters() {
 	const [isSliding, setIsSliding] = useState(false);
 	const backAnimTimersRef = useRef([]);
 
-	const [openSelectId, setOpenSelectId] = useState(null);
+const [openSelectId, setOpenSelectId] = useState(null);
 	const handleSeriesOpen = useCallback(v => setOpenSelectId(v ? 'series' : null), []);
 	const handleModelOpen = useCallback(v => setOpenSelectId(v ? 'model' : null), []);
+	const handleLockOpen = useCallback(v => setOpenSelectId(v ? 'lock' : null), []);
+	const handleVentilationOpen = useCallback(v => setOpenSelectId(v ? 'ventilation' : null), []);
+	const handleDoorColorOpen = useCallback(v => setOpenSelectId(v ? 'doorColor' : null), []);
+	const handleBodyColorOpen = useCallback(v => setOpenSelectId(v ? 'bodyColor' : null), []);
+
+	function handleDoorColorChange(name) {
+		setDoorColor(name ? (COLOR_MAP.get(name) ?? null) : null);
+	}
+
+	function handleBodyColorChange(name) {
+		setBodyColor(name ? (COLOR_MAP.get(name) ?? null) : null);
+	}
 
 	const stepperStepRef = useRef(stepperStep);
 	// eslint-disable-next-line react-hooks/refs -- ref для актуального значения в таймерах goToStep, избегает stale closure
@@ -78,6 +99,7 @@ export default function Parameters() {
 	function goToStep(newStep) {
 		if (newStep === stepperStepRef.current) return;
 		const prevStep = stepperStepRef.current;
+		setParametersUnlocked(newStep === 3);
 		setIsSliding(true);
 		setOpenSelectId(null);
 		setDirection(newStep > prevStep ? 1 : -1);
@@ -104,6 +126,11 @@ export default function Parameters() {
 		}
 	}
 
+	function handleModelSelect(newModelId) {
+		setParametersUnlocked(false);
+		onModelChange(newModelId);
+	}
+
 	function handleStepClick(step) {
 		if (step === 2 && !seriesId) return;
 		if (step === 3 && !modelId) return;
@@ -117,17 +144,6 @@ export default function Parameters() {
 	}
 
 	const priceRules = catalog.priceRules ?? {};
-	const depthMinQty = priceRules.depth?.minQty ?? 10;
-	const heightMinQty = priceRules.height?.minQty ?? 100;
-	const thicknessMinQty = priceRules.thickness?.minQty ?? 100;
-	const showThickness = quantity >= thicknessMinQty;
-
-	const doorColorMinQty = priceRules.color?.door
-		? Math.min(...Object.values(priceRules.color.door).map(c => c.minQty))
-		: 30;
-	const bodyColorMinQty = priceRules.color?.full
-		? Math.min(...Object.values(priceRules.color.full).map(c => c.minQty))
-		: 50;
 
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
 	const lockEntries = Object.entries(catalog.locks).sort((a, b) => (a[1].single ?? 0) - (b[1].single ?? 0));
@@ -160,43 +176,49 @@ export default function Parameters() {
 		<aside className={styles.parameters}>
 			<div className={styles.titleRow}>
 				<div className={styles.titleGroup}>
-					<img className={styles.titleIcon} src='/img/mekanizm.svg' alt='' width='24' height='24' />
+					<img className={styles.titleIcon} src='/img/icons/icon-gear.svg' alt='' width='24' height='24' />
 					<h2 className={styles.title}>Параметры</h2>
 				</div>
 			</div>
 
-			<div className={styles.breadcrumbs}>
-				{STEP_LABELS.map((label, i) => {
-					const step = i + 1;
-					const status = getStepStatus(step);
-					const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && !!modelId);
+			<LayoutGroup id='breadcrumbs'>
+				<div className={styles.breadcrumbs}>
+					{STEP_LABELS.map((label, i) => {
+						const step = i + 1;
+						const status = getStepStatus(step);
+						const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && !!modelId);
 
-					return (
-						<Fragment key={step}>
-							{i > 0 && (
-								<img className={styles.breadcrumbArrow} src='/img/strelka.svg' alt='' />
-							)}
-							<button
-								type='button'
-								className={cx(
-									styles.breadcrumbBadge,
-									status === 'active' && styles.breadcrumbBadgeActive,
-									status === 'complete' && styles.breadcrumbBadgeComplete,
+						return (
+							<Fragment key={step}>
+								{i > 0 && (
+									<img className={styles.breadcrumbArrow} src='/img/icons/icon-arrow-right.svg' alt='' />
 								)}
-								onClick={() => handleStepClick(step)}
-								disabled={!canClick || isSliding}
-							>
-								{status === 'complete' && (
-									<svg width='9' height='9' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'>
-										<path d='M5 13l4 4L19 7' />
-									</svg>
-								)}
-								{label}
-							</button>
-						</Fragment>
-					);
-				})}
-			</div>
+								<button
+									type='button'
+									className={cx(
+										styles.breadcrumbBadge,
+										status === 'active' && styles.breadcrumbBadgeActive,
+										status === 'complete' && styles.breadcrumbBadgeComplete,
+									)}
+									onClick={() => handleStepClick(step)}
+									disabled={!canClick || isSliding}
+								>
+									{status === 'active' && (
+										<motion.span
+											layoutId='breadcrumb-active-bg'
+											className={styles.breadcrumbActiveBg}
+											transition={{ type: 'spring', bounce: 0.2, duration: 0.38 }}
+										/>
+									)}
+									<span className={styles.breadcrumbBadgeContent}>
+										{label}
+									</span>
+								</button>
+							</Fragment>
+						);
+					})}
+				</div>
+			</LayoutGroup>
 
 			<div className={styles.stepContent} style={{ overflow: isSliding ? 'hidden' : 'visible' }}>
 				<AnimatePresence initial={false} custom={direction} mode='popLayout'>
@@ -224,6 +246,7 @@ export default function Parameters() {
 										options={(catalog.series ?? []).map(s => ({ value: s.id, label: s.name }))}
 										isOpen={openSelectId === 'series'}
 										onOpenChange={handleSeriesOpen}
+										leftIcon={<img src='/img/icons/icon-series.svg' alt='' width='16' height='16' />}
 									/>
 									{!seriesId && <p className={styles.hint}>Начните с выбора серии шкафа</p>}
 								</div>
@@ -239,11 +262,12 @@ export default function Parameters() {
 									<CustomSelect
 										id='model'
 										value={modelId}
-										onChange={onModelChange}
+										onChange={handleModelSelect}
 										placeholder='Выберите модель'
 										options={modelEntries.map(([id, m]) => ({ value: id, label: m.name }))}
 										isOpen={openSelectId === 'model'}
 										onOpenChange={handleModelOpen}
+										leftIcon={<img src='/img/icons/icon-model.svg' alt='' width='16' height='16' />}
 									/>
 									{!modelId && <p className={styles.hint}>Теперь выберите модель шкафа</p>}
 								</div>
@@ -256,39 +280,47 @@ export default function Parameters() {
 											exit={{ opacity: 0, y: 10 }}
 											transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
 										>
-											<div className={styles.paramGroup}>
-												<label className={styles.groupLabel} htmlFor='quantity'>
-													Количество шкафов (шт.)
-												</label>
-												<StepperInput
-													id='quantity'
-													value={String(quantity)}
-													min={1}
-													max={300}
-													step={1}
-													onChange={v => setQuantity(Number(v))}
-													defaultValue={10}
-													editable
-												/>
+											<div className={styles.qtyRow}>
+												<div className={styles.paramGroup}>
+													<label className={styles.groupLabel} htmlFor='quantity'>
+														Количество шкафов
+													</label>
+													<StepperInput
+														id='quantity'
+														value={String(quantity)}
+														min={1}
+														max={300}
+														step={1}
+														onChange={v => setQuantity(Number(v))}
+														defaultValue={10}
+														editable
+													/>
+												</div>
+												<div className={styles.paramGroup}>
+													<label className={styles.groupLabel} htmlFor='discount'>
+														Скидка %
+													</label>
+													<StepperInput
+														id='discount'
+														value={String(discount)}
+														min={0}
+														max={50}
+														step={1}
+														onChange={v => setDiscount(Number(v))}
+														defaultValue={0}
+														editable
+													/>
+												</div>
 											</div>
-											<div className={styles.paramGroup}>
-												<label className={styles.groupLabel} htmlFor='discount'>
-													Скидка (%)
-												</label>
-												<StepperInput
-													id='discount'
-													value={String(discount)}
-													min={0}
-													max={50}
-													step={1}
-													onChange={v => setDiscount(Number(v))}
-													defaultValue={0}
-													editable
-												/>
-											</div>
-											<button type='button' className={styles.nextBtn} onClick={() => goToStep(3)}>
+											<motion.button
+												type='button'
+												className={styles.nextBtn}
+												onClick={() => goToStep(3)}
+												whileTap={{ scale: 0.97 }}
+												transition={{ duration: 0.1 }}
+											>
 												Перейти к параметрам
-											</button>
+											</motion.button>
 										</motion.div>
 									)}
 								</AnimatePresence>
@@ -300,10 +332,7 @@ export default function Parameters() {
 								<div className={styles.paramGroup}>
 									<span className={styles.groupLabel}>Изменение габаритов</span>
 									<div className={styles.dimFields}>
-										<div className={styles.paramGroup}>
-											<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='width'>
-												Ширина (мм)
-											</label>
+										<div className={styles.dimField}>
 											<StepperInput
 												id='width'
 												value={width}
@@ -313,11 +342,10 @@ export default function Parameters() {
 												defaultValue={specs?.width}
 												blocked
 											/>
+											<label className={styles.dimLabel} htmlFor='width'>Ширина, мм</label>
 										</div>
-										<div className={styles.paramGroup}>
-											<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='height'>
-												Высота (мм)
-											</label>
+										<img className={styles.dimSeparator} src='/img/icons/icon-times.svg' alt='' width='15' height='15' />
+										<div className={styles.dimField}>
 											<StepperInput
 												id='height'
 												value={height}
@@ -328,13 +356,11 @@ export default function Parameters() {
 												modified={!!specs && String(height) !== String(specs.height)}
 												defaultValue={specs?.height}
 												snaps={HEIGHT_SNAPS}
-												blocked={quantity < heightMinQty}
 											/>
+											<label className={styles.dimLabel} htmlFor='height'>Высота, мм</label>
 										</div>
-										<div className={styles.paramGroup}>
-											<label className={cx(styles.groupLabel, styles.groupLabelSm)} htmlFor='depth'>
-												Глубина (мм)
-											</label>
+										<img className={styles.dimSeparator} src='/img/icons/icon-times.svg' alt='' width='15' height='15' />
+										<div className={styles.dimField}>
 											<StepperInput
 												id='depth'
 												value={depth}
@@ -343,107 +369,109 @@ export default function Parameters() {
 												onChange={setDepth}
 												modified={!!specs && String(depth) !== String(specs.depth)}
 												defaultValue={specs?.depth}
-												blocked={quantity < depthMinQty}
 											/>
+											<label className={styles.dimLabel} htmlFor='depth'>Глубина, мм</label>
 										</div>
 									</div>
 								</div>
 
 								<div className={styles.paramsGrid}>
-									{showThickness && (
-										<>
-											<div className={styles.paramGroup}>
-												<span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
-												<div className={styles.toggleGroup}>
-													{bodyThicknessOptions.map(t => (
-														<button
-															key={t}
-															className={cx(styles.toggleBtn, bodyThickness === t && styles.toggleBtnActive)}
-															onClick={() => setBodyThickness(t)}
-														>
-															{t}
-														</button>
-													))}
-												</div>
-											</div>
+									<div className={styles.paramGroup}>
+										<span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
+										<div className={styles.toggleGroup}>
+											{bodyThicknessOptions.map(t => {
+												const isActive = bodyThickness === t;
+												return (
+													<motion.button
+														key={t}
+														className={cx(styles.toggleBtn, isActive && styles.toggleBtnActive)}
+														onClick={() => setBodyThickness(t)}
+														whileTap={{ scale: 0.94 }}
+														transition={{ duration: 0.1 }}
+													>
+														<img src={isActive ? '/img/icons/icon-thickness-active.svg' : '/img/icons/icon-thickness.svg'} alt='' width='16' height='16' />
+														{t}
+													</motion.button>
+												);
+											})}
+										</div>
+									</div>
 
-											<div className={styles.paramGroup}>
-												<span className={styles.groupLabel}>Толщина металла двери (мм)</span>
-												<div className={styles.toggleGroup}>
-													{doorThicknessOptions.map(t => (
-														<button
-															key={t}
-															className={cx(styles.toggleBtn, doorThickness === t && styles.toggleBtnActive)}
-															onClick={() => setDoorThickness(t)}
-														>
-															{t}
-														</button>
-													))}
-												</div>
-											</div>
-										</>
-									)}
+									<div className={styles.paramGroup}>
+										<span className={styles.groupLabel}>Толщина металла двери (мм)</span>
+										<div className={styles.toggleGroup}>
+											{doorThicknessOptions.map(t => {
+												const isActive = doorThickness === t;
+												return (
+													<motion.button
+														key={t}
+														className={cx(styles.toggleBtn, isActive && styles.toggleBtnActive)}
+														onClick={() => setDoorThickness(t)}
+														whileTap={{ scale: 0.94 }}
+														transition={{ duration: 0.1 }}
+													>
+														<img src={isActive ? '/img/icons/icon-thickness-active.svg' : '/img/icons/icon-thickness.svg'} alt='' width='16' height='16' />
+														{t}
+													</motion.button>
+												);
+											})}
+										</div>
+									</div>
 
 									<div className={styles.paramGroup}>
 										<span className={styles.groupLabel}>Выбор замка</span>
-										<ul className={styles.lockList}>
-											{lockEntries.map(([id, lock]) => (
-												<li key={id}>
-													<button
-														className={cx(styles.lockItem, lockId === id && styles.lockItemActive)}
-														onClick={() => setLockId(id)}
-													>
-														<span className={styles.lockName}>{lock.name}</span>
-													</button>
-												</li>
-											))}
-										</ul>
+										<CustomSelect
+											id='lock'
+											value={lockId}
+											onChange={setLockId}
+											options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name }))}
+											isOpen={openSelectId === 'lock'}
+											onOpenChange={handleLockOpen}
+											leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
+										/>
 									</div>
 
 									<div className={styles.paramGroup}>
 										<span className={styles.groupLabel}>Вентиляция</span>
-										<ul className={styles.lockList}>
-											{[
-												{ id: null, label: 'Нет' },
-												...Object.entries(priceRules.ventilation ?? {}).map(([id, v]) => ({ id, label: v.name || id })),
-											].map(opt => (
-												<li key={String(opt.id)}>
-													<button
-														className={cx(styles.lockItem, ventilationType === opt.id && styles.lockItemActive)}
-														onClick={() => setVentilationType(opt.id)}
-													>
-														<span className={styles.lockName}>{opt.label}</span>
-													</button>
-												</li>
-											))}
-										</ul>
+										<CustomSelect
+											id='ventilation'
+											value={ventilationType}
+											onChange={setVentilationType}
+											options={[
+												{ value: null, label: 'Нет' },
+												...Object.entries(priceRules.ventilation ?? {}).map(([id, v]) => ({ value: id, label: v.name || id })),
+											]}
+											isOpen={openSelectId === 'ventilation'}
+											onOpenChange={handleVentilationOpen}
+											leftIcon={<img src='/img/icons/icon-ventilation.svg' alt='' width='16' height='16' />}
+										/>
 									</div>
 
-									{quantity >= doorColorMinQty && (
-										<div className={styles.paramGroup}>
-											<span className={styles.groupLabel}>Изменение цвета двери</span>
-											<ColorPicker
-												placeholder='Стандартный цвет'
-												selected={doorColor}
-												onSelect={setDoorColor}
-												colorRule={priceRules.color?.door}
-												quantity={quantity}
-											/>
-										</div>
-									)}
+									<div className={styles.paramGroup}>
+										<span className={styles.groupLabel}>Изменение цвета двери</span>
+										<CustomSelect
+											id='doorColor'
+											value={doorColor?.name ?? null}
+											onChange={handleDoorColorChange}
+											options={COLOR_OPTIONS}
+											isOpen={openSelectId === 'doorColor'}
+											onOpenChange={handleDoorColorOpen}
+											leftIcon={<img src='/img/icons/icon-color.svg' alt='' width='16' height='16' />}
+										/>
+									</div>
 
-									{quantity >= bodyColorMinQty && (
-										<div className={styles.paramGroup}>
-											<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
-											<ColorPicker
-												placeholder='Стандартный цвет'
-												selected={bodyColor}
-												onSelect={setBodyColor}
-												colorRule={priceRules.color?.full}
-												quantity={quantity}
-											/>
-										</div>
-									)}
+									<div className={styles.paramGroup}>
+										<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
+										<CustomSelect
+											id='bodyColor'
+											value={bodyColor?.name ?? null}
+											onChange={handleBodyColorChange}
+											options={COLOR_OPTIONS}
+											isOpen={openSelectId === 'bodyColor'}
+											onOpenChange={handleBodyColorOpen}
+											leftIcon={<img src='/img/icons/icon-color.svg' alt='' width='16' height='16' />}
+										/>
+									</div>
 								</div>
 							</div>
 						)}

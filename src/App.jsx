@@ -2,9 +2,14 @@ import { useState } from 'react';
 import { Toaster } from 'sonner';
 import { LoginScreen } from './modules/Auth';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
+import LoadingPreviewPage from './pages/LoadingPreviewPage/LoadingPreviewPage';
 import './index.css';
 
 export default function App() {
+  if (window.location.search.includes('preview=loading')) {
+    return <LoadingPreviewPage />;
+  }
+
   const [isAuth, setIsAuth] = useState(() => localStorage.getItem('promet_auth') === '1');
 
   if (!isAuth) return <LoginScreen onAuth={() => setIsAuth(true)} />;
