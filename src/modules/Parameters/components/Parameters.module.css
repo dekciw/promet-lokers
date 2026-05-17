@@ -6,6 +6,8 @@
 	display: flex;
 	flex-direction: column;
 	gap: 16px;
+	align-self: flex-start;
+	min-height: calc(100dvh - 99px);
 }
 
 .titleRow {
@@ -120,11 +122,11 @@
 	border: 0.5px solid transparent;
 	cursor: pointer;
 	transition: background 0.15s, border-color 0.15s, color 0.15s;
-	line-height: 1;
+	line-height: 1.25;
 	letter-spacing: 0.1px;
-	white-space: nowrap;
+	white-space: normal;
 	flex: 1;
-	overflow: hidden;
+	overflow: visible;
 	min-height: 34px;
 }
 
@@ -151,13 +153,10 @@
 .breadcrumbBadgeContent {
 	position: relative;
 	z-index: 1;
-	display: inline-flex;
-	align-items: center;
-	gap: 5px;
-	line-height: 1;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	max-width: 100%;
+	display: block;
+	line-height: 1.25;
+	text-align: center;
+	word-break: break-word;
 }
 
 .breadcrumbBadgeActive {
@@ -191,7 +190,6 @@
 /* ── Анимируемый контент ── */
 .stepContent {
 	position: relative;
-	flex: 1;
 	margin-top: 4px;
 }
 
@@ -747,6 +745,8 @@
 		border-left: none;
 		border-top: 1px solid var(--c-border);
 		padding: 24px 32px;
+		align-self: auto;
+		min-height: unset;
 	}
 
 	.paramsGrid {
