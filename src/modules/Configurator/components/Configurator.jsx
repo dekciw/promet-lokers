@@ -1,28 +1,45 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'sonner';
 import { calcDiff } from '../../../shared/utils/calcDiff';
+import Notification from '../../../shared/components/Notification/Notification.jsx';
 import { getColorHex } from '../../../shared/utils/colors';
 import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
 import NZModal from '../../../shared/components/NZModal/NZModal.jsx';
 import styles from './Configurator.module.css';
 
-const diffItemVariants = {
-	hidden: { opacity: 0, y: 10 },
+const specItemVariants = {
+	hidden: { opacity: 0, x: -10, scale: 0.97 },
 	visible: i => ({
 		opacity: 1,
-		y: 0,
-		transition: { duration: 0.28, ease: [0.23, 1, 0.32, 1], delay: i * 0.05 },
+		x: 0,
+		scale: 1,
+		transition: { type: 'spring', stiffness: 240, damping: 22, delay: i * 0.055 },
 	}),
-	exit: { opacity: 0, y: -6, transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] } },
 };
 
-const colVariants = {
-	hidden: { opacity: 0, y: 20 },
+const diffItemVariants = {
+	hidden: { opacity: 0, y: 16, scale: 0.96 },
 	visible: {
 		opacity: 1,
 		y: 0,
+		scale: 1,
+		transition: { type: 'spring', stiffness: 220, damping: 20 },
+	},
+	exit: {
+		opacity: 0,
+		y: -14,
+		scale: 0.96,
+		transition: { type: 'spring', stiffness: 220, damping: 20 },
+	},
+};
+
+const colVariants = {
+	hidden: { opacity: 0, y: 20, scale: 0.97 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
 		transition: { duration: 0.35, ease: [0.23, 1, 0.32, 1] },
 	},
 };
@@ -51,12 +68,12 @@ function buildCurrentForDiff(config, lock) {
 function buildDefaultSpecsList(defaults, catalog) {
 	if (!defaults) return [];
 	return [
+		{ label: 'Замок', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
 		{ label: 'Ширина', value: `${defaults.width} мм` },
 		{ label: 'Высота', value: `${defaults.height} мм` },
 		{ label: 'Глубина', value: `${defaults.depth} мм` },
 		{ label: 'Толщина корпуса', value: `${defaults.bodyThickness} мм` },
 		{ label: 'Толщина двери', value: `${defaults.doorThickness} мм` },
-		{ label: 'Замок', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
 		{ label: 'Вентиляция', value: 'Нет' },
 		{ label: 'Цвет корпуса', value: defaults.bodyColorName, colorHex: getColorHex(defaults.bodyColorName) },
 		{ label: 'Цвет двери', value: defaults.doorColorName, colorHex: getColorHex(defaults.doorColorName) },
@@ -66,6 +83,7 @@ function buildDefaultSpecsList(defaults, catalog) {
 function buildFinalSpecsList(config, defaults, lock, ventilation) {
 	if (!defaults) return [];
 	return [
+		{ label: 'Замок', value: lock?.name ?? config.lockId },
 		{ label: 'Количество', value: `${config.quantity ?? 10} шт.` },
 		{
 			label: 'Габариты',
@@ -73,7 +91,6 @@ function buildFinalSpecsList(config, defaults, lock, ventilation) {
 		},
 		{ label: 'Толщина корпуса', value: `${config.bodyThickness} мм` },
 		{ label: 'Толщина двери', value: `${config.doorThickness} мм` },
-		{ label: 'Замок', value: lock?.name ?? config.lockId },
 		...(config.ventilationType ? [{ label: 'Вентиляция', value: ventilation?.[config.ventilationType]?.name ?? config.ventilationType }] : []),
 		...(config.bodyColor ? [{ label: 'Цвет корпуса', value: config.bodyColor.name, colorHex: config.bodyColor.color }] : []),
 		...(config.doorColor ? [{ label: 'Цвет двери', value: config.doorColor.name, colorHex: config.doorColor.color }] : []),
@@ -127,6 +144,7 @@ export default function Configurator() {
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock, catalog.priceRules?.ventilation);
 
 	const [isNZOpen, setIsNZOpen] = useState(false);
+	const [notify, setNotify] = useState({ visible: false, status: 'ok', title: '', message: '' });
 
 	function openNZModal() {
 		setIsNZOpen(true);
@@ -136,15 +154,19 @@ export default function Configurator() {
 		setIsNZOpen(false);
 	}
 
+	function closeNotify() {
+		setNotify(n => ({ ...n, visible: false }));
+	}
+
 	async function handleNZSubmit({ managerName, clientName, nzNumber, calcNumber }) {
 		try {
 			const { generateNZ } = await import('../../../pdf/generateNZ.js');
 			await generateNZ({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
 			setIsNZOpen(false);
-			toast.success('Бланк НЗ скачан');
+			setNotify({ visible: true, status: 'ok', title: 'Бланк скачан', message: 'Бланк нестандартного заказа успешно сохранён' });
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);
-			toast.error('Не удалось создать PDF', { description: err?.message ?? String(err) });
+			setNotify({ visible: true, status: 'error', title: 'Не удалось создать PDF', message: err?.message ?? String(err) });
 		}
 	}
 
@@ -198,7 +220,7 @@ export default function Configurator() {
 							exit={{ opacity: 0, scale: 0.98 }}
 							transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
 						>
-							<svg className={`${styles.emptyIcon} animate__animated animate__pulse animate__infinite animate__slow`} width='72' height='96' viewBox='0 0 60 80' fill='none' stroke='currentColor' strokeWidth='1.4' strokeLinecap='round' strokeLinejoin='round'>
+							<svg className={styles.emptyIcon} width='72' height='96' viewBox='0 0 60 80' fill='none' stroke='currentColor' strokeWidth='1.4' strokeLinecap='round' strokeLinejoin='round'>
 								<rect x='2' y='72' width='56' height='6' rx='1.5' />
 								<rect x='2' y='2' width='56' height='70' rx='2' />
 								<line x1='20.7' y1='2' x2='20.7' y2='72' />
@@ -252,9 +274,19 @@ export default function Configurator() {
 											<span>Показатель</span>
 											<span>Значение</span>
 										</div>
-										<ul className={styles.specList} key={`${config.modelId}-${resetKey}`}>
+										<motion.ul
+											className={styles.specList}
+											key={`${config.modelId}-${resetKey}`}
+											initial='hidden'
+											animate='visible'
+										>
 											{defaultSpecsList.map(({ label, value, colorHex }, i) => (
-												<li key={label} className={styles.specItem} style={{ animationDelay: `${i * 0.05}s` }}>
+												<motion.li
+													key={label}
+													className={styles.specItem}
+													custom={i}
+													variants={specItemVariants}
+												>
 													<span className={styles.specLabel}>{label}</span>
 													<span className={styles.specValue}>
 														{colorHex && (
@@ -268,12 +300,12 @@ export default function Configurator() {
 														)}
 														{value}
 													</span>
-												</li>
+												</motion.li>
 											))}
 											{Array.from({ length: 3 }).map((_, i) => (
 												<li key={`empty-${i}`} className={styles.specItem} />
 											))}
-										</ul>
+										</motion.ul>
 									</div>
 								</div>
 							</motion.div>
@@ -290,13 +322,26 @@ export default function Configurator() {
 											<span>Показатель</span>
 											<span>Значение</span>
 										</div>
-										<ul className={styles.diffList}>
-											<AnimatePresence initial={false} key={`${config.modelId}-${resetKey}`}>
-												{changedSpecs.map(({ label, value }, i) => (
+										<motion.ul className={styles.diffList} layout>
+											<AnimatePresence initial={false} mode='popLayout' key={`${config.modelId}-${resetKey}`}>
+												{changedSpecs.length === 0 && (
+													<motion.li
+														key='empty-diff'
+														layout
+														className={styles.emptyDiffMsg}
+														initial={{ opacity: 0, y: 10, scale: 0.97 }}
+														animate={{ opacity: 1, y: 0, scale: 1 }}
+														exit={{ opacity: 0, y: -10, scale: 0.97 }}
+														transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+													>
+														Изменений нет — параметры стандартные
+													</motion.li>
+												)}
+												{changedSpecs.map(({ label, value }) => (
 													<motion.li
 														key={label}
+														layout
 														className={styles.diffItem}
-														custom={i}
 														variants={diffItemVariants}
 														initial='hidden'
 														animate='visible'
@@ -310,7 +355,7 @@ export default function Configurator() {
 											{Array.from({ length: Math.max(0, defaultSpecsList.length + 3 - changedSpecs.length) }).map((_, i) => (
 												<li key={`empty-${i}`} className={styles.diffItem} />
 											))}
-										</ul>
+										</motion.ul>
 									</div>
 								</div>
 							</motion.div>
@@ -328,9 +373,19 @@ export default function Configurator() {
 												<span>Показатель</span>
 												<span>Значение</span>
 											</div>
-											<ul className={styles.finalSpec} key={`${config.modelId}-${resetKey}`}>
+											<motion.ul
+												className={styles.finalSpec}
+												key={`${config.modelId}-${resetKey}`}
+												initial='hidden'
+												animate='visible'
+											>
 												{finalSpecsList.map(({ label, value, colorHex }, i) => (
-													<li key={label} className={styles.finalItem} style={{ animationDelay: `${i * 0.05}s` }}>
+													<motion.li
+														key={label}
+														className={styles.finalItem}
+														custom={i}
+														variants={specItemVariants}
+													>
 														<span className={styles.finalLabel}>{label}</span>
 														<span className={styles.finalValue}>
 															{colorHex && (
@@ -344,7 +399,7 @@ export default function Configurator() {
 															)}
 															{value}
 														</span>
-													</li>
+													</motion.li>
 												))}
 												{price && !price.manual && (
 													<li className={styles.finalItem}>
@@ -373,7 +428,7 @@ export default function Configurator() {
 														<span className={styles.finalValue}>{price.leadTime}</span>
 													</li>
 												)}
-											</ul>
+											</motion.ul>
 										</div>
 									</div>
 
@@ -385,7 +440,7 @@ export default function Configurator() {
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
-												КП для клиента
+												Коммерческое предложение для клиента
 											</motion.button>
 										</div>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
@@ -397,7 +452,7 @@ export default function Configurator() {
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
-												Бланк НЗ
+												Бланк нестандартного заказа
 											</motion.button>
 										</div>
 									</div>
@@ -441,7 +496,7 @@ export default function Configurator() {
 								whileTap={{ scale: 0.96 }}
 								transition={{ duration: 0.1 }}
 							>
-								Бланк НЗ
+								Бланк нестандартного заказа
 							</motion.button>
 							<motion.button
 								className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`}
@@ -449,7 +504,7 @@ export default function Configurator() {
 								whileTap={{ scale: 0.96 }}
 								transition={{ duration: 0.1 }}
 							>
-								КП для клиента
+								Коммерческое предложение для клиента
 							</motion.button>
 						</div>
 					</motion.div>
@@ -457,6 +512,17 @@ export default function Configurator() {
 			</AnimatePresence>
 
 			<NZModal isOpen={isNZOpen} onClose={closeNZModal} onSubmit={handleNZSubmit} />
+
+			<Notification
+				visible={notify.visible}
+				status={notify.status}
+				title={notify.title}
+				stickTo='left'
+				offset={20}
+				onCloserClick={closeNotify}
+			>
+				{notify.message}
+			</Notification>
 		</main>
 	);
 }

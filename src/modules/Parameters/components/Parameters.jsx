@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, Fragment } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import CustomSelect from './CustomSelect';
+import ColorPicker from './ColorPicker/ColorPicker';
 import StepperInput from './StepperInput';
 import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
@@ -26,9 +27,9 @@ const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 const STEP_LABELS = ['Серия', 'Модель', 'Изменяемые параметры'];
 
 const slideVariants = {
-	initial: dir => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0 }),
-	animate: { x: 0, opacity: 1 },
-	exit: dir => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0 }),
+	initial: dir => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0, scale: 0.97 }),
+	animate: { x: 0, opacity: 1, scale: 1 },
+	exit: dir => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0, scale: 0.97 }),
 };
 
 function buildThicknessOptions(baseVal) {
@@ -74,6 +75,7 @@ export default function Parameters() {
 	const [displayStep, setDisplayStep] = useState(() => (modelId ? 3 : seriesId ? 2 : 1));
 	const [direction, setDirection] = useState(1);
 	const [isSliding, setIsSliding] = useState(false);
+	const [modelConfirmed, setModelConfirmed] = useState(() => !!modelId);
 	const backAnimTimersRef = useRef([]);
 
 const [openSelectId, setOpenSelectId] = useState(null);
@@ -128,6 +130,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 
 	function handleModelSelect(newModelId) {
 		setParametersUnlocked(false);
+		setModelConfirmed(false);
 		onModelChange(newModelId);
 	}
 
@@ -160,6 +163,13 @@ const [openSelectId, setOpenSelectId] = useState(null);
 
 	const specs = currentModel?.defaultSpecs;
 
+	const heightModified = !!specs && String(height) !== String(specs.height);
+	const depthModified = !!specs && String(depth) !== String(specs.depth);
+	const lockModified = !!specs && lockId !== specs.lockId;
+	const ventilationModified = ventilationType !== null && ventilationType !== undefined;
+	const doorColorModified = doorColor !== null;
+	const bodyColorModified = bodyColor !== null;
+
 	function getStepStatus(step) {
 		if (step === displayStep) return 'active';
 		if (step < displayStep) return 'complete';
@@ -186,7 +196,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 					{STEP_LABELS.map((label, i) => {
 						const step = i + 1;
 						const status = getStepStatus(step);
-						const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && !!modelId);
+						const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && modelConfirmed);
 
 						return (
 							<Fragment key={step}>
@@ -254,7 +264,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 						)}
 
 						{stepperStep === 2 && (
-							<div className={styles.stepPane}>
+							<motion.div className={styles.stepPane}>
 								<div className={styles.paramGroup}>
 									<label className={styles.groupLabel} htmlFor='model'>
 										Модель шкафа
@@ -315,7 +325,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 											<motion.button
 												type='button'
 												className={styles.nextBtn}
-												onClick={() => goToStep(3)}
+												onClick={() => { setModelConfirmed(true); goToStep(3); }}
 												whileTap={{ scale: 0.97 }}
 												transition={{ duration: 0.1 }}
 											>
@@ -324,7 +334,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 										</motion.div>
 									)}
 								</AnimatePresence>
-							</div>
+							</motion.div>
 						)}
 
 						{stepperStep === 3 && (
@@ -333,6 +343,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 									<span className={styles.groupLabel}>Изменение габаритов</span>
 									<div className={styles.dimFields}>
 										<div className={styles.dimField}>
+											<label className={styles.dimLabel} htmlFor='width'>Ширина, мм</label>
 											<StepperInput
 												id='width'
 												value={width}
@@ -342,10 +353,10 @@ const [openSelectId, setOpenSelectId] = useState(null);
 												defaultValue={specs?.width}
 												blocked
 											/>
-											<label className={styles.dimLabel} htmlFor='width'>Ширина, мм</label>
 										</div>
 										<img className={styles.dimSeparator} src='/img/icons/icon-times.svg' alt='' width='15' height='15' />
 										<div className={styles.dimField}>
+											<label className={styles.dimLabel} htmlFor='height'>Высота, мм</label>
 											<StepperInput
 												id='height'
 												value={height}
@@ -353,24 +364,23 @@ const [openSelectId, setOpenSelectId] = useState(null);
 												max={HEIGHT_MAX}
 												step={10000}
 												onChange={setHeight}
-												modified={!!specs && String(height) !== String(specs.height)}
+												modified={heightModified}
 												defaultValue={specs?.height}
 												snaps={HEIGHT_SNAPS}
 											/>
-											<label className={styles.dimLabel} htmlFor='height'>Высота, мм</label>
 										</div>
 										<img className={styles.dimSeparator} src='/img/icons/icon-times.svg' alt='' width='15' height='15' />
 										<div className={styles.dimField}>
+											<label className={styles.dimLabel} htmlFor='depth'>Глубина, мм</label>
 											<StepperInput
 												id='depth'
 												value={depth}
 												min={minDepth}
 												max={maxDepth}
 												onChange={setDepth}
-												modified={!!specs && String(depth) !== String(specs.depth)}
+												modified={depthModified}
 												defaultValue={specs?.depth}
 											/>
-											<label className={styles.dimLabel} htmlFor='depth'>Глубина, мм</label>
 										</div>
 									</div>
 								</div>
@@ -428,6 +438,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 											isOpen={openSelectId === 'lock'}
 											onOpenChange={handleLockOpen}
 											leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
+											modified={lockModified}
 										/>
 									</div>
 
@@ -444,32 +455,31 @@ const [openSelectId, setOpenSelectId] = useState(null);
 											isOpen={openSelectId === 'ventilation'}
 											onOpenChange={handleVentilationOpen}
 											leftIcon={<img src='/img/icons/icon-ventilation.svg' alt='' width='16' height='16' />}
+											modified={ventilationModified}
 										/>
 									</div>
 
 									<div className={styles.paramGroup}>
 										<span className={styles.groupLabel}>Изменение цвета двери</span>
-										<CustomSelect
-											id='doorColor'
-											value={doorColor?.name ?? null}
-											onChange={handleDoorColorChange}
-											options={COLOR_OPTIONS}
+										<ColorPicker
+											placeholder='Стандарт (без изменений)'
+											selected={doorColor}
+											onSelect={setDoorColor}
 											isOpen={openSelectId === 'doorColor'}
 											onOpenChange={handleDoorColorOpen}
-											leftIcon={<img src='/img/icons/icon-color.svg' alt='' width='16' height='16' />}
+											modified={doorColorModified}
 										/>
 									</div>
 
 									<div className={styles.paramGroup}>
 										<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
-										<CustomSelect
-											id='bodyColor'
-											value={bodyColor?.name ?? null}
-											onChange={handleBodyColorChange}
-											options={COLOR_OPTIONS}
+										<ColorPicker
+											placeholder='Стандарт (без изменений)'
+											selected={bodyColor}
+											onSelect={setBodyColor}
 											isOpen={openSelectId === 'bodyColor'}
 											onOpenChange={handleBodyColorOpen}
-											leftIcon={<img src='/img/icons/icon-color.svg' alt='' width='16' height='16' />}
+											modified={bodyColorModified}
 										/>
 									</div>
 								</div>

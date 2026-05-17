@@ -28,9 +28,9 @@ export default function LoginScreen({ onAuth }) {
 
   return (
     <div className={styles.loginPage}>
-      <div className={`${styles.loginCard}${shake ? ` ${styles.loginCardShake}` : ''}`}>
+      <div className={`${styles.loginCard} animate__animated animate__fadeInUp${shake ? ` ${styles.loginCardShake}` : ''}`}>
         <div className={styles.loginLogo}>
-          <img src='/img/logo.svg' alt='Промет' className={styles.loginLogoImg} />
+          <img src='/img/brand/logo.svg' alt='Промет' className={styles.loginLogoImg} />
         </div>
 
         <div className={styles.loginHeader}>

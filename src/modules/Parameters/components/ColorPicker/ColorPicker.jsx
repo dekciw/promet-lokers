@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, Fragment } from 'react';
+import { useRef, useCallback, Fragment } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useClickOutside } from '../../../../shared/hooks/useClickOutside';
 import { COLORS } from '../../../../shared/utils/colors';
@@ -6,8 +6,22 @@ import { cx } from '../../../../shared/utils/cx';
 import styles from './ColorPicker.module.css';
 
 const dropdownVariants = {
-	hidden: { opacity: 0, scaleY: 0.95, y: 4 },
-	visible: { opacity: 1, scaleY: 1, y: 0 },
+	hidden: { clipPath: 'inset(100% 0 0 0)', opacity: 0 },
+	visible: {
+		clipPath: 'inset(0% 0 0 0)',
+		opacity: 1,
+		transition: {
+			duration: 0.22,
+			ease: [0.23, 1, 0.32, 1],
+			staggerChildren: 0.02,
+			delayChildren: 0.04,
+		},
+	},
+};
+
+const itemVariants = {
+	hidden: { opacity: 0, x: -5 },
+	visible: { opacity: 1, x: 0, transition: { duration: 0.16 } },
 };
 
 export default function ColorPicker({
@@ -15,20 +29,22 @@ export default function ColorPicker({
 	selected,
 	onSelect,
 	standardLabel = 'Стандарт (без изменений)',
+	isOpen,
+	onOpenChange,
+	modified,
 }) {
-	const [open, setOpen] = useState(false);
 	const ref = useRef(null);
-	const closeDropdown = useCallback(() => setOpen(false), []);
+	const closeDropdown = useCallback(() => onOpenChange(false), [onOpenChange]);
 	useClickOutside(ref, closeDropdown);
 
 	function handleTriggerClick(e) {
 		e.stopPropagation();
-		setOpen(prev => !prev);
+		onOpenChange(!isOpen);
 	}
 
 	function handleSelect(item) {
 		onSelect(item);
-		setOpen(false);
+		onOpenChange(false);
 	}
 
 	function getSwatchStyle(colorHex) {
@@ -39,49 +55,68 @@ export default function ColorPicker({
 	const swatchStyle = selected ? getSwatchStyle(selected.color) : {};
 
 	return (
-		<div className={cx(styles.colorPicker, open && styles.colorPickerOpen)} ref={ref}>
-			<button type='button' className={styles.trigger} aria-expanded={open} onClick={handleTriggerClick}>
-				<span className={styles.triggerSwatch} style={swatchStyle} />
+		<div className={cx(styles.colorPicker, isOpen && styles.colorPickerOpen)} ref={ref}>
+			<button type='button' className={cx(styles.trigger, modified && styles.triggerModified)} aria-expanded={isOpen} onClick={handleTriggerClick}>
+				<img src='/img/icons/icon-color.svg' alt='' width='16' height='16' className={styles.triggerIcon} />
+				{selected && <span className={styles.triggerSwatch} style={swatchStyle} />}
 				<span className={`${styles.triggerText}${selected ? ` ${styles.triggerTextSelected}` : ''}`}>
 					{selected ? selected.name : placeholder}
 				</span>
-				<img className={styles.triggerArrow} src='/img/icons/icon-arrow-down.svg' alt='' />
+				<motion.img
+					className={styles.triggerArrow}
+					src='/img/icons/icon-arrow-down.svg'
+					alt=''
+					animate={{ rotate: isOpen ? 180 : 0 }}
+					transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+				/>
 			</button>
 
 			<AnimatePresence>
-				{open && (
+				{isOpen && (
 					<motion.ul
 						className={styles.dropdown}
 						variants={dropdownVariants}
 						initial='hidden'
 						animate='visible'
 						exit='hidden'
-						transition={{ duration: 0.15, ease: [0.23, 1, 0.32, 1] }}
-						style={{ transformOrigin: 'bottom center' }}
+						transition={{ duration: 0.15, ease: [0.4, 0, 1, 1] }}
 					>
 						{selected && (
-							<li className={`${styles.item} ${styles.itemReset}`} onClick={() => handleSelect(null)}>
+							<motion.li variants={itemVariants} className={`${styles.item} ${styles.itemReset}`} onClick={() => handleSelect(null)}>
 								<span className={`${styles.itemSwatch} ${styles.itemSwatchStandard}`} />
 								<span className={styles.itemName}>{standardLabel}</span>
-							</li>
+							</motion.li>
 						)}
-						{COLORS.map((group) => {
-							return (
-								<Fragment key={group.group}>
-									<li className={styles.group}>{group.group}</li>
-									{group.items.map(item => (
-										<li
-											key={item.name}
-											className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
-											onClick={() => handleSelect(item)}
-										>
-											<span className={styles.itemSwatch} style={{ background: item.color }} />
-											<span className={styles.itemName}>{item.name}</span>
-										</li>
-									))}
-								</Fragment>
-							);
-						})}
+						{COLORS.map((group) => (
+							<Fragment key={group.group}>
+								<motion.li variants={itemVariants} className={styles.group}>{group.group}</motion.li>
+								{group.items.map(item => (
+									<motion.li
+										key={item.name}
+										variants={itemVariants}
+										className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
+										onClick={() => handleSelect(item)}
+									>
+										<span className={styles.itemSwatch} style={{ background: item.color }} />
+										<span className={styles.itemName}>{item.name}</span>
+										<AnimatePresence>
+											{selected?.name === item.name && (
+												<motion.svg
+													width='14' height='14' viewBox='0 0 14 14' fill='none'
+													className={styles.itemCheck}
+													initial={{ scale: 0, opacity: 0 }}
+													animate={{ scale: 1, opacity: 1 }}
+													exit={{ scale: 0, opacity: 0 }}
+													transition={{ duration: 0.15, type: 'spring', bounce: 0.4 }}
+												>
+													<path d='M2.5 7l3 3 6-6' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' />
+												</motion.svg>
+											)}
+										</AnimatePresence>
+									</motion.li>
+								))}
+							</Fragment>
+						))}
 					</motion.ul>
 				)}
 			</AnimatePresence>
