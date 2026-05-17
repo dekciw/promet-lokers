@@ -42,15 +42,12 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 
 	useEffect(() => {
 		if (!isOpen) return;
-		const scrollY = window.scrollY;
-		document.body.style.position = 'fixed';
-		document.body.style.top = `-${scrollY}px`;
-		document.body.style.width = '100%';
+		function stopWheel(e) { e.preventDefault(); }
+		document.addEventListener('wheel', stopWheel, { passive: false });
+		document.addEventListener('touchmove', stopWheel, { passive: false });
 		return () => {
-			document.body.style.position = '';
-			document.body.style.top = '';
-			document.body.style.width = '';
-			window.scrollTo(0, scrollY);
+			document.removeEventListener('wheel', stopWheel);
+			document.removeEventListener('touchmove', stopWheel);
 		};
 	}, [isOpen]);
 
