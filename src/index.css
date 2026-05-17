@@ -6,6 +6,12 @@
 	padding: 0;
 }
 
+html {
+	background: var(--c-bg);
+	min-height: 100%;
+	overflow-x: hidden;
+}
+
 :root {
 	/* CSS переменные */
 	--c-bg: #f0f2f7;
@@ -26,7 +32,7 @@
 
 	/* Шрифты */
 	--f-main: 'Inter', 'Roboto', sans-serif;
-	--f-display: 'Oswald', sans-serif;
+	--f-display: 'Montserrat', 'Inter', sans-serif;
 	--f-mono: 'Liberation Mono', monospace;
 
 	/* Радиус */
@@ -73,7 +79,10 @@ body {
 	font-size: 14px;
 	background: var(--c-bg);
 	color: var(--c-text-dark);
-	min-height: 100vh;
+	min-height: 100dvh;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	overflow-x: hidden;
 }
 
 /* Экран статуса (загрузка / ошибка каталога) */
@@ -82,7 +91,7 @@ body {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	min-height: 100vh;
+	min-height: 100dvh;
 	gap: 16px;
 	padding: 40px;
 	text-align: center;
@@ -109,7 +118,7 @@ body {
 /* Основная раскладка страницы */
 .layout {
 	display: flex;
-	min-height: calc(100vh - 99px);
+	min-height: calc(100dvh - 99px);
 	position: relative;
 	isolation: isolate;
 }
@@ -117,11 +126,11 @@ body {
 /* Декоративное синее свечение из макета Figma */
 .layout::before {
 	content: '';
-	position: fixed;
-	bottom: -10%;
+	position: absolute;
+	bottom: 0;
 	left: -20%;
-	width: 90vw;
-	height: 75vh;
+	width: 90%;
+	height: 75%;
 	background: radial-gradient(ellipse at center, rgba(22, 86, 253, 0.18) 0%, transparent 65%);
 	pointer-events: none;
 	z-index: -1;
@@ -196,24 +205,33 @@ body {
 
 /* ──────────── АДАПТИВ ──────────── */
 
-/* Ноутбук (≤1279px) — сужаем панель параметров, остальное не трогаем */
+/* Ноутбук (≤1279px) */
 @media (max-width: 1279px) {
 	.layout {
-		min-height: calc(100vh - 99px);
+		min-height: calc(100dvh - 99px);
 	}
 }
 
-/* Планшет (≤1023px) — панель параметров уходит под конфигуратор */
+/* Планшет landscape и меньше (≤1023px) — параметры сверху, карточки снизу */
 @media (max-width: 1023px) {
 	.layout {
-		flex-direction: column;
+		flex-direction: column-reverse;
 		min-height: unset;
 	}
 }
 
-/* Мобильный (≤767px) — параметры поднимаем выше конфигуратора */
-@media (max-width: 767px) {
-	.layout {
-		flex-direction: column-reverse;
+/* Телефон (≤480px) — iOS: предотвращаем зум при фокусе на input */
+@media (max-width: 480px) {
+	input:not([type='checkbox']):not([type='radio']):not([type='range']),
+	select,
+	textarea {
+		font-size: max(16px, 1em) !important;
+	}
+}
+
+/* Маленький телефон (≤375px) — iPhone SE и аналоги */
+@media (max-width: 375px) {
+	.layout__content {
+		min-width: 0;
 	}
 }

@@ -3,11 +3,11 @@
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 40px;
+	padding: 0 32px;
 	height: 85px;
 	flex-shrink: 0;
 	overflow: hidden;
-	background: url('/img/header_bg.png') center 70% / 100% 120% no-repeat,
+	background: url('/img/header/header-bg.png') center 70% / 100% 120% no-repeat,
 		linear-gradient(to right, #1e53a4 0%, #0c143b 100%);
 	box-shadow: 0 6px 20px rgba(8, 15, 50, 0.6);
 }
@@ -46,10 +46,10 @@
 
 .tagline {
 	font-family: var(--f-display);
-	font-size: 11px;
-	font-weight: 400;
+	font-size: 10px;
+	font-weight: 600;
 	color: rgba(255, 255, 255, 0.85);
-	letter-spacing: 1.2px;
+	letter-spacing: 1.5px;
 	text-transform: uppercase;
 	line-height: 1.35;
 	white-space: nowrap;
@@ -110,9 +110,10 @@
 
 /* ──────────── АДАПТИВ ──────────── */
 
+/* Ноутбук */
 @media (max-width: 1279px) {
 	.header {
-		padding: 0 28px;
+		padding: 0 24px;
 	}
 
 	.tagline {
@@ -121,6 +122,24 @@
 	}
 }
 
+/* Планшет landscape / iPad Pro 12.9" */
+@media (max-width: 1023px) {
+	.header {
+		padding: 0 20px;
+		height: 76px;
+	}
+
+	.decoIcons {
+		width: 42%;
+		left: 40%;
+	}
+
+	.tagline {
+		letter-spacing: 0.6px;
+	}
+}
+
+/* Планшет portrait / большой телефон */
 @media (max-width: 767px) {
 	.header {
 		height: auto;
@@ -145,6 +164,7 @@
 	}
 }
 
+/* Телефон */
 @media (max-width: 480px) {
 	.info {
 		display: none;
@@ -152,5 +172,21 @@
 
 	.divider {
 		display: none;
+	}
+}
+
+/* Маленький телефон — iPhone SE, Galaxy A */
+@media (max-width: 375px) {
+	.header {
+		padding: 10px 12px;
+		min-height: 52px;
+	}
+
+	.logo {
+		height: 24px;
+	}
+
+	.userBtnImg {
+		height: 20px;
 	}
 }

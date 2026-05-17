@@ -6,19 +6,8 @@
   80%       { transform: translateX(6px); }
 }
 
-@keyframes cardIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .loginPage {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--c-bg);
   display: flex;
   align-items: center;
@@ -37,7 +26,7 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  animation: cardIn 0.4s var(--ease-out) both;
+  --animate-duration: 0.5s;
 }
 
 .loginCardShake {
@@ -62,17 +51,18 @@
 }
 
 .loginTitle {
+  font-family: var(--f-display);
   font-size: 22px;
   font-weight: 700;
   color: var(--c-brand);
   line-height: 28px;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.4px;
 }
 
 .loginSubtitle {
   font-size: 13px;
   font-weight: 400;
-  color: var(--c-text-muted);
+  color: var(--c-text-faint);
   line-height: 20px;
 }
 
@@ -89,10 +79,10 @@
 }
 
 .loginLabel {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--c-text-mid);
-  letter-spacing: 0.2px;
+  letter-spacing: 0.3px;
 }
 
 .loginInput {
@@ -134,8 +124,9 @@
   border: none;
   border-radius: var(--r-md);
   font-family: var(--f-main);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
   box-shadow: 0 4px 12px rgba(12, 83, 179, 0.3);
@@ -156,5 +147,30 @@
 @media (max-width: 480px) {
   .loginCard {
     padding: 36px 24px 32px;
+  }
+}
+
+/* Samsung Galaxy, Xiaomi и другие телефоны стандартного размера */
+@media (max-width: 414px) {
+  .loginCard {
+    padding: 32px 20px 28px;
+    gap: 24px;
+  }
+}
+
+/* iPhone SE, Galaxy A03 и аналоги */
+@media (max-width: 375px) {
+  .loginCard {
+    padding: 28px 16px 24px;
+    gap: 20px;
+  }
+
+  .loginTitle {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .loginBtn {
+    height: 44px;
   }
 }
