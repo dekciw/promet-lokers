@@ -41,12 +41,17 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 	}, [isOpen, reset]);
 
 	useEffect(() => {
-		if (isOpen) {
-			document.documentElement.style.overflow = 'hidden';
-		} else {
-			document.documentElement.style.overflow = '';
-		}
-		return () => { document.documentElement.style.overflow = ''; };
+		if (!isOpen) return;
+		const scrollY = window.scrollY;
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
+		return () => {
+			document.body.style.position = '';
+			document.body.style.top = '';
+			document.body.style.width = '';
+			window.scrollTo(0, scrollY);
+		};
 	}, [isOpen]);
 
 	useEffect(() => {
