@@ -149,7 +149,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 	const priceRules = catalog.priceRules ?? {};
 
 	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
-	const lockEntries = Object.entries(catalog.locks).sort((a, b) => (a[1].single ?? 0) - (b[1].single ?? 0));
+	const lockEntries = Object.entries(catalog.locks).sort((a, b) => (Number(a[1].perSection) ?? 0) - (Number(b[1].perSection) ?? 0));
 	const currentModel = modelId ? catalog.models[modelId] : null;
 	const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness);
 	const doorThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.doorThickness);
