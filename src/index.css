@@ -8,64 +8,76 @@
 
 html {
 	background: var(--c-bg);
-	min-height: 100%;
-	overflow-x: hidden;
+	height: 100%;
+	overflow: hidden;
 }
 
 :root {
-	/* CSS переменные */
-	--c-bg: #f0f2f7;
+	/* Backgrounds */
+	--c-bg: #edf1f9;
 	--c-white: #ffffff;
-	--c-border: #b6c2e2;
-	--c-border-light: #dde3f0;
-	--c-text-dark: #1a1f36;
-	--c-text-mid: #333e5a;
-	--c-text-muted: #445275;
-	--c-text-faint: #8896b3;
-	--c-primary: #00359e;
-	--c-primary-bg: rgba(0, 53, 158, 0.08);
-	--c-primary-border: rgba(0, 53, 158, 0.25);
-	--c-amber-bg: #fffbeb;
-	--c-amber-border: #fde68a;
-	--c-amber: #b45309;
-	--c-amber-dark: #78350f;
 
-	/* Шрифты */
-	--f-main: 'Inter', 'Roboto', sans-serif;
-	--f-display: 'Roboto', 'Inter', sans-serif;
-	--f-mono: 'Liberation Mono', monospace;
-
-	/* Радиус */
-	--r-sm: 8px;
-	--r-md: 12px;
-	--r-lg: 16px;
-	--r-full: 9999px;
-
-	/* Тени */
-	--s-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
-	--s-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-	--s-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-	--s-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-	--s-primary: 0 9px 25px rgba(132, 142, 151, 0.07);
-	--s-primary-btn: 0 4px 12px rgba(0, 53, 158, 0.25);
-
-	/* Easing curves */
-	--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-	--ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
-	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-
-	/* Цвета стеклянных карточек (одинаковые для всех трёх) */
-	--card-bg: rgba(240, 240, 240, 0.72);
-	--card-border: #999999;
-	--card-label: #333333;
-	--card-text: #333333;
-
-	/* Акцентный */
+	/* Brand (корпоративные — не меняем) */
 	--c-brand: #14307c;
+	--c-primary: #00359e;
+	--c-primary-hover: #002d85;
+	--c-primary-active: #00246b;
+	--c-primary-bg: rgba(0, 53, 158, 0.06);
+	--c-primary-border: rgba(0, 53, 158, 0.18);
+
+	/* Orange CTA */
 	--c-orange: #f58214;
 	--c-orange-hover: #e07312;
 	--c-orange-active: #cc6a0f;
-	--c-border-subtle: #dde3f0;
+
+	/* Текстовая иерархия */
+	--c-text-dark: #0c1529;
+	--c-text-mid: #273659;
+	--c-text-muted: #546182;
+	--c-text-faint: #8897b8;
+
+	/* Границы */
+	--c-border: #d0d9ed;
+	--c-border-subtle: #e8edf7;
+	--c-border-light: #f2f5fc;
+
+	/* Статусы */
+	--c-amber: #b45309;
+	--c-amber-bg: #fffbeb;
+	--c-amber-border: #fde68a;
+
+	/* Шрифты */
+	--f-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+	--f-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+	--f-mono: 'Liberation Mono', 'Courier New', monospace;
+
+	/* Радиус */
+	--r-xs: 4px;
+	--r-sm: 8px;
+	--r-md: 12px;
+	--r-lg: 16px;
+	--r-xl: 20px;
+	--r-full: 9999px;
+
+	/* Тени — многослойные, мягкие */
+	--s-xs: 0 1px 2px rgba(12, 21, 41, 0.04);
+	--s-sm: 0 2px 6px rgba(12, 21, 41, 0.05), 0 1px 2px rgba(12, 21, 41, 0.04);
+	--s-md: 0 4px 16px rgba(12, 21, 41, 0.08), 0 1px 4px rgba(12, 21, 41, 0.04);
+	--s-lg: 0 8px 32px rgba(12, 21, 41, 0.10), 0 2px 8px rgba(12, 21, 41, 0.05);
+	--s-xl: 0 20px 60px rgba(12, 21, 41, 0.14), 0 4px 16px rgba(12, 21, 41, 0.06);
+	--s-primary-btn: 0 4px 14px rgba(0, 53, 158, 0.28);
+	--s-orange-btn: 0 4px 14px rgba(245, 130, 20, 0.32);
+
+	/* Карточки */
+	--card-bg: #ffffff;
+	--card-border: #dde4f0;
+	--card-label: #546182;
+	--card-text: #0c1529;
+
+	/* Easing */
+	--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
+	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* Корневой контейнер React */
@@ -79,10 +91,10 @@ body {
 	font-size: 14px;
 	background: var(--c-bg);
 	color: var(--c-text-dark);
-	min-height: 100dvh;
+	height: 100dvh;
+	overflow: hidden;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
-	overflow-x: hidden;
 }
 
 /* Экран статуса (загрузка / ошибка каталога) */
@@ -100,49 +112,53 @@ body {
 }
 
 .app-status__retry {
-	padding: 8px 24px;
-	background: var(--c-brand);
+	padding: 10px 28px;
+	background: var(--c-primary);
 	color: #fff;
 	border: none;
 	border-radius: var(--r-sm);
 	cursor: pointer;
 	font-family: var(--f-main);
 	font-size: 14px;
-	transition: background 0.15s;
+	font-weight: 600;
+	transition: background 0.18s, box-shadow 0.18s;
+	box-shadow: var(--s-primary-btn);
 }
 
 .app-status__retry:hover {
-	background: #0a47a0;
+	background: var(--c-primary-hover);
+	box-shadow: 0 6px 18px rgba(0, 53, 158, 0.35);
+}
+
+/* Обёртка всей страницы — хедер фиксирован, контент под ним скролится */
+.app-wrapper {
+	display: flex;
+	flex-direction: column;
+	height: 100dvh;
+	overflow: hidden;
+}
+
+.main-scroll {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	min-height: 0;
 }
 
 /* Основная раскладка страницы */
 .layout {
 	display: flex;
-	min-height: calc(100dvh - 99px);
+	min-height: calc(100dvh - 116px); /* 68px header + 48px footer */
 	position: relative;
 	isolation: isolate;
-	max-width: 1600px;
-	margin: 0 auto;
 	width: 100%;
-}
-
-/* Декоративное синее свечение из макета Figma */
-.layout::before {
-	content: '';
-	position: absolute;
-	bottom: 0;
-	left: -20%;
-	width: 90%;
-	height: 75%;
-	background: radial-gradient(ellipse at center, rgba(22, 86, 253, 0.18) 0%, transparent 65%);
-	pointer-events: none;
-	z-index: -1;
 }
 
 .layout__content {
 	flex: 1 1 0;
 	min-width: 0;
 }
+
 
 /* Тултип через data-tooltip атрибут */
 [data-tooltip] {
@@ -155,12 +171,12 @@ body {
 	bottom: calc(100% + 8px);
 	left: 50%;
 	transform: translateX(-50%) translateY(4px) scale(0.96);
-	background: #1e293b;
+	background: #0c1529;
 	color: #fff;
 	font-family: var(--f-main);
-	font-size: 12px;
+	font-size: 11.5px;
 	font-weight: 400;
-	line-height: 1.4;
+	line-height: 1.5;
 	white-space: nowrap;
 	padding: 6px 10px;
 	border-radius: 6px;
@@ -168,7 +184,7 @@ body {
 	opacity: 0;
 	transition: opacity 0.12s var(--ease-out), transform 0.12s var(--ease-out);
 	z-index: 500;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 [data-tooltip]::before {
@@ -178,7 +194,7 @@ body {
 	left: 50%;
 	transform: translateX(-50%);
 	border: 5px solid transparent;
-	border-top-color: #1e293b;
+	border-top-color: #0c1529;
 	pointer-events: none;
 	opacity: 0;
 	transition: opacity 0.12s var(--ease-out);
@@ -195,7 +211,7 @@ body {
 	}
 }
 
-/* Отключаем анимации для пользователей с настройкой "уменьшить движение" */
+/* Отключаем анимации */
 @media (prefers-reduced-motion: reduce) {
 	*,
 	*::before,
@@ -206,16 +222,53 @@ body {
 	}
 }
 
+/* ── Скроллбар ── */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-button {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:decrement,
+::-webkit-scrollbar-button:single-button:vertical:increment,
+::-webkit-scrollbar-button:single-button:horizontal:decrement,
+::-webkit-scrollbar-button:single-button:horizontal:increment {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--c-border);
+	border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--c-text-faint);
+}
+
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--c-border) transparent;
+}
+
 /* ──────────── АДАПТИВ ──────────── */
 
-/* Ноутбук (≤1279px) */
 @media (max-width: 1279px) {
 	.layout {
-		min-height: calc(100dvh - 99px);
+		min-height: calc(100dvh - 108px);
 	}
 }
 
-/* Планшет landscape и меньше (≤1023px) — параметры сверху, карточки снизу */
 @media (max-width: 1023px) {
 	.layout {
 		flex-direction: column-reverse;
@@ -223,7 +276,6 @@ body {
 	}
 }
 
-/* Телефон (≤480px) — iOS: предотвращаем зум при фокусе на input */
 @media (max-width: 480px) {
 	input:not([type='checkbox']):not([type='radio']):not([type='range']),
 	select,
@@ -232,7 +284,6 @@ body {
 	}
 }
 
-/* Маленький телефон (≤375px) — iPhone SE и аналоги */
 @media (max-width: 375px) {
 	.layout__content {
 		min-width: 0;

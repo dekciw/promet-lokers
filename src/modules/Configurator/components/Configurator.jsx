@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { calcDiff } from '../../../shared/utils/calcDiff';
 import Notification from '../../../shared/components/Notification/Notification.jsx';
@@ -99,7 +100,7 @@ function buildFinalSpecsList(config, defaults, lock, ventilation) {
 
 function IconDefault() {
 	return (
-		<svg width='40' height='40' viewBox='0 0 42 43' fill='none'>
+		<svg width='28' height='28' viewBox='0 0 42 43' fill='none'>
 			<path opacity='0.5' d='M0.899132 8.3989V34.8989L20.8991 41.3989L40.3991 34.8989L39.8991 8.3989L20.8991 0.898895L0.899132 8.3989Z' fill='white' />
 			<path d='M0.899132 8.15912V34.9571L20.6747 41.3489V14.4562L0.899132 8.15912Z' stroke='#888888' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
 			<path d='M40.4502 8.15912L20.6747 14.4562V41.3489L40.4502 34.8152V8.15912Z' stroke='#888888' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
@@ -111,7 +112,7 @@ function IconDefault() {
 
 function IconNonStandard() {
 	return (
-		<svg width='40' height='40' viewBox='0 0 41 41' fill='none'>
+		<svg width='28' height='28' viewBox='0 0 41 41' fill='none'>
 			<path d='M0.8992 6.98373V34.0051L20.1677 40.4501V13.3333L0.8992 6.98373Z' stroke='#E69718' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
 			<path d='M40.4503 6.98373L20.1677 13.3333V40.4501L40.4503 33.862V6.98373Z' stroke='#E69718' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
 			<path d='M0.899139 6.98368L20.6924 0.898895L40.4502 6.98368' stroke='#E69718' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
@@ -122,7 +123,7 @@ function IconNonStandard() {
 
 function IconFinal() {
 	return (
-		<svg width='40' height='40' viewBox='0 0 41 41' fill='none'>
+		<svg width='28' height='28' viewBox='0 0 41 41' fill='none'>
 			<path d='M0.8992 6.98373V34.0051L20.1677 40.4501V13.3333L0.8992 6.98373Z' stroke='#33A258' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
 			<path d='M40.4503 6.98373L20.1677 13.3333V40.4501L40.4503 33.862V6.98373Z' stroke='#33A258' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
 			<path d='M0.899139 6.98368L20.6924 0.898895L40.4502 6.98368' stroke='#33A258' strokeWidth='1.79778' strokeMiterlimit='10' strokeLinecap='round' strokeLinejoin='round' />
@@ -146,17 +147,9 @@ export default function Configurator() {
 	const [isNZOpen, setIsNZOpen] = useState(false);
 	const [notify, setNotify] = useState({ visible: false, status: 'ok', title: '', message: '' });
 
-	function openNZModal() {
-		setIsNZOpen(true);
-	}
-
-	function closeNZModal() {
-		setIsNZOpen(false);
-	}
-
-	function closeNotify() {
-		setNotify(n => ({ ...n, visible: false }));
-	}
+	function openNZModal() { setIsNZOpen(true); }
+	function closeNZModal() { setIsNZOpen(false); }
+	function closeNotify() { setNotify(n => ({ ...n, visible: false })); }
 
 	async function handleNZSubmit({ managerName, clientName, nzNumber, calcNumber }) {
 		try {
@@ -262,39 +255,128 @@ export default function Configurator() {
 							initial='hidden'
 							animate='visible'
 						>
-							{/* Стандартное исполнение */}
+							{/* ── Стандартное исполнение ── */}
 							<motion.div className={styles.configColWrapper} variants={colVariants}>
-								<div className={styles.colHeader}>
-									<span className={styles.colIcon}><IconDefault /></span>
-									<span className={styles.colTitle}>Стандартное<br/>исполнение</span>
-								</div>
 								<div className={`${styles.configCol} ${styles.configColDefault}`}>
-									<div className={styles.tableWrap}>
-										<div className={styles.tableHead}>
-											<span>Показатель</span>
-											<span>Значение</span>
-										</div>
+									<div className={styles.colHeader}>
+										<span className={styles.colIcon}><IconDefault /></span>
+										<span className={styles.colTitle}>Стандартное исполнение</span>
+									</div>
+									<motion.ul
+										className={styles.specList}
+										key={`${config.modelId}-${resetKey}`}
+										initial='hidden'
+										animate='visible'
+									>
+										{defaultSpecsList.map(({ label, value, colorHex }, i) => (
+											<motion.li
+												key={label}
+												className={styles.specItem}
+												custom={i}
+												variants={specItemVariants}
+											>
+												<span className={styles.specLabel}>{label}</span>
+												<span className={styles.specValue}>
+													{colorHex && (
+														<span
+															className={styles.colorSwatch}
+															style={{
+																background: colorHex,
+																border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
+															}}
+														/>
+													)}
+													{value}
+												</span>
+											</motion.li>
+										))}
+									</motion.ul>
+								</div>
+							</motion.div>
+
+							{/* ── Нестандартное исполнение ── */}
+							<motion.div className={styles.configColWrapper} variants={colVariants}>
+								<div className={`${styles.configCol} ${styles.configColChanged}`}>
+									<div className={styles.colHeader}>
+										<span className={styles.colIcon}><IconNonStandard /></span>
+										<span className={styles.colTitle}>Нестандартное исполнение</span>
+										<AnimatePresence>
+											{changedSpecs.length > 0 && (
+												<motion.span
+													className={styles.changeBadge}
+													initial={{ opacity: 0, scale: 0.7 }}
+													animate={{ opacity: 1, scale: 1 }}
+													exit={{ opacity: 0, scale: 0.7 }}
+													transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+												>
+													{changedSpecs.length}
+												</motion.span>
+											)}
+										</AnimatePresence>
+									</div>
+									<motion.ul className={styles.diffList} layout>
+										<AnimatePresence initial={false} mode='popLayout' key={`${config.modelId}-${resetKey}`}>
+											{changedSpecs.length === 0 && (
+												<motion.li
+													key='empty-diff'
+													layout
+													className={styles.emptyDiffMsg}
+													initial={{ opacity: 0, y: 10, scale: 0.97 }}
+													animate={{ opacity: 1, y: 0, scale: 1 }}
+													exit={{ opacity: 0, y: -10, scale: 0.97 }}
+													transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+												>
+													Изменений нет — параметры стандартные
+												</motion.li>
+											)}
+											{changedSpecs.map(({ label, value }) => (
+												<motion.li
+													key={label}
+													layout
+													className={styles.diffItem}
+													variants={diffItemVariants}
+													initial='hidden'
+													animate='visible'
+													exit='exit'
+												>
+													<span className={styles.diffLabel}>{label}</span>
+													<span className={styles.diffValue}>{value}</span>
+												</motion.li>
+											))}
+										</AnimatePresence>
+									</motion.ul>
+								</div>
+							</motion.div>
+
+							{/* ── Итоговая конфигурация ── */}
+							<motion.div className={styles.configColWrapper} variants={colVariants}>
+								<div className={`${styles.configCol} ${styles.configColFinal}`}>
+									<div className={styles.colHeader}>
+										<span className={styles.colIcon}><IconFinal /></span>
+										<span className={styles.colTitle}>Итоговая конфигурация</span>
+									</div>
+									<div className={styles.colTop}>
 										<motion.ul
-											className={styles.specList}
+											className={styles.finalSpec}
 											key={`${config.modelId}-${resetKey}`}
 											initial='hidden'
 											animate='visible'
 										>
-											{defaultSpecsList.map(({ label, value, colorHex }, i) => (
+											{finalSpecsList.map(({ label, value, colorHex }, i) => (
 												<motion.li
 													key={label}
-													className={styles.specItem}
+													className={styles.finalItem}
 													custom={i}
 													variants={specItemVariants}
 												>
-													<span className={styles.specLabel}>{label}</span>
-													<span className={styles.specValue}>
+													<span className={styles.finalLabel}>{label}</span>
+													<span className={styles.finalValue}>
 														{colorHex && (
 															<span
 																className={styles.colorSwatch}
 																style={{
 																	background: colorHex,
-																	border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
+																	border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
 																}}
 															/>
 														)}
@@ -302,134 +384,34 @@ export default function Configurator() {
 													</span>
 												</motion.li>
 											))}
-											{Array.from({ length: 3 }).map((_, i) => (
-												<li key={`empty-${i}`} className={styles.specItem} />
-											))}
-										</motion.ul>
-									</div>
-								</div>
-							</motion.div>
-
-							{/* Нестандартное исполнение */}
-							<motion.div className={styles.configColWrapper} variants={colVariants}>
-								<div className={styles.colHeader}>
-									<span className={styles.colIcon}><IconNonStandard /></span>
-									<span className={styles.colTitle}>Нестандартное<br/>исполнение</span>
-								</div>
-								<div className={`${styles.configCol} ${styles.configColChanged}`}>
-									<div className={styles.tableWrap}>
-										<div className={styles.tableHead}>
-											<span>Показатель</span>
-											<span>Значение</span>
-										</div>
-										<motion.ul className={styles.diffList} layout>
-											<AnimatePresence initial={false} mode='popLayout' key={`${config.modelId}-${resetKey}`}>
-												{changedSpecs.length === 0 && (
-													<motion.li
-														key='empty-diff'
-														layout
-														className={styles.emptyDiffMsg}
-														initial={{ opacity: 0, y: 10, scale: 0.97 }}
-														animate={{ opacity: 1, y: 0, scale: 1 }}
-														exit={{ opacity: 0, y: -10, scale: 0.97 }}
-														transition={{ type: 'spring', stiffness: 220, damping: 20 }}
-													>
-														Изменений нет — параметры стандартные
-													</motion.li>
-												)}
-												{changedSpecs.map(({ label, value }) => (
-													<motion.li
-														key={label}
-														layout
-														className={styles.diffItem}
-														variants={diffItemVariants}
-														initial='hidden'
-														animate='visible'
-														exit='exit'
-													>
-														<span className={styles.diffLabel}>{label}</span>
-														<span className={styles.diffValue}>{value}</span>
-													</motion.li>
-												))}
-											</AnimatePresence>
-											{Array.from({ length: Math.max(0, defaultSpecsList.length + 3 - changedSpecs.length) }).map((_, i) => (
-												<li key={`empty-${i}`} className={styles.diffItem} />
-											))}
-										</motion.ul>
-									</div>
-								</div>
-							</motion.div>
-
-							{/* Итоговая конфигурация */}
-							<motion.div className={styles.configColWrapper} variants={colVariants}>
-								<div className={styles.colHeader}>
-									<span className={styles.colIcon}><IconFinal /></span>
-									<span className={styles.colTitle}>Итоговая<br/>конфигурация</span>
-								</div>
-								<div className={`${styles.configCol} ${styles.configColFinal}`}>
-									<div className={styles.colTop}>
-										<div className={styles.tableWrap}>
-											<div className={styles.tableHead}>
-												<span>Показатель</span>
-												<span>Значение</span>
-											</div>
-											<motion.ul
-												className={styles.finalSpec}
-												key={`${config.modelId}-${resetKey}`}
-												initial='hidden'
-												animate='visible'
-											>
-												{finalSpecsList.map(({ label, value, colorHex }, i) => (
-													<motion.li
-														key={label}
-														className={styles.finalItem}
-														custom={i}
-														variants={specItemVariants}
-													>
-														<span className={styles.finalLabel}>{label}</span>
-														<span className={styles.finalValue}>
-															{colorHex && (
-																<span
-																	className={styles.colorSwatch}
-																	style={{
-																		background: colorHex,
-																		border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
-																	}}
-																/>
-															)}
-															{value}
-														</span>
-													</motion.li>
-												))}
-												{price && !price.manual && (
-													<li className={styles.finalItem}>
-														<span className={styles.finalLabel}>Цена за 1 шт.</span>
-														<span className={styles.finalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
-													</li>
-												)}
-												<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
-													<span className={styles.finalLabel}>Итого ({qty} шт.)</span>
-													<AnimatePresence mode='wait' initial={false}>
-														<motion.span
-															key={priceDisplay}
-															className={styles.finalValue}
-															initial={{ opacity: 0, y: -7 }}
-															animate={{ opacity: 1, y: 0 }}
-															exit={{ opacity: 0, y: 7 }}
-															transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-														>
-															{priceDisplay}
-														</motion.span>
-													</AnimatePresence>
+											{price && !price.manual && (
+												<li className={styles.finalItem}>
+													<span className={styles.finalLabel}>Цена за 1 шт.</span>
+													<span className={styles.finalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
 												</li>
-												{price && !price.manual && price.leadTime && (
-													<li className={styles.finalItem}>
-														<span className={styles.finalLabel}>Срок</span>
-														<span className={styles.finalValue}>{price.leadTime}</span>
-													</li>
-												)}
-											</motion.ul>
-										</div>
+											)}
+											<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
+												<span className={styles.finalLabel}>Итого ({qty} шт.)</span>
+												<AnimatePresence mode='wait' initial={false}>
+													<motion.span
+														key={priceDisplay}
+														className={styles.finalValue}
+														initial={{ opacity: 0, y: -7 }}
+														animate={{ opacity: 1, y: 0 }}
+														exit={{ opacity: 0, y: 7 }}
+														transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+													>
+														{priceDisplay}
+													</motion.span>
+												</AnimatePresence>
+											</li>
+											{price && !price.manual && price.leadTime && (
+												<li className={styles.finalItem}>
+													<span className={styles.finalLabel}>Срок</span>
+													<span className={styles.finalValue}>{price.leadTime}</span>
+												</li>
+											)}
+										</motion.ul>
 									</div>
 
 									<div className={styles.actions}>
@@ -463,53 +445,56 @@ export default function Configurator() {
 				</AnimatePresence>
 			</div>
 
-			<AnimatePresence>
-				{model && (
-					<motion.div
-						className={styles.stickyBar}
-						initial={{ y: '100%' }}
-						animate={{ y: 0 }}
-						exit={{ y: '100%' }}
-						transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-					>
-						<div className={styles.stickyPrice}>
-							<span className={styles.stickyPriceLabel}>Итого</span>
-							<AnimatePresence mode='wait' initial={false}>
-								<motion.span
-									key={priceDisplay}
-									className={styles.stickyPriceValue}
-									initial={{ opacity: 0, y: -5 }}
-									animate={{ opacity: 1, y: 0 }}
-									exit={{ opacity: 0, y: 5 }}
-									transition={{ duration: 0.16 }}
+			{createPortal(
+				<AnimatePresence>
+					{model && (
+						<motion.div
+							className={styles.stickyBar}
+							initial={{ y: '100%' }}
+							animate={{ y: 0 }}
+							exit={{ y: '100%' }}
+							transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+						>
+							<div className={styles.stickyPrice}>
+								<span className={styles.stickyPriceLabel}>Итого</span>
+								<AnimatePresence mode='wait' initial={false}>
+									<motion.span
+										key={priceDisplay}
+										className={styles.stickyPriceValue}
+										initial={{ opacity: 0, y: -5 }}
+										animate={{ opacity: 1, y: 0 }}
+										exit={{ opacity: 0, y: 5 }}
+										transition={{ duration: 0.16 }}
+									>
+										{priceDisplay}
+									</motion.span>
+								</AnimatePresence>
+							</div>
+							<div className={styles.stickyActions}>
+								<motion.button
+									className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn} ${styles.btnNoAnim}`}
+									disabled={!model || !parametersUnlocked || isNZOpen}
+									onClick={openNZModal}
+									type='button'
+									whileTap={{ scale: 0.96 }}
+									transition={{ duration: 0.1 }}
 								>
-									{priceDisplay}
-								</motion.span>
-							</AnimatePresence>
-						</div>
-						<div className={styles.stickyActions}>
-							<motion.button
-								className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn} ${styles.btnNoAnim}`}
-								disabled={!model || !parametersUnlocked || isNZOpen}
-								onClick={openNZModal}
-								type='button'
-								whileTap={{ scale: 0.96 }}
-								transition={{ duration: 0.1 }}
-							>
-								Бланк нестандартного заказа
-							</motion.button>
-							<motion.button
-								className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`}
-								disabled={!model || !parametersUnlocked}
-								whileTap={{ scale: 0.96 }}
-								transition={{ duration: 0.1 }}
-							>
-								Коммерческое предложение для клиента
-							</motion.button>
-						</div>
-					</motion.div>
-				)}
-			</AnimatePresence>
+									Бланк нестандартного заказа
+								</motion.button>
+								<motion.button
+									className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`}
+									disabled={!model || !parametersUnlocked}
+									whileTap={{ scale: 0.96 }}
+									transition={{ duration: 0.1 }}
+								>
+									Коммерческое предложение для клиента
+								</motion.button>
+							</div>
+						</motion.div>
+					)}
+				</AnimatePresence>,
+				document.body
+			)}
 
 			<NZModal isOpen={isNZOpen} onClose={closeNZModal} onSubmit={handleNZSubmit} />
 

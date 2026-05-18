@@ -1,176 +1,191 @@
 @keyframes loginShake {
-  0%, 100% { transform: translateX(0); }
-  20%       { transform: translateX(-8px); }
-  40%       { transform: translateX(8px); }
-  60%       { transform: translateX(-6px); }
-  80%       { transform: translateX(6px); }
+	0%, 100% { transform: translateX(0); }
+	20%       { transform: translateX(-8px); }
+	40%       { transform: translateX(8px); }
+	60%       { transform: translateX(-6px); }
+	80%       { transform: translateX(6px); }
 }
 
 .loginPage {
-  min-height: 100dvh;
-  background: var(--c-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
+	min-height: 100dvh;
+	background: linear-gradient(145deg, #081228 0%, #0f1f4a 45%, #07101e 100%);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 24px;
+	position: relative;
+	overflow: hidden;
+}
+
+/* Глубинное свечение — не дешёвое, а объёмное */
+.loginPage::before {
+	content: '';
+	position: absolute;
+	top: 15%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 700px;
+	height: 500px;
+	background: radial-gradient(ellipse, rgba(0, 53, 158, 0.18) 0%, transparent 65%);
+	pointer-events: none;
 }
 
 .loginCard {
-  background: var(--c-white);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-lg);
-  padding: 48px 40px 40px;
-  width: 100%;
-  max-width: 400px;
-  box-shadow: var(--s-xl);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  --animate-duration: 0.5s;
+	background: rgba(255, 255, 255, 0.97);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 20px;
+	padding: 48px 44px 44px;
+	width: 100%;
+	max-width: 420px;
+	box-shadow:
+		0 32px 100px rgba(0, 0, 0, 0.55),
+		0 8px 24px rgba(0, 0, 0, 0.3),
+		0 0 0 1px rgba(255, 255, 255, 0.05);
+	display: flex;
+	flex-direction: column;
+	gap: 32px;
+	position: relative;
 }
 
 .loginCardShake {
-  animation: loginShake 0.4s ease;
+	animation: loginShake 0.4s ease;
 }
 
 .loginLogo {
-  display: flex;
-  justify-content: center;
+	display: flex;
+	justify-content: center;
 }
 
 .loginLogoImg {
-  height: 48px;
-  width: auto;
+	height: 42px;
+	width: auto;
 }
 
 .loginHeader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
 }
 
 .loginTitle {
-  font-family: var(--f-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--c-brand);
-  line-height: 28px;
-  letter-spacing: -0.4px;
+	font-family: var(--f-display);
+	font-size: 21px;
+	font-weight: 700;
+	color: var(--c-brand);
+	line-height: 28px;
+	letter-spacing: -0.5px;
 }
 
 .loginSubtitle {
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--c-text-faint);
-  line-height: 20px;
+	font-size: 13px;
+	font-weight: 400;
+	color: var(--c-text-faint);
+	line-height: 20px;
 }
 
 .loginForm {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 }
 
 .loginField {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
 }
 
 .loginLabel {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--c-text-mid);
-  letter-spacing: 0.3px;
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--c-text-muted);
+	letter-spacing: 0.6px;
+	text-transform: uppercase;
 }
 
 .loginInput {
-  height: 44px;
-  padding: 0 14px;
-  border: 1px solid var(--c-border);
-  border-radius: var(--r-sm);
-  background: var(--c-white);
-  font-family: var(--f-main);
-  font-size: 14px;
-  color: var(--c-text-dark);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+	height: 46px;
+	padding: 0 16px;
+	border: 1.5px solid var(--c-border);
+	border-radius: var(--r-sm);
+	background: var(--c-bg);
+	font-family: var(--f-main);
+	font-size: 14px;
+	color: var(--c-text-dark);
+	outline: none;
+	transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
 }
 
 .loginInput:focus {
-  border-color: var(--c-primary);
-  box-shadow: 0 0 0 2px var(--c-primary-border);
+	background: var(--c-white);
+	border-color: var(--c-primary);
+	box-shadow: 0 0 0 3px var(--c-primary-bg);
 }
 
 .loginInputError {
-  border-color: #e53e3e;
-  box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.15);
+	border-color: #dc2626;
+	box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
 .loginError {
-  font-size: 13px;
-  color: #e53e3e;
-  text-align: center;
-  margin-top: -4px;
+	font-size: 12.5px;
+	color: #dc2626;
+	text-align: center;
+	margin-top: -4px;
+	font-weight: 500;
 }
 
 .loginBtn {
-  margin-top: 4px;
-  height: 46px;
-  width: 100%;
-  background: var(--c-brand);
-  color: #fff;
-  border: none;
-  border-radius: var(--r-md);
-  font-family: var(--f-main);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
-  box-shadow: 0 4px 12px rgba(12, 83, 179, 0.3);
+	margin-top: 8px;
+	height: 48px;
+	width: 100%;
+	background: var(--c-primary);
+	color: #fff;
+	border: none;
+	border-radius: var(--r-md);
+	font-family: var(--f-main);
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.2px;
+	cursor: pointer;
+	transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
+	box-shadow: var(--s-primary-btn);
+}
+
+.loginBtn:hover {
+	background: var(--c-primary-hover);
+	box-shadow: 0 6px 20px rgba(0, 53, 158, 0.38);
 }
 
 .loginBtn:active {
-  background: #093d8a;
-  transform: scale(0.98);
-  box-shadow: 0 2px 6px rgba(12, 83, 179, 0.2);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .loginBtn:hover {
-    background: #0a47a0;
-  }
+	background: var(--c-primary-active);
+	transform: scale(0.99);
+	box-shadow: none;
 }
 
 @media (max-width: 480px) {
-  .loginCard {
-    padding: 36px 24px 32px;
-  }
+	.loginCard {
+		padding: 36px 28px 32px;
+	}
 }
 
-/* Samsung Galaxy, Xiaomi и другие телефоны стандартного размера */
 @media (max-width: 414px) {
-  .loginCard {
-    padding: 32px 20px 28px;
-    gap: 24px;
-  }
+	.loginCard {
+		padding: 32px 22px 28px;
+		gap: 24px;
+	}
 }
 
-/* iPhone SE, Galaxy A03 и аналоги */
 @media (max-width: 375px) {
-  .loginCard {
-    padding: 28px 16px 24px;
-    gap: 20px;
-  }
-
-  .loginTitle {
-    font-size: 20px;
-    line-height: 26px;
-  }
-
-  .loginBtn {
-    height: 44px;
-  }
+	.loginCard {
+		padding: 28px 18px 24px;
+		gap: 20px;
+	}
+	.loginTitle {
+		font-size: 19px;
+	}
+	.loginBtn {
+		height: 46px;
+	}
 }

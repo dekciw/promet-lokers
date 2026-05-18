@@ -1,13 +1,14 @@
 /* Правая панель параметров */
 .parameters {
-	width: 384px;
+	width: 480px;
 	flex-shrink: 0;
-	padding: 37px 24px 24px 14px;
+	padding: 32px 58px 24px 28px;
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
+	gap: 18px;
 	align-self: flex-start;
-	min-height: calc(100dvh - 99px);
+	min-height: calc(100dvh - 116px);
+	overflow-x: hidden;
 }
 
 .titleRow {
@@ -24,46 +25,49 @@
 
 .titleIcon {
 	flex-shrink: 0;
-	width: 28px;
-	height: 28px;
+	width: 26px;
+	height: 26px;
+	color: var(--c-text-faint);
 }
 
 .title {
 	font-family: var(--f-main);
-	font-size: 19px;
-	font-style: normal;
+	font-size: 17px;
 	font-weight: 700;
 	line-height: 24px;
 	letter-spacing: -0.3px;
-	color: #00359e;
+	color: var(--c-brand);
 }
 
-/* ── Кнопка сброса ── */
+/* ── Кнопка сброса — чистая, без трюков ── */
 .resetBtn {
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
-	width: 30px;
-	height: 30px;
-	border: none;
-	border-radius: 50%;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: var(--r-sm);
+	border: 1.5px solid #fca5a5;
+	background: #fff5f5;
+	color: #dc2626;
 	cursor: pointer;
-	position: relative;
-	overflow: hidden;
-	transition-duration: 0.3s;
-	box-shadow: 2px 2px 6px rgba(229, 62, 62, 0.3);
-	background-color: #e53e3e;
 	flex-shrink: 0;
+	transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.resetBtn:hover {
+	background: #fee2e2;
+	border-color: #f87171;
 }
 
 .resetBtn:active {
-	transform: translate(1px, 1px);
+	transform: scale(0.93);
 }
 
 .resetBtn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
-	border-radius: 50%;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #dc2626;
+	border-radius: var(--r-sm);
 }
 
 .resetBtnSign {
@@ -71,120 +75,70 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	flex-shrink: 0;
-	transition-duration: 0.3s;
 }
 
+/* Скрываем expand-текст — убираем дешёвый трюк */
 .resetBtnText {
-	position: absolute;
-	right: 0;
-	width: 0;
-	opacity: 0;
-	color: white;
-	font-family: var(--f-main);
-	font-size: 12px;
-	font-weight: 600;
-	white-space: nowrap;
-	overflow: hidden;
-	transition-duration: 0.3s;
+	display: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
-	.resetBtn,
-	.resetBtnSign,
-	.resetBtnText {
-		transition: none;
-	}
-}
-
-
-/* ── Бейдж-навигация ── */
+/* ── Tabs ── */
 .breadcrumbs {
 	display: flex;
-	align-items: center;
+	align-items: stretch;
+	border-bottom: 2px solid var(--c-border);
 	gap: 0;
-	flex-wrap: nowrap;
 	width: 100%;
 }
 
 .breadcrumbBadge {
-	position: relative;
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	padding: 7px 10px;
-	border-radius: 200px;
-	font-size: 12px;
+	padding: 0 16px;
+	height: 38px;
+	font-size: 13px;
 	font-weight: 600;
 	font-family: var(--f-main);
-	background: #e8e8e8;
-	color: #888888;
-	border: 0.5px solid transparent;
+	background: transparent;
+	color: var(--c-text-muted);
+	border: none;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -2px;
 	cursor: pointer;
-	transition: background 0.15s, border-color 0.15s, color 0.15s;
-	line-height: 1.25;
-	letter-spacing: 0.1px;
 	white-space: nowrap;
+	letter-spacing: 0.1px;
+	transition: color 0.15s, border-color 0.15s;
 	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-	min-height: 34px;
 }
 
 .breadcrumbBadge:disabled {
 	cursor: default;
-	opacity: 0.6;
+	opacity: 0.45;
 }
 
 .breadcrumbBadge:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c-primary);
-}
-
-/* layoutId фон: скользит между активными шагами */
-.breadcrumbActiveBg {
-	position: absolute;
-	inset: 0;
-	background: #d7d7d7;
-	border-radius: 200px;
-	z-index: 0;
-}
-
-/* Текст и иконка поверх layoutId-фона */
-.breadcrumbBadgeContent {
-	position: relative;
-	z-index: 1;
-	display: block;
-	line-height: 1.25;
-	text-align: center;
+	border-radius: 4px;
 }
 
 .breadcrumbBadgeActive {
-	background: transparent;
-	border-color: var(--c-primary);
 	color: var(--c-primary);
-	font-weight: 600;
+	border-bottom-color: var(--c-primary);
 }
 
 .breadcrumbBadgeComplete {
-	background: #e8e8e8;
-	color: #888888;
+	color: var(--c-text-muted);
 	cursor: pointer;
 }
 
-@media (hover: hover) and (pointer: fine) {
-	.breadcrumbBadgeComplete:hover,
-	.breadcrumbBadge:not(:disabled):hover {
-		background: #d7d7d7;
-	}
+.breadcrumbArrow {
+	display: none;
 }
 
-.breadcrumbArrow {
-	flex-shrink: 0;
-	display: block;
-	opacity: 0.5;
-	width: 12px;
-	height: 12px;
+.breadcrumbActiveBg {
+	display: none;
 }
 
 /* ── Анимируемый контент ── */
@@ -196,15 +150,15 @@
 .stepPane {
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
-	padding: 8px 0 4px;
+	gap: 24px;
+	padding: 10px 0 6px;
 }
 
 .hint {
 	font-size: 12px;
-	color: var(--c-brand);
+	color: var(--c-text-muted);
 	margin: 0;
-	opacity: 0.75;
+	opacity: 0.8;
 }
 
 /* Группа параметра */
@@ -218,9 +172,10 @@
 	display: block;
 	font-size: 11px;
 	font-weight: 600;
-	color: var(--c-text-muted);
+	color: var(--c-text-faint);
 	line-height: 1;
-	letter-spacing: 0.3px;
+	letter-spacing: 0.5px;
+	text-transform: uppercase;
 }
 
 /* Custom Select */
@@ -241,11 +196,11 @@
 .paramsGrid {
 	display: flex;
 	flex-direction: column;
-	gap: 20px;
+	gap: 24px;
 }
 
 .cselectDisabled {
-	opacity: 0.45;
+	opacity: 0.4;
 	cursor: not-allowed;
 }
 
@@ -257,38 +212,33 @@
 .cselectTrigger {
 	display: flex;
 	align-items: center;
-	gap: 8px;
+	gap: 10px;
 	width: 100%;
-	height: 42px;
-	padding: 0 12px;
+	height: 44px;
+	padding: 0 14px;
 	background: var(--c-white);
-	border: 1px solid #B6C2E2;
-	border-radius: 6px;
+	border: 1.5px solid var(--c-border);
+	border-radius: var(--r-sm);
 	cursor: pointer;
 	font-family: var(--f-main);
-	font-size: 13px;
-	font-weight: 500;
-	color: #333E5A;
+	font-size: 13.5px;
+	font-weight: 400;
+	color: var(--c-text-dark);
 	text-align: left;
-	box-shadow: 0 9px 12.5px rgba(132, 142, 151, 0.07);
-	transition: border-color 0.15s;
+	box-shadow: var(--s-xs);
+	transition: border-color 0.18s, box-shadow 0.18s;
 	outline: none;
 }
 
 .cselectTrigger:active {
-	transform: scale(0.99);
-	transition: transform 100ms ease-out;
+	background: var(--c-bg);
 }
 
 .cselectTrigger:focus-visible {
 	border-color: var(--c-primary);
-	box-shadow: 0 0 0 2px var(--c-primary-border);
+	box-shadow: 0 0 0 3px var(--c-primary-bg);
 }
 
-.cselectTriggerModified {
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2.5px rgba(59, 130, 246, 0.12);
-}
 
 .cselectOpen .cselectTrigger {
 	border-color: var(--c-border);
@@ -313,6 +263,7 @@
 	height: 20px;
 	flex-shrink: 0;
 	pointer-events: none;
+	color: var(--c-text-faint);
 }
 
 .cselectSwatch {
@@ -320,7 +271,7 @@
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	border: 1px solid rgba(0, 0, 0, 0.12);
+	border: 1px solid rgba(0, 0, 0, 0.1);
 	display: inline-block;
 }
 
@@ -330,7 +281,7 @@
 	left: 0;
 	right: 0;
 	background: var(--c-white);
-	border: 1px solid var(--c-border);
+	border: 1.5px solid var(--c-border);
 	border-top: none;
 	border-bottom-left-radius: var(--r-sm);
 	border-bottom-right-radius: var(--r-sm);
@@ -341,39 +292,26 @@
 	max-height: 240px;
 	overflow-y: auto;
 	scrollbar-width: thin;
-	scrollbar-color: #c1c1c1 transparent;
+	scrollbar-color: var(--c-border) transparent;
 }
 
-.cselectDropdown::-webkit-scrollbar {
-	width: 8px;
-}
-
-.cselectDropdown::-webkit-scrollbar-track {
-	background: transparent;
-}
-
+.cselectDropdown::-webkit-scrollbar { width: 6px; }
+.cselectDropdown::-webkit-scrollbar-track { background: transparent; }
 .cselectDropdown::-webkit-scrollbar-thumb {
-	background: #c1c1c1;
-	border-radius: 4px;
-	border: 2px solid var(--c-white);
-}
-
-.cselectDropdown::-webkit-scrollbar-thumb:hover {
-	background: #a0a0a0;
+	background: var(--c-border);
+	border-radius: 3px;
 }
 
 .cselectItem {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 10px 12px 10px 14px;
-	font-size: 14px;
+	padding: 10px 14px;
+	font-size: 13.5px;
 	color: var(--c-text-mid);
 	cursor: pointer;
-	border-left: 3px solid transparent;
-	transition: background 0.12s, color 0.12s, padding-left 0.12s;
-	margin: 2px 4px;
-	border-radius: 6px;
+	transition: background 0.12s, color 0.12s;
+	border-radius: 0;
 }
 
 .cselectItemLabel {
@@ -391,68 +329,60 @@
 	background: var(--c-primary-bg);
 	color: var(--c-primary);
 	font-weight: 500;
-	border-left-color: var(--c-border);
-	border-radius: 0 6px 6px 0;
-	margin-left: 0;
-	padding-left: 15px;
 }
 
 /* Толщина металла */
 .toggleGroup {
-	display: flex;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
 	gap: 8px;
-	flex-wrap: wrap;
 }
 
 .toggleBtn {
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	gap: 8px;
-	padding: 8px 12px;
-	border-radius: 6px;
-	border: 1px solid #B6C2E2;
+	padding: 0 14px;
+	border-radius: var(--r-sm);
+	border: 1.5px solid var(--c-border);
 	background: var(--c-white);
 	font-family: var(--f-main);
 	font-size: 13px;
-	font-weight: 600;
-	color: #445275;
+	font-weight: 500;
+	color: var(--c-text-mid);
 	cursor: pointer;
 	line-height: 1;
 	letter-spacing: 0.1px;
-	box-shadow: 0 9px 12.5px rgba(132, 142, 151, 0.07);
-	transition: border-color 0.15s, background 0.15s, color 0.15s;
+	box-shadow: var(--s-xs);
+	transition: border-color 0.18s, background 0.18s, color 0.18s, box-shadow 0.18s;
+	height: 44px;
 }
 
 .toggleBtn:active {
-	transform: scale(0.96);
-	transition: transform 100ms ease-out;
+	opacity: 0.85;
 }
 
 .toggleBtn:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c-primary);
-	border-radius: 6px;
 }
 
 .toggleBtnActive {
 	background: var(--c-primary);
 	border-color: var(--c-primary);
 	color: #fff;
-	box-shadow: 0 9px 12.5px rgba(132, 142, 151, 0.07);
+	box-shadow: var(--s-primary-btn);
 }
-
 
 /* Поля габаритов */
 .dimFields {
-	display: flex;
-	flex-direction: row;
-	align-items: flex-start;
-	gap: 6px;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
 }
 
 .dimField {
-	flex: 1;
-	min-width: 0;
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
@@ -465,11 +395,12 @@
 
 .dimLabel {
 	font-family: var(--f-main);
-	font-size: 10px;
+	font-size: 8px;
 	font-weight: 600;
 	color: var(--c-text-faint);
 	line-height: 1;
-	letter-spacing: 0.3px;
+	letter-spacing: 0.4px;
+	text-transform: uppercase;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -477,16 +408,7 @@
 }
 
 
-.dimSeparator {
-	flex-shrink: 0;
-	display: block;
-	opacity: 0.7;
-	margin-top: calc(11px + 4px + (44px - 15px) / 2 - 1px);
-}
-
-
-/* ──────────── Количество шкафов / переход на шаг 3 ──────────── */
-
+/* ── Количество / Следующий шаг ── */
 .modelExtra {
 	display: flex;
 	flex-direction: column;
@@ -501,46 +423,44 @@
 
 .nextBtn {
 	width: 100%;
-	height: 40px;
-	background: #304FFE;
+	height: 44px;
+	background: var(--c-primary);
 	color: #fff;
-	border: 1px solid transparent;
+	border: none;
 	border-radius: var(--r-sm);
 	font-family: var(--f-main);
-	font-size: 13px;
-	font-weight: 700;
+	font-size: 13.5px;
+	font-weight: 600;
 	letter-spacing: 0.2px;
 	cursor: pointer;
-	position: relative;
-	overflow: hidden;
-	z-index: 1;
-	transition: border-color 0.15s;
+	transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
+	box-shadow: var(--s-primary-btn);
 }
 
-.nextBtn::before {
-	display: none;
+.nextBtn:hover:not(:disabled) {
+	background: var(--c-primary-hover);
+	box-shadow: 0 6px 20px rgba(0, 53, 158, 0.38);
 }
 
 .nextBtn:active {
-	background: #0026CA;
+	background: var(--c-primary-active);
 	box-shadow: none;
+	transform: scale(0.98);
 }
 
 .nextBtn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #304FFE;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c-primary);
 }
 
 .nextBtn:disabled {
-	background: #fff;
-	border-color: #C9CFDA;
-	color: #C9CFDA;
+	background: var(--c-border);
+	color: var(--c-text-faint);
 	cursor: not-allowed;
 	box-shadow: none;
 }
 
-/* ──────────── Stepper ──────────── */
-
+/* ── Stepper ── */
 @keyframes stepper-shake {
 	0%, 100% { transform: translateX(0); }
 	20%       { transform: translateX(-5px); }
@@ -560,30 +480,27 @@
 	display: flex;
 	align-items: center;
 	width: 100%;
+	height: 44px;
 	background: var(--c-white);
-	border: 1px solid #B6C2E2;
-	border-radius: 6px;
+	border: 1.5px solid var(--c-border);
+	border-radius: var(--r-sm);
 	overflow: hidden;
-	box-shadow: 0 10.5px 14.6px rgba(132, 142, 151, 0.07);
-	transition: border-color 0.2s;
+	box-shadow: var(--s-xs);
+	transition: border-color 0.18s, box-shadow 0.18s;
 }
 
-.stepperRowModified {
-	border-color: #3b82f6;
-	box-shadow: 0 0 0 2.5px rgba(59, 130, 246, 0.12);
-}
 
 .stepperLimit .stepperRow {
-	border-color: #e53e3e;
-	box-shadow: 0 0 0 2px rgba(229, 62, 62, 0.15);
+	border-color: #dc2626;
+	box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
 	animation: stepper-shake 0.35s ease;
 }
 
 .stepperBtn {
 	flex-shrink: 0;
-	width: 26px;
+	width: 36px;
 	min-height: 44px;
-	background: var(--c-white);
+	background: transparent;
 	border: none;
 	color: var(--c-primary);
 	cursor: pointer;
@@ -594,20 +511,14 @@
 	user-select: none;
 }
 
-.stepperBtn:last-child {
-	border: none;
-}
-
 .stepperBtn:active {
 	background: var(--c-primary-bg);
-	color: var(--c-primary);
-	transform: scale(0.92);
-	transition: transform 80ms ease-out;
+	opacity: 0.7;
 }
 
 .stepperBtn:focus-visible {
 	outline: none;
-	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #0C53B3;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--c-primary);
 	border-radius: var(--r-sm);
 }
 
@@ -646,96 +557,81 @@
 	left: 0;
 	right: 0;
 	font-size: 10px;
-	color: #e53e3e;
+	color: #dc2626;
 	letter-spacing: 0.3px;
 	line-height: 1.35;
 	white-space: nowrap;
 	text-align: center;
 	pointer-events: none;
 	z-index: 10;
+	font-weight: 500;
 }
 
-/* ──────────── HOVER (только pointer-устройства) ──────────── */
+/* ── HOVER ── */
 @media (hover: hover) and (pointer: fine) {
-	.cselectTrigger:hover {
-		background: var(--c-bg);
+	.cselectTrigger:hover:not(:focus-visible) {
+		border-color: var(--c-text-muted);
+	}
+
+	.stepperRow:hover {
+		border-color: var(--c-text-muted);
 	}
 
 	.cselectItem:hover {
-		background: var(--c-bg);
-		color: var(--c-text-dark);
-		padding-left: 18px;
+		background: var(--c-primary-bg);
+		color: var(--c-primary);
 	}
 
 	.cselectItemActive:hover {
-		padding-left: 15px;
+		background: var(--c-primary-bg);
 	}
 
 	.toggleBtn:hover:not(.toggleBtnActive) {
 		border-color: var(--c-primary);
-		background: var(--c-white);
+		color: var(--c-primary);
+		background: var(--c-primary-bg);
 	}
 
 	.toggleBtnActive:hover {
-		background: #002d8a;
-		border-color: #002d8a;
+		background: var(--c-primary-hover);
+		border-color: var(--c-primary-hover);
 	}
 
 	.stepperBtn:hover {
-		background: #f5f6f7;
-		color: var(--c-primary);
-	}
-
-	.resetBtn:hover {
-		width: 104px;
-		border-radius: 40px;
-		transition-duration: 0.3s;
-	}
-
-	.resetBtn:hover .resetBtnSign {
-		width: 30%;
-		padding-left: 12px;
-		transition-duration: 0.3s;
-	}
-
-	.resetBtn:hover .resetBtnText {
-		opacity: 1;
-		width: 70%;
-		padding-right: 10px;
-		transition-duration: 0.3s;
+		background: var(--c-primary-bg);
 	}
 
 	.nextBtn:hover:not(:disabled) {
-		background: #1a3ee8;
+		background: var(--c-primary-hover);
+	}
+
+	.breadcrumbBadge:not(.breadcrumbBadgeActive):not(:disabled):hover {
+		color: var(--c-text-dark);
 	}
 }
 
-/* ──────────── АДАПТИВ ──────────── */
+/* ── АДАПТИВ ── */
 
-/* Ноутбук (≤1279px) — панель сужается */
 @media (max-width: 1279px) {
 	.parameters {
-		width: 320px;
+		width: 400px;
+		padding: 28px 26px 20px 22px;
 	}
-
-	/* Хлебные крошки чуть компактнее */
 	.breadcrumbBadge {
-		padding: 6px 8px;
-		font-size: 11px;
+		font-size: 12px;
+		padding: 0 12px;
 	}
 }
 
-/* Планшет landscape / iPad Pro 12.9" — панель становится полной шириной */
 @media (max-width: 1023px) {
 	.parameters {
 		width: 100%;
 		border-left: none;
-		border-top: 1px solid var(--c-border);
+		border-top: 1px solid var(--c-border-subtle);
 		padding: 24px 32px;
 		align-self: auto;
 		min-height: unset;
 	}
-
 	.paramsGrid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
@@ -743,97 +639,66 @@
 	}
 }
 
-/* Планшет portrait / большой телефон */
 @media (max-width: 767px) {
 	.parameters {
 		padding: 16px;
 		gap: 20px;
 	}
-
 	.paramsGrid {
 		display: flex;
 		flex-direction: column;
 		gap: 24px;
 	}
-
 	.dimFields {
-		flex-direction: column;
-		align-items: stretch;
+		grid-template-columns: 1fr;
 		gap: 12px;
 	}
-
-	.dimSeparator {
-		display: none;
-	}
-
 	.title {
-		font-size: 18px;
+		font-size: 17px;
 	}
-
-	/* Увеличиваем зону касания степпера */
 	.stepperBtn {
 		width: 44px;
 	}
-
-	/* Минимальная высота переключателей толщины */
 	.toggleBtn {
-		min-height: 44px;
+		height: 44px;
 	}
 }
 
-/* Телефон — Samsung, Xiaomi, iPhone */
 @media (max-width: 480px) {
 	.parameters {
 		padding: 14px;
 		gap: 16px;
 	}
-
 	.stepPane {
 		gap: 16px;
 	}
-
 	.paramGroup {
 		gap: 10px;
 	}
 }
 
-/* Маленький телефон — iPhone SE, Galaxy A03 */
 @media (max-width: 375px) {
 	.parameters {
 		padding: 12px;
 		gap: 14px;
 	}
-
 	.title {
-		font-size: 17px;
+		font-size: 16px;
 	}
-
 	.titleIcon {
 		width: 22px;
 		height: 22px;
 	}
-
-	/* Хлебные крошки на мини-экране */
 	.breadcrumbBadge {
-		padding: 5px 7px;
-		font-size: 10px;
-		min-height: 30px;
+		font-size: 11px;
+		padding: 0 10px;
 	}
-
-	.breadcrumbArrow {
-		width: 10px;
-		height: 10px;
-	}
-
 	.groupLabel {
 		font-size: 10px;
 	}
-
 	.stepPane {
 		gap: 14px;
 	}
-
-	/* Степпер на крошечных экранах */
 	.stepperBtn {
 		width: 40px;
 	}
