@@ -434,7 +434,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 											id='lock'
 											value={lockId}
 											onChange={setLockId}
-											options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name }))}
+											options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name.replace(/^Замок\s+/i, '') }))}
 											isOpen={openSelectId === 'lock'}
 											onOpenChange={handleLockOpen}
 											leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
