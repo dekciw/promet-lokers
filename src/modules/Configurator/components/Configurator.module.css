@@ -714,6 +714,19 @@
 	}
 }
 
+/* Широкие мониторы и 21:9 (≥1440px) — ограничиваем ширину карточек */
+@media (min-width: 1440px) {
+	.configGrid {
+		grid-template-columns: repeat(3, minmax(0, 420px));
+	}
+
+	.btn {
+		max-width: 400px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
 /* Маленький телефон — iPhone SE, Galaxy A03 */
 @media (max-width: 375px) {
 	.configurator {

@@ -121,6 +121,9 @@ body {
 	min-height: calc(100dvh - 99px);
 	position: relative;
 	isolation: isolate;
+	max-width: 1600px;
+	margin: 0 auto;
+	width: 100%;
 }
 
 /* Декоративное синее свечение из макета Figma */
