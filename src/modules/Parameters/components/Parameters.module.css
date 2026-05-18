@@ -518,25 +518,12 @@
 }
 
 .nextBtn::before {
-	content: '';
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100%;
-	width: 100%;
-	background: #0026CA;
-	z-index: -1;
-	transform: scaleX(0);
-	transform-origin: left;
-	transition: transform 1300ms cubic-bezier(0.23, 1, 0.32, 1);
+	display: none;
 }
 
 .nextBtn:active {
-	background: #7A7CFF;
-	box-shadow:
-		0 8px 5px rgba(122, 124, 255, 0.14),
-		0 3px 7px rgba(122, 124, 255, 0.12),
-		0 4px 2.5px rgba(122, 124, 255, 0.20);
+	background: #0026CA;
+	box-shadow: none;
 }
 
 .nextBtn:focus-visible {
@@ -718,8 +705,8 @@
 		transition-duration: 0.3s;
 	}
 
-	.nextBtn:hover:not(:disabled)::before {
-		transform: scaleX(1);
+	.nextBtn:hover:not(:disabled) {
+		background: #1a3ee8;
 	}
 }
 

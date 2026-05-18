@@ -445,7 +445,7 @@ export default function Configurator() {
 										</div>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
 											<motion.button
-												className={`${styles.btn} ${styles.btnPrimary}`}
+												className={`${styles.btn} ${styles.btnPrimary} ${styles.btnNoAnim}`}
 												disabled={!model || !parametersUnlocked || isNZOpen}
 												onClick={openNZModal}
 												type='button'
@@ -489,7 +489,7 @@ export default function Configurator() {
 						</div>
 						<div className={styles.stickyActions}>
 							<motion.button
-								className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn}`}
+								className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn} ${styles.btnNoAnim}`}
 								disabled={!model || !parametersUnlocked || isNZOpen}
 								onClick={openNZModal}
 								type='button'

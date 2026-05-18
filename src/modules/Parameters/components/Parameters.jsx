@@ -326,7 +326,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 												type='button'
 												className={styles.nextBtn}
 												onClick={() => { setModelConfirmed(true); goToStep(3); }}
-												whileTap={{ scale: 0.97 }}
+												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
 												Перейти к параметрам

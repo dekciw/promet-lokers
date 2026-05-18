@@ -329,6 +329,10 @@
 	gap: 6px;
 }
 
+.finalItemPrice {
+	margin-top: 10px;
+}
+
 .finalItemPrice .finalLabel {
 	font-size: 11px;
 	font-weight: 700;
@@ -384,6 +388,15 @@
 
 .btn:active {
 	transform: scale(0.97);
+}
+
+.btnNoAnim::before {
+	display: none !important;
+}
+
+.btnNoAnim.btnPrimary:active {
+	background: #0026CA !important;
+	box-shadow: none !important;
 }
 
 .btnPrimary {
