@@ -124,9 +124,10 @@
 	transition: background 0.15s, border-color 0.15s, color 0.15s;
 	line-height: 1.25;
 	letter-spacing: 0.1px;
-	white-space: normal;
+	white-space: nowrap;
 	flex: 1;
-	overflow: visible;
+	min-width: 0;
+	overflow: hidden;
 	min-height: 34px;
 }
 
@@ -156,7 +157,6 @@
 	display: block;
 	line-height: 1.25;
 	text-align: center;
-	word-break: break-word;
 }
 
 .breadcrumbBadgeActive {

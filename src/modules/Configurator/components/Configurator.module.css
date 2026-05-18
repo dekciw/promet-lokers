@@ -268,7 +268,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	min-height: 32px;
+	min-height: 26px;
 	padding: 0;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
@@ -286,7 +286,7 @@
 	font-size: 12px;
 	font-weight: 400;
 	color: var(--card-label);
-	line-height: 32px;
+	line-height: 26px;
 }
 
 .specValue,
@@ -294,7 +294,7 @@
 	font-size: 12px;
 	font-weight: 500;
 	color: var(--card-text);
-	line-height: 32px;
+	line-height: 26px;
 	display: flex;
 	align-items: center;
 	gap: 6px;
@@ -323,7 +323,7 @@
 	font-size: 12px;
 	font-weight: 500;
 	color: var(--card-text);
-	line-height: 32px;
+	line-height: 26px;
 	display: flex;
 	align-items: center;
 	gap: 6px;
