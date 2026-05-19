@@ -14,7 +14,7 @@ html {
 
 :root {
 	/* Backgrounds */
-	--c-bg: #edf1f9;
+	--c-bg: #f1f4f9;
 	--c-white: #ffffff;
 
 	/* Brand (корпоративные — не меняем) */
@@ -148,7 +148,7 @@ body {
 /* Основная раскладка страницы */
 .layout {
 	display: flex;
-	min-height: calc(100dvh - 116px); /* 68px header + 48px footer */
+	min-height: calc(100dvh - 80px); /* 80px header */
 	position: relative;
 	isolation: isolate;
 	width: 100%;
@@ -265,7 +265,7 @@ body {
 
 @media (max-width: 1279px) {
 	.layout {
-		min-height: calc(100dvh - 108px);
+		min-height: calc(100dvh - 80px);
 	}
 }
 
