@@ -11,7 +11,7 @@ import { useConfig } from '../../shared/hooks/useConfig';
 import { calcPrice } from '../../shared/utils/calcPrice';
 
 export default function ConfiguratorPage({ onLogout, username }) {
-  const { catalog, catalogError, retry } = useCatalog();
+  const { catalog, catalogError, isLoading, retry } = useCatalog();
   const { config, setters, isResetting, resetKey } = useConfig(catalog);
   const [parametersUnlocked, setParametersUnlocked] = useState(false);
 
@@ -19,8 +19,9 @@ export default function ConfiguratorPage({ onLogout, username }) {
     return (
       <div className='app-status'>
         <p>Не удалось загрузить каталог. Проверьте подключение к интернету.</p>
-        <button className='app-status__retry' onClick={retry}>
-          Повторить
+        <p style={{ fontSize: 13, color: 'var(--c-text-muted)' }}>{catalogError}</p>
+        <button className='app-status__retry' onClick={retry} disabled={isLoading}>
+          {isLoading ? 'Загрузка…' : 'Повторить'}
         </button>
       </div>
     );
@@ -34,7 +35,7 @@ export default function ConfiguratorPage({ onLogout, username }) {
   return (
     <MotionConfig reducedMotion='user'>
       <AnimatePresence mode='wait'>
-        {!catalog ? (
+        {isLoading ? (
           <LoadingScreen key='loading' />
         ) : (
           <motion.div

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { LoginScreen } from './modules/Auth';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
+import ErrorBoundary from './shared/components/ErrorBoundary/ErrorBoundary';
 import './index.css';
 
 export default function App() {
@@ -16,5 +17,9 @@ export default function App() {
     setUsername('');
   }
 
-  return <ConfiguratorPage onLogout={handleLogout} username={username} />;
+  return (
+    <ErrorBoundary>
+      <ConfiguratorPage onLogout={handleLogout} username={username} />
+    </ErrorBoundary>
+  );
 }

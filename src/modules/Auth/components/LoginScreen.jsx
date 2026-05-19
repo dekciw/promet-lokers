@@ -12,6 +12,7 @@ export default function LoginScreen({ onAuth }) {
     register,
     handleSubmit,
     setError,
+    clearErrors,
     formState: { errors },
   } = useForm();
 
@@ -48,7 +49,7 @@ export default function LoginScreen({ onAuth }) {
               type='text'
               autoComplete='username'
               autoFocus
-              {...register('login', { required: true })}
+              {...register('login', { required: true, onChange: () => clearErrors('root') })}
             />
           </div>
 
@@ -59,7 +60,7 @@ export default function LoginScreen({ onAuth }) {
               id='password'
               type='password'
               autoComplete='current-password'
-              {...register('password', { required: true })}
+              {...register('password', { required: true, onChange: () => clearErrors('root') })}
             />
           </div>
 

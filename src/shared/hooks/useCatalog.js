@@ -3,19 +3,27 @@ import { loadCatalog } from '../api/loadCatalog';
 
 export function useCatalog() {
   const [catalog, setCatalog] = useState(null);
-  const [catalogError, setCatalogError] = useState(false);
+  const [catalogError, setCatalogError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
+    setIsLoading(true);
+    setCatalogError(null);
     loadCatalog()
-      .then(setCatalog)
-      .catch(() => setCatalogError(true));
+      .then(data => {
+        setCatalog(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        setCatalogError(err.message ?? 'Неизвестная ошибка');
+        setIsLoading(false);
+      });
   }, [retryKey]);
 
   function retry() {
-    setCatalogError(false);
     setRetryKey(k => k + 1);
   }
 
-  return { catalog, catalogError, retry };
+  return { catalog, catalogError, isLoading, retry };
 }

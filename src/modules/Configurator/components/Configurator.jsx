@@ -66,8 +66,12 @@ function buildCurrentForDiff(config, lock) {
 	};
 }
 
+const DEFAULT_COLOR_NAME = 'RAL 7038';
+
 function buildDefaultSpecsList(defaults, catalog) {
 	if (!defaults) return [];
+	const bodyColor = defaults.bodyColorName ?? DEFAULT_COLOR_NAME;
+	const doorColor = defaults.doorColorName ?? DEFAULT_COLOR_NAME;
 	return [
 		{ label: 'Замок', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
 		{ label: 'Ширина', value: `${defaults.width} мм` },
@@ -76,8 +80,8 @@ function buildDefaultSpecsList(defaults, catalog) {
 		{ label: 'Толщина корпуса', value: `${defaults.bodyThickness} мм` },
 		{ label: 'Толщина двери', value: `${defaults.doorThickness} мм` },
 		{ label: 'Вентиляция', value: 'Нет' },
-		{ label: 'Цвет корпуса', value: defaults.bodyColorName, colorHex: getColorHex(defaults.bodyColorName) },
-		{ label: 'Цвет двери', value: defaults.doorColorName, colorHex: getColorHex(defaults.doorColorName) },
+		{ label: 'Цвет корпуса', value: bodyColor, colorHex: getColorHex(bodyColor) },
+		{ label: 'Цвет двери', value: doorColor, colorHex: getColorHex(doorColor) },
 	];
 }
 
@@ -139,8 +143,17 @@ export default function Configurator() {
 	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
 
-	const defaultsForDiff = defaults ? { ...defaults, lockName: catalog.locks[defaults.lockId]?.name } : null;
-	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff);
+	const defaultsForDiff = defaults ? {
+		...defaults,
+		lockName: catalog.locks[defaults.lockId]?.name,
+		bodyColorName: defaults.bodyColorName ?? DEFAULT_COLOR_NAME,
+		doorColorName: defaults.doorColorName ?? DEFAULT_COLOR_NAME,
+	} : null;
+	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff).map(spec => {
+		if (spec.label === 'Цвет корпуса:') return { ...spec, colorHex: config.bodyColor?.color ?? getColorHex(spec.value) };
+		if (spec.label === 'Цвет двери:') return { ...spec, colorHex: config.doorColor?.color ?? getColorHex(spec.value) };
+		return spec;
+	});
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock, catalog.priceRules?.ventilation);
 
@@ -329,7 +342,7 @@ export default function Configurator() {
 													Изменений нет — параметры стандартные
 												</motion.li>
 											)}
-											{changedSpecs.map(({ label, value }) => (
+											{changedSpecs.map(({ label, value, colorHex }) => (
 												<motion.li
 													key={label}
 													layout
@@ -340,7 +353,18 @@ export default function Configurator() {
 													exit='exit'
 												>
 													<span className={styles.diffLabel}>{label}</span>
-													<span className={styles.diffValue}>{value}</span>
+													<span className={styles.diffValue}>
+														{colorHex && (
+															<span
+																className={styles.colorSwatch}
+																style={{
+																	background: colorHex,
+																	border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
+																}}
+															/>
+														)}
+														{value}
+													</span>
 												</motion.li>
 											))}
 										</AnimatePresence>
@@ -422,7 +446,7 @@ export default function Configurator() {
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
-												Коммерческое предложение для клиента
+												КП для клиента
 											</motion.button>
 										</div>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
