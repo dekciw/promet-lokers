@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, Fragment } from 'react';
-import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
+import { useState, useRef, useCallback, startTransition } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import CustomSelect from './CustomSelect';
 import ColorPicker from './ColorPicker/ColorPicker';
 import StepperInput from './StepperInput';
@@ -27,9 +27,9 @@ const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 const STEP_LABELS = ['Серия', 'Модель', 'Параметры'];
 
 const slideVariants = {
-	initial: dir => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0, scale: 0.97 }),
+	initial: dir => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0, scale: 1 }),
 	animate: { x: 0, opacity: 1, scale: 1 },
-	exit: dir => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0, scale: 0.97 }),
+	exit: dir => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0, scale: 1 }),
 };
 
 function buildThicknessOptions(baseVal) {
@@ -105,27 +105,12 @@ const [openSelectId, setOpenSelectId] = useState(null);
 		setIsSliding(true);
 		setOpenSelectId(null);
 		setDirection(newStep > prevStep ? 1 : -1);
-		setStepperStep(newStep);
+		startTransition(() => setStepperStep(newStep));
 		setTimeout(() => setIsSliding(false), 450);
 
 		backAnimTimersRef.current.forEach(id => clearTimeout(id));
 		backAnimTimersRef.current = [];
-
-		if (newStep < prevStep) {
-			const stepsBack = prevStep - newStep;
-			for (let i = 1; i <= stepsBack; i++) {
-				const intermediate = prevStep - i;
-				const timerId = setTimeout(() => setDisplayStep(intermediate), i * 160);
-				backAnimTimersRef.current.push(timerId);
-			}
-		} else {
-			const stepsForward = newStep - prevStep;
-			for (let i = 1; i <= stepsForward; i++) {
-				const intermediate = prevStep + i;
-				const timerId = setTimeout(() => setDisplayStep(intermediate), i * 160);
-				backAnimTimersRef.current.push(timerId);
-			}
-		}
+		setDisplayStep(newStep);
 	}
 
 	function handleModelSelect(newModelId) {
@@ -191,44 +176,29 @@ const [openSelectId, setOpenSelectId] = useState(null);
 				</div>
 			</div>
 
-			<LayoutGroup id='breadcrumbs'>
-				<div className={styles.breadcrumbs}>
-					{STEP_LABELS.map((label, i) => {
-						const step = i + 1;
-						const status = getStepStatus(step);
-						const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && modelConfirmed);
+			<div className={styles.breadcrumbs}>
+				{STEP_LABELS.map((label, i) => {
+					const step = i + 1;
+					const status = getStepStatus(step);
+					const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && modelConfirmed);
 
-						return (
-							<Fragment key={step}>
-								{i > 0 && (
-									<img className={styles.breadcrumbArrow} src='/img/icons/icon-arrow-right.svg' alt='' />
-								)}
-								<button
-									type='button'
-									className={cx(
-										styles.breadcrumbBadge,
-										status === 'active' && styles.breadcrumbBadgeActive,
-										status === 'complete' && styles.breadcrumbBadgeComplete,
-									)}
-									onClick={() => handleStepClick(step)}
-									disabled={!canClick || isSliding}
-								>
-									{status === 'active' && (
-										<motion.span
-											layoutId='breadcrumb-active-bg'
-											className={styles.breadcrumbActiveBg}
-											transition={{ type: 'spring', bounce: 0.2, duration: 0.38 }}
-										/>
-									)}
-									<span className={styles.breadcrumbBadgeContent}>
-										{label}
-									</span>
-								</button>
-							</Fragment>
-						);
-					})}
-				</div>
-			</LayoutGroup>
+					return (
+						<button
+							key={step}
+							type='button'
+							className={cx(
+								styles.breadcrumbBadge,
+								status === 'active' && styles.breadcrumbBadgeActive,
+								status === 'complete' && styles.breadcrumbBadgeComplete,
+							)}
+							onClick={() => handleStepClick(step)}
+							disabled={!canClick}
+						>
+							{label}
+						</button>
+					);
+				})}
+			</div>
 
 			<div className={styles.stepContent} style={{ overflow: isSliding ? 'hidden' : 'visible' }}>
 				<AnimatePresence initial={false} custom={direction} mode='popLayout'>
@@ -354,7 +324,6 @@ const [openSelectId, setOpenSelectId] = useState(null);
 												blocked
 											/>
 										</div>
-										<img className={styles.dimSeparator} src='/img/icons/icon-times.svg' alt='' width='15' height='15' />
 										<div className={styles.dimField}>
 											<label className={styles.dimLabel} htmlFor='height'>Высота, мм</label>
 											<StepperInput
@@ -369,7 +338,6 @@ const [openSelectId, setOpenSelectId] = useState(null);
 												snaps={HEIGHT_SNAPS}
 											/>
 										</div>
-										<img className={styles.dimSeparator} src='/img/icons/icon-times.svg' alt='' width='15' height='15' />
 										<div className={styles.dimField}>
 											<label className={styles.dimLabel} htmlFor='depth'>Глубина, мм</label>
 											<StepperInput

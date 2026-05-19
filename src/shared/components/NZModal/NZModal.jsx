@@ -112,7 +112,7 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 							</button>
 						</div>
 
-						<form className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+						<form id='nz-form' className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
 							<div className={styles.field}>
 								<div className={styles.inputGroup}>
 									<input
@@ -127,6 +127,10 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 										aria-describedby='nz-manager-err'
 										{...register('managerName', {
 											required: 'Заполните Ф.И.О. менеджера',
+											pattern: {
+												value: /^[а-яёА-ЯЁa-zA-Z\s\-.]+$/,
+												message: 'Только буквы',
+											},
 											validate: v => v.trim().length > 0 || 'Заполните Ф.И.О. менеджера',
 										})}
 									/>
@@ -153,6 +157,10 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 										aria-describedby='nz-client-err'
 										{...register('clientName', {
 											required: 'Заполните название клиента',
+											pattern: {
+												value: /^[а-яёА-ЯЁa-zA-Z0-9\s\-.,«»"'()]+$/,
+												message: 'Буквы и цифры',
+											},
 											validate: v => v.trim().length > 0 || 'Заполните название клиента',
 										})}
 									/>
@@ -166,6 +174,8 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 								</span>
 							</div>
 
+							<div className={styles.sectionDivider}><span>Дополнительно</span></div>
+
 							<div className={styles.field}>
 								<div className={styles.inputGroup}>
 									<input
@@ -174,14 +184,20 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 										placeholder='Например, 123'
 										autoComplete='off'
 										disabled={isSubmitting}
-										className={styles.input}
-										{...register('nzNumber')}
+										className={cx(styles.input, errors.nzNumber && styles.inputError)}
+										aria-invalid={errors.nzNumber ? 'true' : 'false'}
+										aria-describedby='nz-number-err'
+										{...register('nzNumber', {
+											validate: v => !v.trim() || /^[\d\-\/.\s]+$/.test(v.trim()) || 'Только цифры и знаки',
+										})}
 									/>
 									<label className={styles.label} htmlFor='nz-number'>
 										№ листа нестандартного заказа
 									</label>
 								</div>
-								<span className={styles.errorMsg} />
+								<span id='nz-number-err' className={styles.errorMsg}>
+									{errors.nzNumber?.message ?? ''}
+								</span>
 							</div>
 
 							<div className={styles.field}>
@@ -192,42 +208,49 @@ export default function NZModal({ isOpen, onClose, onSubmit }) {
 										placeholder='Например, 456'
 										autoComplete='off'
 										disabled={isSubmitting}
-										className={styles.input}
-										{...register('calcNumber')}
+										className={cx(styles.input, errors.calcNumber && styles.inputError)}
+										aria-invalid={errors.calcNumber ? 'true' : 'false'}
+										aria-describedby='nz-calc-err'
+										{...register('calcNumber', {
+											validate: v => !v.trim() || /^[\d\-\/.\s]+$/.test(v.trim()) || 'Только цифры и знаки',
+										})}
 									/>
 									<label className={styles.label} htmlFor='nz-calc'>
 										Номер расчёта
 									</label>
 								</div>
-								<span className={styles.errorMsg} />
-							</div>
-
-							<div className={styles.actions}>
-								<button
-									type='button'
-									className={cx(styles.btn, styles.btnSecondary)}
-									onClick={onClose}
-									disabled={isSubmitting}
-								>
-									Отмена
-								</button>
-								<button
-									type='submit'
-									className={cx(styles.btn, styles.btnPrimary)}
-									disabled={isSubmitting}
-								>
-									{isSubmitting ? (
-										<>
-											<svg className={styles.spinner} viewBox='0 0 20 20' fill='none' aria-hidden='true' width='14' height='14'>
-												<circle cx='10' cy='10' r='7' stroke='currentColor' strokeWidth='2.5' strokeOpacity='0.25' />
-												<path d='M10 3a7 7 0 0 1 7 7' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
-											</svg>
-											Генерация...
-										</>
-									) : 'Скачать'}
-								</button>
+								<span id='nz-calc-err' className={styles.errorMsg}>
+									{errors.calcNumber?.message ?? ''}
+								</span>
 							</div>
 						</form>
+
+						<div className={styles.actions}>
+							<button
+								type='button'
+								className={cx(styles.btn, styles.btnSecondary)}
+								onClick={onClose}
+								disabled={isSubmitting}
+							>
+								Отмена
+							</button>
+							<button
+								type='submit'
+								form='nz-form'
+								className={cx(styles.btn, styles.btnPrimary)}
+								disabled={isSubmitting}
+							>
+								{isSubmitting ? (
+									<>
+										<svg className={styles.spinner} viewBox='0 0 20 20' fill='none' aria-hidden='true' width='14' height='14'>
+											<circle cx='10' cy='10' r='7' stroke='currentColor' strokeWidth='2.5' strokeOpacity='0.25' />
+											<path d='M10 3a7 7 0 0 1 7 7' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+										</svg>
+										Генерация...
+									</>
+								) : 'Скачать'}
+							</button>
+						</div>
 					</motion.div>
 				</motion.div>
 			)}

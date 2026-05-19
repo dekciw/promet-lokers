@@ -18,7 +18,8 @@ export default function LoginScreen({ onAuth }) {
   function onSubmit({ login, password }) {
     if (login === LOGIN && password === PASSWORD) {
       localStorage.setItem('promet_auth', '1');
-      onAuth();
+      localStorage.setItem('promet_user', login);
+      onAuth(login);
     } else {
       setError('root', { message: 'Неверный логин или пароль' });
       setShake(true);

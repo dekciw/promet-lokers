@@ -10,7 +10,7 @@ import { useCatalog } from '../../shared/hooks/useCatalog';
 import { useConfig } from '../../shared/hooks/useConfig';
 import { calcPrice } from '../../shared/utils/calcPrice';
 
-export default function ConfiguratorPage({ onLogout }) {
+export default function ConfiguratorPage({ onLogout, username }) {
   const { catalog, catalogError, retry } = useCatalog();
   const { config, setters, isResetting, resetKey } = useConfig(catalog);
   const [parametersUnlocked, setParametersUnlocked] = useState(false);
@@ -39,22 +39,25 @@ export default function ConfiguratorPage({ onLogout }) {
         ) : (
           <motion.div
             key='app'
+            className='app-wrapper'
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
           >
             <AppProvider value={ctx}>
-              <Header onLogout={onLogout} />
-              <motion.div
-                className='layout'
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.05 }}
-              >
-                <Configurator />
-                <Parameters />
-              </motion.div>
-              <Footer />
+              <Header onLogout={onLogout} username={username} />
+              <div className='main-scroll'>
+                <motion.div
+                  className='layout'
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.05 }}
+                >
+                  <Configurator />
+                  <Parameters />
+                </motion.div>
+                <Footer />
+              </div>
             </AppProvider>
           </motion.div>
         )}
