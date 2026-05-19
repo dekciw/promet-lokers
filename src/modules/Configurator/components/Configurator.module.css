@@ -1,9 +1,9 @@
 /* Внешний контейнер конфигуратора */
 .configurator {
-  padding: 28px 36px 32px;
+  padding: 32px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
   width: 100%;
 }
 
@@ -29,10 +29,10 @@
 }
 
 .title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--c-brand);
-  letter-spacing: -0.4px;
+  letter-spacing: -0.6px;
   line-height: 28px;
   font-family: var(--f-display);
 }
@@ -68,13 +68,13 @@
 .productImage {
   width: 100%;
   flex-shrink: 0;
-  border-radius: var(--r-md);
+  border-radius: var(--r-lg);
   overflow: hidden;
 }
 
 .productImg {
   width: 100%;
-  height: 200px;
+  height: 180px;
   object-fit: cover;
   object-position: center 40%;
   display: block;
@@ -116,7 +116,7 @@
 .configGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
 }
 
 /* Анимация сворачивания при сбросе */
@@ -140,19 +140,26 @@
 
 /* ── Колонки ── */
 .configCol {
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   flex: 1;
   background: var(--card-bg);
-  border: 1px solid var(--card-border);
+  border: none;
+  box-shadow:
+    0 1px 3px rgba(12, 21, 41, 0.04),
+    0 8px 28px rgba(12, 21, 41, 0.08);
   position: relative;
 }
 
 .configColChanged {
 }
+
 .configColFinal {
+  box-shadow:
+    0 1px 3px rgba(12, 21, 41, 0.05),
+    0 10px 36px rgba(12, 21, 41, 0.11);
 }
 
 /* Цветной кружок в правой части заголовка */
@@ -173,10 +180,60 @@
   background: #16a34a;
 }
 
+/* ── Info-bar внизу карточек 1 и 2 ── */
+.cardInfoBar {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-top: 1px solid var(--c-border-subtle);
+  margin-top: auto;
+  flex-shrink: 0;
+  gap: 0;
+}
+
+.cardInfoBarItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.cardInfoBarItemRight {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.cardInfoBarLabel {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--c-text-faint);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.cardInfoBarValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c-text-dark);
+  line-height: 1.3;
+  letter-spacing: -0.2px;
+}
+
+.cardInfoBarDivider {
+  width: 1px;
+  height: 28px;
+  background: var(--c-border-subtle);
+  flex-shrink: 0;
+  margin: 0 16px;
+}
+
 /* Обёртка колонки */
 .configColWrapper {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
 /* Заголовок карточки — внутри карточки */
@@ -184,7 +241,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 18px;
+  padding: 16px 20px;
   border-bottom: 1px solid var(--c-border-subtle);
   flex-shrink: 0;
 }
@@ -232,7 +289,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px 18px 20px;
+  padding: 14px 20px 22px;
 }
 
 /* Анимации строк */
@@ -254,7 +311,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  padding: 0 18px;
+  padding: 0 20px 8px;
   flex: 1;
 }
 
@@ -339,12 +396,71 @@
 }
 
 .finalItemPrice .finalValue {
-  font-size: 21px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   line-height: 1;
   color: var(--c-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
   display: inline-block;
+}
+
+/* ── Блок цены ── */
+.priceBlock {
+  border-radius: 16px;
+  background: linear-gradient(150deg, #111f47 0%, #07101e 100%);
+  padding: 22px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  box-shadow:
+    0 4px 24px rgba(7, 16, 30, 0.3),
+    0 1px 4px rgba(7, 16, 30, 0.18);
+}
+
+.priceBlockTop {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 20px;
+}
+
+.priceBlockLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.32);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.priceBlockValue {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+}
+
+.priceBlockUnit {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.32);
+  line-height: 1;
+  margin-top: 6px;
+}
+
+.priceBlockLeadTime {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.32);
+  margin-top: 2px;
+}
+
+.priceBlockActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ── Кнопки действий ── */
@@ -446,6 +562,33 @@
   opacity: 1;
 }
 
+/* Ghost — для тёмного блока цены */
+.btnGhost {
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.65);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+}
+
+.btnGhost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+}
+
+.btnGhost:active {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: none;
+}
+
+.btnGhost:disabled {
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow: none;
+  opacity: 1;
+}
+
 /* Алиас для отключения анимаций (обратная совместимость) */
 .btnNoAnim {
 }
@@ -463,8 +606,8 @@
 
 @media (max-width: 1279px) {
   .configurator {
-    padding: 24px 24px 22px;
-    gap: 16px;
+    padding: 24px 28px 24px;
+    gap: 20px;
   }
 }
 
@@ -474,13 +617,13 @@
   }
   .configGrid {
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 16px;
   }
   .configColFinal {
     grid-column: 1 / -1;
   }
   .productImg {
-    height: 180px;
+    height: 190px;
   }
 }
 
@@ -510,94 +653,9 @@
   }
 }
 
-/* ── Мобильная sticky-плашка ── */
-.stickyBar {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  .stickyBar {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(135deg, #0c1e4a 0%, #081228 100%);
-    border-top: 1px solid rgba(255, 255, 255, 0.07);
-    padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
-    z-index: 200;
-  }
-
-  .stickyPrice {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2px;
-  }
-
-  .stickyPriceLabel {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.4);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    line-height: 1;
-  }
-
-  .stickyPriceValue {
-    font-size: 22px;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1;
-    letter-spacing: -0.4px;
-  }
-
-  .stickyActions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .stickyBtn {
-    width: 100%;
-    min-height: 42px;
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 0.1px;
-    line-height: 1.3;
-    border-radius: var(--r-sm);
-    padding: 9px 16px;
-  }
-
-  .stickyBar .btnPrimary {
-    background: var(--c-primary);
-    box-shadow: none;
-    font-weight: 500;
-  }
-
-  .stickyBar .btnSecondary {
-    color: rgba(255, 255, 255, 0.6);
-    border-color: rgba(255, 255, 255, 0.12);
-    background: transparent;
-    font-weight: 400;
-  }
-
-  .stickyBar .btnSecondary:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.22);
-  }
-
-  .configurator {
-    padding-bottom: 160px;
-  }
-}
-
 @media (max-width: 480px) {
   .configurator {
     padding: 14px;
-    margin-bottom: 125px;
   }
   .productImg {
     height: 130px;
@@ -641,6 +699,11 @@
   .currentModel {
     margin-top: 0;
     text-align: left;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .currentModelLabel {
+    display: none;
   }
   .productImg {
     height: 110px;

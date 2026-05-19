@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import Header from '../../shared/components/Header/Header';
-import Footer from '../../shared/components/Footer/Footer';
 import LoadingScreen from '../../shared/components/LoadingScreen/LoadingScreen';
 import { Configurator } from '../../modules/Configurator';
 import { Parameters } from '../../modules/Parameters';
@@ -57,7 +56,6 @@ export default function ConfiguratorPage({ onLogout, username }) {
                   <Configurator />
                   <Parameters />
                 </motion.div>
-                <Footer />
               </div>
             </AppProvider>
           </motion.div>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { calcDiff } from '../../../shared/utils/calcDiff';
 import Notification from '../../../shared/components/Notification/Notification.jsx';
@@ -186,6 +185,17 @@ export default function Configurator() {
 
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : null;
 
+	const nzSummary = model && defaults ? {
+		model: modelDisplay,
+		dims: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
+		thickness: `${config.bodyThickness} / ${config.doorThickness} мм`,
+		lock: lock?.name ?? '—',
+		qty: `${qty} шт.`,
+		price: priceDisplay,
+		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038',
+		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038',
+	} : null;
+
 	return (
 		<main className='layout__content'>
 			<div className={styles.configurator}>
@@ -304,6 +314,12 @@ export default function Configurator() {
 											</motion.li>
 										))}
 									</motion.ul>
+									<div className={styles.cardInfoBar}>
+										<div className={styles.cardInfoBarItem}>
+											<span className={styles.cardInfoBarLabel}>Базовая цена</span>
+											<span className={styles.cardInfoBarValue}>{model.basePrice?.toLocaleString('ru-RU')} ₽</span>
+										</div>
+									</div>
 								</div>
 							</motion.div>
 
@@ -369,6 +385,15 @@ export default function Configurator() {
 											))}
 										</AnimatePresence>
 									</motion.ul>
+									<div className={styles.cardInfoBar}>
+										<div className={styles.cardInfoBarItem}>
+											<span className={styles.cardInfoBarLabel}>
+												{changedSpecs.length === 0
+													? 'Все параметры стандартные'
+													: `Изменено ${changedSpecs.length} из 9 параметров`}
+											</span>
+										</div>
+									</div>
 								</div>
 							</motion.div>
 
@@ -379,66 +404,63 @@ export default function Configurator() {
 										<span className={styles.colIcon}><IconFinal /></span>
 										<span className={styles.colTitle}>Итоговая конфигурация</span>
 									</div>
-									<div className={styles.colTop}>
-										<motion.ul
-											className={styles.finalSpec}
-											key={`${config.modelId}-${resetKey}`}
-											initial='hidden'
-											animate='visible'
-										>
-											{finalSpecsList.map(({ label, value, colorHex }, i) => (
-												<motion.li
-													key={label}
-													className={styles.finalItem}
-													custom={i}
-													variants={specItemVariants}
-												>
-													<span className={styles.finalLabel}>{label}</span>
-													<span className={styles.finalValue}>
-														{colorHex && (
-															<span
-																className={styles.colorSwatch}
-																style={{
-																	background: colorHex,
-																	border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
-																}}
-															/>
-														)}
-														{value}
-													</span>
-												</motion.li>
-											))}
-											{price && !price.manual && (
-												<li className={styles.finalItem}>
-													<span className={styles.finalLabel}>Цена за 1 шт.</span>
-													<span className={styles.finalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
-												</li>
-											)}
-											<li className={`${styles.finalItem} ${styles.finalItemPrice}`}>
-												<span className={styles.finalLabel}>Итого ({qty} шт.)</span>
-												<AnimatePresence mode='wait' initial={false}>
-													<motion.span
-														key={priceDisplay}
-														className={styles.finalValue}
-														initial={{ opacity: 0, y: -7 }}
-														animate={{ opacity: 1, y: 0 }}
-														exit={{ opacity: 0, y: 7 }}
-														transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-													>
-														{priceDisplay}
-													</motion.span>
-												</AnimatePresence>
-											</li>
-											{price && !price.manual && price.leadTime && (
-												<li className={styles.finalItem}>
-													<span className={styles.finalLabel}>Срок</span>
-													<span className={styles.finalValue}>{price.leadTime}</span>
-												</li>
-											)}
-										</motion.ul>
-									</div>
+									<motion.ul
+										className={styles.finalSpec}
+										key={`${config.modelId}-${resetKey}`}
+										initial='hidden'
+										animate='visible'
+									>
+										{finalSpecsList.map(({ label, value, colorHex }, i) => (
+											<motion.li
+												key={label}
+												className={styles.finalItem}
+												custom={i}
+												variants={specItemVariants}
+											>
+												<span className={styles.finalLabel}>{label}</span>
+												<span className={styles.finalValue}>
+													{colorHex && (
+														<span
+															className={styles.colorSwatch}
+															style={{
+																background: colorHex,
+																border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
+															}}
+														/>
+													)}
+													{value}
+												</span>
+											</motion.li>
+										))}
+									</motion.ul>
+								</div>
 
-									<div className={styles.actions}>
+								{/* ── Блок цены ── */}
+								<div className={styles.priceBlock}>
+									<div className={styles.priceBlockTop}>
+										<span className={styles.priceBlockLabel}>Итого {qty} шт.</span>
+										<AnimatePresence mode='wait' initial={false}>
+											<motion.div
+												key={priceDisplay}
+												className={styles.priceBlockValue}
+												initial={{ opacity: 0, y: -8 }}
+												animate={{ opacity: 1, y: 0 }}
+												exit={{ opacity: 0, y: 8 }}
+												transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+											>
+												{priceDisplay}
+											</motion.div>
+										</AnimatePresence>
+										{price && !price.manual && (
+											<span className={styles.priceBlockUnit}>
+												{price.clientPrice.toLocaleString('ru-RU')} ₽ × {qty} шт.
+											</span>
+										)}
+										{price && !price.manual && price.leadTime && (
+											<span className={styles.priceBlockLeadTime}>{price.leadTime}</span>
+										)}
+									</div>
+									<div className={styles.priceBlockActions}>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
 											<motion.button
 												className={`${styles.btn} ${styles.btnKP}`}
@@ -451,7 +473,7 @@ export default function Configurator() {
 										</div>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
 											<motion.button
-												className={`${styles.btn} ${styles.btnPrimary} ${styles.btnNoAnim}`}
+												className={`${styles.btn} ${styles.btnGhost} ${styles.btnNoAnim}`}
 												disabled={!model || !parametersUnlocked || isNZOpen}
 												onClick={openNZModal}
 												type='button'
@@ -469,65 +491,14 @@ export default function Configurator() {
 				</AnimatePresence>
 			</div>
 
-			{createPortal(
-				<AnimatePresence>
-					{model && (
-						<motion.div
-							className={styles.stickyBar}
-							initial={{ y: '100%' }}
-							animate={{ y: 0 }}
-							exit={{ y: '100%' }}
-							transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
-						>
-							<div className={styles.stickyPrice}>
-								<span className={styles.stickyPriceLabel}>Итого</span>
-								<AnimatePresence mode='wait' initial={false}>
-									<motion.span
-										key={priceDisplay}
-										className={styles.stickyPriceValue}
-										initial={{ opacity: 0, y: -5 }}
-										animate={{ opacity: 1, y: 0 }}
-										exit={{ opacity: 0, y: 5 }}
-										transition={{ duration: 0.16 }}
-									>
-										{priceDisplay}
-									</motion.span>
-								</AnimatePresence>
-							</div>
-							<div className={styles.stickyActions}>
-								<motion.button
-									className={`${styles.btn} ${styles.btnSecondary} ${styles.stickyBtn} ${styles.btnNoAnim}`}
-									disabled={!model || !parametersUnlocked || isNZOpen}
-									onClick={openNZModal}
-									type='button'
-									whileTap={{ scale: 0.96 }}
-									transition={{ duration: 0.1 }}
-								>
-									Бланк нестандартного заказа
-								</motion.button>
-								<motion.button
-									className={`${styles.btn} ${styles.btnPrimary} ${styles.stickyBtn}`}
-									disabled={!model || !parametersUnlocked}
-									whileTap={{ scale: 0.96 }}
-									transition={{ duration: 0.1 }}
-								>
-									Коммерческое предложение для клиента
-								</motion.button>
-							</div>
-						</motion.div>
-					)}
-				</AnimatePresence>,
-				document.body
-			)}
 
-			<NZModal isOpen={isNZOpen} onClose={closeNZModal} onSubmit={handleNZSubmit} />
+			<NZModal isOpen={isNZOpen} onClose={closeNZModal} onSubmit={handleNZSubmit} summary={nzSummary} />
 
 			<Notification
 				visible={notify.visible}
 				status={notify.status}
 				title={notify.title}
-				stickTo='left'
-				offset={20}
+				onCloseTimeout={closeNotify}
 				onCloserClick={closeNotify}
 			>
 				{notify.message}
