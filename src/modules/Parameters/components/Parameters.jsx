@@ -52,7 +52,7 @@ export default function Parameters() {
 		setBodyColor,
 		setDoorColor,
 		setQuantity,
-		setDiscount,
+		setProfitability,
 		onReset,
 	} = setters;
 	const {
@@ -68,7 +68,7 @@ export default function Parameters() {
 		bodyColor,
 		doorColor,
 		quantity,
-		discount,
+		profitability,
 	} = config;
 
 	const [stepperStep, setStepperStep] = useState(() => (modelId ? 3 : seriesId ? 2 : 1));
@@ -277,17 +277,17 @@ const [openSelectId, setOpenSelectId] = useState(null);
 													/>
 												</div>
 												<div className={styles.paramGroup}>
-													<label className={styles.groupLabel} htmlFor='discount'>
-														Скидка %
+													<label className={styles.groupLabel} htmlFor='profitability'>
+														Рентабельность %
 													</label>
 													<StepperInput
-														id='discount'
-														value={String(discount)}
-														min={0}
-														max={50}
+														id='profitability'
+														value={String(profitability)}
+														min={30}
+														max={300}
 														step={1}
-														onChange={v => setDiscount(Number(v))}
-														defaultValue={0}
+														onChange={v => setProfitability(Number(v))}
+														defaultValue={30}
 														editable
 													/>
 												</div>

@@ -56,7 +56,7 @@ const BASE_CONFIG = {
   bodyColor:      null,
   doorColor:      null,
   quantity:       100,
-  discount:       0,
+  profitability:  0,
 };
 
 describe('calcPrice', () => {
@@ -116,11 +116,6 @@ describe('calcPrice', () => {
     const r = calcPrice({ ...BASE_CONFIG, ventilationType: 'roof' }, CATALOG_BASE);
     expect(r.manual).toBe(false);
     expect(r.clientPrice).toBe(Math.round(10000 * 1.05));
-  });
-
-  it('applies discount after base rounding', () => {
-    const r = calcPrice({ ...BASE_CONFIG, discount: 10 }, CATALOG_BASE);
-    expect(r.clientPrice).toBe(Math.round(10000 * 0.9));
   });
 
   it('computes weight using WEIGHT_MULT for 0.5mm', () => {

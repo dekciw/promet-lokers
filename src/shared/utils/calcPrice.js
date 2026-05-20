@@ -45,7 +45,6 @@ export function calcPrice(config, catalog) {
   const defaults = model.defaultSpecs ?? {};
   const series = model.seriesId; // 'ml' | 'ls'
   const qty = Number(config.quantity) || 1;
-  const discount = Number(config.discount) || 0;
 
   const doorW = model.doorWeight ?? 0;
   const bodyW = model.bodyWeight ?? 0;
@@ -171,10 +170,8 @@ export function calcPrice(config, catalog) {
   const priceMin = model.basePrice ?? 0;
   const cpBezNDS = model.cpBezNDS ?? 0;
 
-  // Округление до целых рублей — до применения скидки (по методике)
-  const clientRounded = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
-  const clientPrice   = Math.round(clientRounded * (1 - discount / 100));
-  const factoryPrice  = Math.round(cpBezNDS * (1 + totalRate) + lockSurcharge);
+  const clientPrice  = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
+  const factoryPrice = Math.round(cpBezNDS * (1 + totalRate) + lockSurcharge);
 
   // ── 7. Вес ──────────────────────────────────────────────────────
   const effDoor = config.doorThickness || defaults.doorThickness || '0.5';

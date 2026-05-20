@@ -177,11 +177,11 @@ export default function Configurator() {
 
 	const qty = config.quantity ?? 10;
 	const totalClientPrice = price && !price.manual ? price.clientPrice * qty : null;
-	const priceDisplay = !price || !config.modelId
+	const unitPriceDisplay = !price || !config.modelId
 		? '—'
 		: price.manual
 			? 'По согласованию'
-			: `${totalClientPrice.toLocaleString('ru-RU')} ₽`;
+			: `${price.clientPrice.toLocaleString('ru-RU')} ₽`;
 
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : null;
 
@@ -191,7 +191,7 @@ export default function Configurator() {
 		thickness: `${config.bodyThickness} / ${config.doorThickness} мм`,
 		lock: lock?.name ?? '—',
 		qty: `${qty} шт.`,
-		price: priceDisplay,
+		price: unitPriceDisplay,
 		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038',
 		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038',
 	} : null;
@@ -438,24 +438,27 @@ export default function Configurator() {
 								{/* ── Блок цены ── */}
 								<div className={styles.priceBlock}>
 									<div className={styles.priceBlockTop}>
-										<span className={styles.priceBlockLabel}>Итого {qty} шт.</span>
+										<span className={styles.priceBlockLabel}>за 1 шт.</span>
 										<AnimatePresence mode='wait' initial={false}>
 											<motion.div
-												key={priceDisplay}
+												key={unitPriceDisplay}
 												className={styles.priceBlockValue}
 												initial={{ opacity: 0, y: -8 }}
 												animate={{ opacity: 1, y: 0 }}
 												exit={{ opacity: 0, y: 8 }}
 												transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
 											>
-												{priceDisplay}
+												{unitPriceDisplay}
 											</motion.div>
 										</AnimatePresence>
 										{price && !price.manual && (
 											<span className={styles.priceBlockUnit}>
-												{price.clientPrice.toLocaleString('ru-RU')} ₽ × {qty} шт.
+												Общая сумма: {totalClientPrice.toLocaleString('ru-RU')} = {price.clientPrice.toLocaleString('ru-RU')} × {qty} шт.
 											</span>
 										)}
+										<span className={styles.priceBlockLeadTime}>
+											Итого: {qty} шт.
+										</span>
 										{price && !price.manual && price.leadTime && (
 											<span className={styles.priceBlockLeadTime}>{price.leadTime}</span>
 										)}

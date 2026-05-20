@@ -15,7 +15,7 @@ export function useConfig(catalog) {
   const [bodyColor, setBodyColor] = useState(null);
   const [doorColor, setDoorColor] = useState(null);
   const [quantity, setQuantity] = useState(10);
-  const [discount, setDiscount] = useState(0);
+  const [profitability, setProfitability] = useState(30);
   const [isResetting, setIsResetting] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
@@ -89,7 +89,7 @@ export function useConfig(catalog) {
       setBodyColor(null);
       setDoorColor(null);
       setQuantity(10);
-      setDiscount(0);
+      setProfitability(30);
       setResetKey(k => k + 1);
       setIsResetting(false);
     }, 330);
@@ -108,7 +108,7 @@ export function useConfig(catalog) {
     bodyColor,
     doorColor,
     quantity,
-    discount,
+    profitability,
   };
 
   const setters = {
@@ -124,7 +124,7 @@ export function useConfig(catalog) {
     setBodyColor,
     setDoorColor,
     setQuantity,
-    setDiscount,
+    setProfitability,
     onReset: handleReset,
   };
 
