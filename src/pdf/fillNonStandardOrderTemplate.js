@@ -7,7 +7,7 @@
  */
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import { buildNZParams } from '../shared/utils/buildNZParams.js';
+import { buildNonStandardOrderParams } from '../shared/utils/buildNonStandardOrderParams.js';
 
 const CDN       = 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest';
 const CDN_ARIAL = 'https://cdn.jsdelivr.net/fontsource/fonts/arimo@latest';
@@ -106,7 +106,7 @@ function drawMixed(page, text, x, y, size, cyrFont, latFont) {
 
 // ─── Основная функция ─────────────────────────────────────────────────────
 
-export async function fillNZTemplate({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
+export async function fillNonStandardOrderTemplate({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
   // 1. Загружаем шаблон
   const templateBytes = await fetch('/nz-template.pdf').then(r => {
     if (!r.ok) throw new Error('Не удалось загрузить /nz-template.pdf');
@@ -146,7 +146,7 @@ export async function fillNZTemplate({ config, catalog, managerName, clientName,
 
   // 3. Данные
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
-  const params = buildNZParams(config, catalog);
+  const params = buildNonStandardOrderParams(config, catalog);
   const qty = config.quantity ?? 1;
 
   // 4. Заполняем поля страницы 1

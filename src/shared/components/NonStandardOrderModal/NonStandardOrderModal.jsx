@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
 import { cx } from '../../utils/cx.js';
-import styles from './NZModal.module.css';
+import styles from './NonStandardOrderModal.module.css';
 
 const overlayVariants = {
 	hidden: { opacity: 0 },
@@ -41,7 +41,7 @@ function SummaryRow({ label, value }) {
 	);
 }
 
-export default function NZModal({ isOpen, onClose, onSubmit, summary }) {
+export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summary }) {
 	const titleId = useId();
 	const [summaryOpen, setSummaryOpen] = useState(false);
 	const {

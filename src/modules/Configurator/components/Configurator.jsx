@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { calcDiff } from '../../../shared/utils/calcDiff';
-import Notification from '../../../shared/components/Notification/Notification.jsx';
-import { getColorHex } from '../../../shared/utils/colors';
-import { cx } from '../../../shared/utils/cx';
-import { useAppContext } from '../../../shared/context/AppContext';
-import NZModal from '../../../shared/components/NZModal/NZModal.jsx';
+import { calcDiff } from '@/shared/utils/calcDiff';
+import Notification from '@/shared/components/Notification/Notification.jsx';
+import { getColorHex } from '@/shared/utils/colors';
+import { cx } from '@/shared/utils/cx';
+import { useAppContext } from '@/shared/context/AppContext';
+import NonStandardOrderModal from '@/shared/components/NonStandardOrderModal/NonStandardOrderModal.jsx';
+import CommercialProposalModal from '@/shared/components/CommercialProposalModal/CommercialProposalModal.jsx';
 import styles from './Configurator.module.css';
 
 const specItemVariants = {
@@ -156,18 +157,36 @@ export default function Configurator() {
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock, catalog.priceRules?.ventilation);
 
-	const [isNZOpen, setIsNZOpen] = useState(false);
+	const [isOrderOpen, setIsOrderOpen] = useState(false);
+	const [isProposalOpen, setIsProposalOpen] = useState(false);
 	const [notify, setNotify] = useState({ visible: false, status: 'ok', title: '', message: '' });
 
-	function openNZModal() { setIsNZOpen(true); }
-	function closeNZModal() { setIsNZOpen(false); }
+	function openOrderModal() { setIsOrderOpen(true); }
+	function closeOrderModal() { setIsOrderOpen(false); }
+
 	function closeNotify() { setNotify(n => ({ ...n, visible: false })); }
 
-	async function handleNZSubmit({ managerName, clientName, nzNumber, calcNumber }) {
+	function handleProposalClick() {
+		setIsProposalOpen(true);
+	}
+
+	async function handleProposalSubmit({ price: enteredPrice }) {
 		try {
-			const { generateNZ } = await import('../../../pdf/generateNZ.js');
-			await generateNZ({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
-			setIsNZOpen(false);
+			const { generateCommercialProposal } = await import('@/pdf/generateCommercialProposal.js');
+			await generateCommercialProposal({ config, catalog, price: enteredPrice });
+			setIsProposalOpen(false);
+			setNotify({ visible: true, status: 'ok', title: 'КП скачано', message: 'Коммерческое предложение успешно сохранено' });
+		} catch (err) {
+			console.error('Ошибка генерации КП:', err);
+			setNotify({ visible: true, status: 'error', title: 'Не удалось создать PDF', message: err?.message ?? String(err) });
+		}
+	}
+
+	async function handleOrderSubmit({ managerName, clientName, nzNumber, calcNumber }) {
+		try {
+			const { generateNonStandardOrder } = await import('@/pdf/generateNonStandardOrder.js');
+			await generateNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+			setIsOrderOpen(false);
 			setNotify({ visible: true, status: 'ok', title: 'Бланк скачан', message: 'Бланк нестандартного заказа успешно сохранён' });
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);
@@ -185,7 +204,7 @@ export default function Configurator() {
 
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : null;
 
-	const nzSummary = model && defaults ? {
+	const orderSummary = model && defaults ? {
 		model: modelDisplay,
 		dims: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
 		thickness: `${config.bodyThickness} / ${config.doorThickness} мм`,
@@ -194,6 +213,19 @@ export default function Configurator() {
 		price: unitPriceDisplay,
 		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038',
 		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038',
+	} : null;
+
+	const proposalSummary = model && defaults ? {
+		model: modelDisplay,
+		dims: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
+		thickness: `${config.bodyThickness} / ${config.doorThickness} мм`,
+		lock: lock?.name ?? '—',
+		ventilation: config.ventilationType
+			? (catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType)
+			: null,
+		qty: `${qty} шт.`,
+		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038',
+		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038',
 	} : null;
 
 	return (
@@ -468,6 +500,8 @@ export default function Configurator() {
 											<motion.button
 												className={`${styles.btn} ${styles.btnKP}`}
 												disabled={!model || !parametersUnlocked}
+												onClick={handleProposalClick}
+												type='button'
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
@@ -477,8 +511,8 @@ export default function Configurator() {
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
 											<motion.button
 												className={`${styles.btn} ${styles.btnGhost} ${styles.btnNoAnim}`}
-												disabled={!model || !parametersUnlocked || isNZOpen}
-												onClick={openNZModal}
+												disabled={!model || !parametersUnlocked || isOrderOpen}
+												onClick={openOrderModal}
 												type='button'
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
@@ -495,7 +529,14 @@ export default function Configurator() {
 			</div>
 
 
-			<NZModal isOpen={isNZOpen} onClose={closeNZModal} onSubmit={handleNZSubmit} summary={nzSummary} />
+			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} summary={orderSummary} />
+			<CommercialProposalModal
+				isOpen={isProposalOpen}
+				onClose={() => setIsProposalOpen(false)}
+				onSubmit={handleProposalSubmit}
+				summary={proposalSummary}
+				initialPrice={price && !price.manual ? price.clientPrice : null}
+			/>
 
 			<Notification
 				visible={notify.visible}

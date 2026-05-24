@@ -269,7 +269,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 														id='quantity'
 														value={String(quantity)}
 														min={1}
-														max={300}
+														max={999}
 														step={1}
 														onChange={v => setQuantity(Number(v))}
 														defaultValue={10}

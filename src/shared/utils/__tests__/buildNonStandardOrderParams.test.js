@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildNZParams } from '../buildNZParams.js';
+import { buildNonStandardOrderParams } from '../buildNonStandardOrderParams.js';
 
 const CATALOG = {
   series: [{ id: 'ml', name: 'ML-серия' }, { id: 'ls', name: 'LS-серия' }],
@@ -33,24 +33,24 @@ const STANDARD_CONFIG = {
   quantity: 10,
 };
 
-describe('buildNZParams', () => {
+describe('buildNonStandardOrderParams', () => {
   // A. Базовые случаи
 
   it('возвращает [] когда модель не выбрана (modelId пустая строка)', () => {
-    expect(buildNZParams({ modelId: '' }, CATALOG)).toEqual([]);
+    expect(buildNonStandardOrderParams({ modelId: '' }, CATALOG)).toEqual([]);
   });
 
   it('возвращает [] когда modelId отсутствует в catalog', () => {
-    expect(buildNZParams({ modelId: 'unknown-model' }, CATALOG)).toEqual([]);
+    expect(buildNonStandardOrderParams({ modelId: 'unknown-model' }, CATALOG)).toEqual([]);
   });
 
   it('возвращает 11 параметров для выбранной модели', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     expect(result).toHaveLength(11);
   });
 
   it('все параметры стандартной конфигурации имеют isNonStandard=false', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     result.forEach(item => {
       expect(item.isNonStandard, `${item.label} должен быть стандартным`).toBe(false);
     });
@@ -59,13 +59,13 @@ describe('buildNZParams', () => {
   // B. Маркировка нестандартных
 
   it('помечает width=700 как нестандартный', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, width: '700' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, width: '700' }, CATALOG);
     const item = result.find(p => p.label === 'Ширина');
     expect(item).toEqual({ label: 'Ширина', value: '700 мм', isNonStandard: true });
   });
 
   it('помечает height и bodyThickness одновременно нестандартными, глубина остаётся стандартной', () => {
-    const result = buildNZParams(
+    const result = buildNonStandardOrderParams(
       { ...STANDARD_CONFIG, height: '2000', bodyThickness: '0.6' },
       CATALOG,
     );
@@ -75,40 +75,40 @@ describe('buildNZParams', () => {
   });
 
   it('помечает doorThickness нестандартным при отличии от defaults', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, doorThickness: '0.7' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, doorThickness: '0.7' }, CATALOG);
     expect(result.find(p => p.label === 'Толщина двери').isNonStandard).toBe(true);
   });
 
   it('форматирует ventilationType=roof как Крыша и помечает нестандартным', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, ventilationType: 'roof' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, ventilationType: 'roof' }, CATALOG);
     const vent = result.find(p => p.label === 'Вентиляция');
     expect(vent).toEqual({ label: 'Вентиляция', value: 'Крыша', isNonStandard: true });
   });
 
   it('форматирует ventilationType=roofBottom как Крыша + дно', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, ventilationType: 'roofBottom' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, ventilationType: 'roofBottom' }, CATALOG);
     expect(result.find(p => p.label === 'Вентиляция').value).toBe('Крыша + дно');
   });
 
   it('форматирует ventilationType=roofBottomPipe как Крыша + дно + труба', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, ventilationType: 'roofBottomPipe' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, ventilationType: 'roofBottomPipe' }, CATALOG);
     expect(result.find(p => p.label === 'Вентиляция').value).toBe('Крыша + дно + труба');
   });
 
   it('форматирует ventilationType=null как Нет (стандартное)', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     const vent = result.find(p => p.label === 'Вентиляция');
     expect(vent).toEqual({ label: 'Вентиляция', value: 'Нет', isNonStandard: false });
   });
 
   it('помечает нестандартный замок (lockId !== key_basic)', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, lockId: 'key_code' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, lockId: 'key_code' }, CATALOG);
     const lock = result.find(p => p.label === 'Замок');
     expect(lock).toEqual({ label: 'Замок', value: 'Практик EL Code', isNonStandard: true });
   });
 
   it('помечает стандартный замок key_basic как isNonStandard=false', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     const lock = result.find(p => p.label === 'Замок');
     expect(lock.isNonStandard).toBe(false);
     expect(lock.value).toBe('Ключевой (Базовый)');
@@ -116,20 +116,20 @@ describe('buildNZParams', () => {
 
   it('помечает выбранный bodyColor как нестандартный', () => {
     const bodyColor = { name: 'RAL 5005', color: '#003087', cat: 1 };
-    const result = buildNZParams({ ...STANDARD_CONFIG, bodyColor }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, bodyColor }, CATALOG);
     const item = result.find(p => p.label === 'Цвет корпуса');
     expect(item).toEqual({ label: 'Цвет корпуса', value: 'RAL 5005', isNonStandard: true });
   });
 
   it('форматирует bodyColor=null как стандартный', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     const item = result.find(p => p.label === 'Цвет корпуса');
     expect(item).toEqual({ label: 'Цвет корпуса', value: 'стандартный', isNonStandard: false });
   });
 
   it('помечает выбранный doorColor как нестандартный', () => {
     const doorColor = { name: 'RAL 9016', color: '#FFFFFF', cat: 1 };
-    const result = buildNZParams({ ...STANDARD_CONFIG, doorColor }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, doorColor }, CATALOG);
     const item = result.find(p => p.label === 'Цвет двери');
     expect(item).toEqual({ label: 'Цвет двери', value: 'RAL 9016', isNonStandard: true });
   });
@@ -137,20 +137,20 @@ describe('buildNZParams', () => {
   // C. Форматирование значений
 
   it('габариты содержат " мм" в конце', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     expect(result.find(p => p.label === 'Ширина').value).toMatch(/ мм$/);
     expect(result.find(p => p.label === 'Высота').value).toMatch(/ мм$/);
     expect(result.find(p => p.label === 'Глубина').value).toMatch(/ мм$/);
   });
 
   it('толщины содержат " мм" в конце', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     expect(result.find(p => p.label === 'Толщина корпуса').value).toMatch(/ мм$/);
     expect(result.find(p => p.label === 'Толщина двери').value).toMatch(/ мм$/);
   });
 
   it('сохраняет порядок параметров: Серия → Модель → Ширина → ... → Цвет двери', () => {
-    const result = buildNZParams(STANDARD_CONFIG, CATALOG);
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, CATALOG);
     const labels = result.map(p => p.label);
     expect(labels).toEqual([
       'Серия', 'Модель', 'Ширина', 'Высота', 'Глубина',
@@ -163,17 +163,17 @@ describe('buildNZParams', () => {
   // D. Крайние случаи
 
   it('подставляет defaults.width когда config.width пустая строка', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, width: '' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, width: '' }, CATALOG);
     expect(result.find(p => p.label === 'Ширина').value).toBe('600 мм');
   });
 
   it('возвращает "—" для серии если catalog.series пустой', () => {
-    const result = buildNZParams(STANDARD_CONFIG, { ...CATALOG, series: [] });
+    const result = buildNonStandardOrderParams(STANDARD_CONFIG, { ...CATALOG, series: [] });
     expect(result.find(p => p.label === 'Серия').value).toBe('—');
   });
 
   it('возвращает "—" для замка если catalog.locks[lockId] отсутствует', () => {
-    const result = buildNZParams({ ...STANDARD_CONFIG, lockId: 'unknown_lock' }, CATALOG);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, lockId: 'unknown_lock' }, CATALOG);
     expect(result.find(p => p.label === 'Замок').value).toBe('—');
   });
 
@@ -184,7 +184,7 @@ describe('buildNZParams', () => {
         'ml-186': { ...CATALOG.models['ml-186'], defaultSpecs: undefined },
       },
     };
-    const result = buildNZParams({ ...STANDARD_CONFIG, width: '999' }, catalogNoDefaults);
+    const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, width: '999' }, catalogNoDefaults);
     expect(result).toHaveLength(11);
     result.forEach(item => {
       expect(item.isNonStandard, `${item.label} должен быть стандартным без defaultSpecs`).toBe(false);

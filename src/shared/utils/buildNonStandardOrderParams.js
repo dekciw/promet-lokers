@@ -18,7 +18,7 @@ function fmtVentilation(type) {
  * @param {object} catalog — каталог из Firebase
  * @returns {Array<{label: string, value: string, isNonStandard: boolean}>}
  */
-export function buildNZParams(config, catalog) {
+export function buildNonStandardOrderParams(config, catalog) {
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   if (!model) return [];
 
