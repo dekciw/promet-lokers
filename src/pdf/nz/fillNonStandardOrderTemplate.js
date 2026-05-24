@@ -7,7 +7,7 @@
  */
 import { PDFDocument, rgb } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
-import { buildNonStandardOrderParams } from '../shared/utils/buildNonStandardOrderParams.js';
+import { buildNonStandardOrderParams } from '../../shared/utils/buildNonStandardOrderParams.js';
 
 const CDN       = 'https://cdn.jsdelivr.net/fontsource/fonts/roboto@latest';
 const CDN_ARIAL = 'https://cdn.jsdelivr.net/fontsource/fonts/arimo@latest';
@@ -108,8 +108,8 @@ function drawMixed(page, text, x, y, size, cyrFont, latFont) {
 
 export async function fillNonStandardOrderTemplate({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
   // 1. Загружаем шаблон
-  const templateBytes = await fetch('/nz-template.pdf').then(r => {
-    if (!r.ok) throw new Error('Не удалось загрузить /nz-template.pdf');
+  const templateBytes = await fetch('/templates/nz/nz-template.pdf').then(r => {
+    if (!r.ok) throw new Error('Не удалось загрузить /templates/nz/nz-template.pdf');
     return r.arrayBuffer();
   });
 

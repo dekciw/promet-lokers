@@ -146,10 +146,10 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const isLS = config.seriesId?.toLowerCase() === 'ls';
   const seriesPrefix = isLS ? 'LS' : 'ML';
 
-  const templateFile = nonStandardCount === 0 ? `/${seriesPrefix}-0.pdf`
-    : nonStandardCount === 1 ? `/${seriesPrefix}-1.pdf`
-    : nonStandardCount === 2 ? `/${seriesPrefix}-2.pdf`
-    : `/${seriesPrefix}-3.pdf`;
+  const templateFile = nonStandardCount === 0 ? `/templates/kp/${seriesPrefix}-0.pdf`
+    : nonStandardCount === 1 ? `/templates/kp/${seriesPrefix}-1.pdf`
+    : nonStandardCount === 2 ? `/templates/kp/${seriesPrefix}-2.pdf`
+    : `/templates/kp/${seriesPrefix}-3.pdf`;
 
   const isMl1 = nonStandardCount === 1;
   const isMl2 = nonStandardCount === 2;

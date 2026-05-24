@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getNonStandardOrderFilename } from '../generateNonStandardOrder.js';
+import { getNonStandardOrderFilename } from '../nz/generateNonStandardOrder.js';
 
 describe('getNonStandardOrderFilename (DOC_5)', () => {
   it('форматирует {article}_{YYYY-MM-DD}.pdf для известной модели', () => {
@@ -31,7 +31,7 @@ describe('getNonStandardOrderFilename (DOC_5)', () => {
 
 describe('generateNonStandardOrder', () => {
   it('экспортирует асинхронную функцию generateNonStandardOrder', async () => {
-    const mod = await import('../generateNonStandardOrder.js');
+    const mod = await import('../nz/generateNonStandardOrder.js');
     expect(typeof mod.generateNonStandardOrder).toBe('function');
     // async функции — это AsyncFunction, проверяем имя конструктора
     expect(mod.generateNonStandardOrder.constructor.name).toBe('AsyncFunction');

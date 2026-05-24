@@ -172,7 +172,7 @@ export default function Configurator() {
 
 	async function handleProposalSubmit({ price: enteredPrice }) {
 		try {
-			const { generateCommercialProposal } = await import('@/pdf/generateCommercialProposal.js');
+			const { generateCommercialProposal } = await import('@/pdf/kp/generateCommercialProposal.js');
 			await generateCommercialProposal({ config, catalog, price: enteredPrice });
 			setIsProposalOpen(false);
 			setNotify({ visible: true, status: 'ok', title: 'КП скачано', message: 'Коммерческое предложение успешно сохранено' });
@@ -184,7 +184,7 @@ export default function Configurator() {
 
 	async function handleOrderSubmit({ managerName, clientName, nzNumber, calcNumber }) {
 		try {
-			const { generateNonStandardOrder } = await import('@/pdf/generateNonStandardOrder.js');
+			const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
 			await generateNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
 			setIsOrderOpen(false);
 			setNotify({ visible: true, status: 'ok', title: 'Бланк скачан', message: 'Бланк нестандартного заказа успешно сохранён' });
