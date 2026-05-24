@@ -218,7 +218,8 @@ export default function Configurator() {
 	const proposalSummary = model && defaults ? {
 		model: modelDisplay,
 		dims: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
-		thickness: `${config.bodyThickness} / ${config.doorThickness} мм`,
+		bodyThickness: `${config.bodyThickness} мм`,
+		doorThickness: `${config.doorThickness} мм`,
 		lock: lock?.name ?? '—',
 		ventilation: config.ventilationType
 			? (catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType)

@@ -76,7 +76,8 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 	const summaryItems = summary ? [
 		{ label: 'Модель', value: summary.model },
 		{ label: 'Габариты', value: summary.dims },
-		{ label: 'Толщина', value: summary.thickness },
+		{ label: 'Толщина корпуса', value: summary.bodyThickness },
+		{ label: 'Толщина двери', value: summary.doorThickness },
 		{ label: 'Замок', value: summary.lock },
 		{ label: 'Вентиляция', value: summary.ventilation },
 		{ label: 'Количество', value: summary.qty },
