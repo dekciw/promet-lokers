@@ -36,13 +36,36 @@ describe('calcDiff', () => {
     expect(labels).toContain('Высота:');
   });
 
-  it('formats ventilationType=roof as Крыша', () => {
+  it('formats ventilationType=roof as Крыша (fallback without catalog)', () => {
     const result = calcDiff({ ...DEFAULTS, ventilationType: 'roof' }, { ...DEFAULTS, ventilationType: undefined });
     expect(result[0].value).toBe('Крыша');
   });
 
-  it('formats ventilationType=roofBottom as Крыша + дно', () => {
+  it('formats ventilationType=roofBottom as Крыша + дно (fallback without catalog)', () => {
     const result = calcDiff({ ...DEFAULTS, ventilationType: 'roofBottom' }, { ...DEFAULTS, ventilationType: undefined });
+    expect(result[0].value).toBe('Крыша + дно');
+  });
+
+  it('uses catalog name for ventilationType when catalog is provided', () => {
+    const ventilationCatalog = {
+      roof: { name: 'Вентиляция крыши' },
+      roofBottom: { name: 'Вентиляция крыши и дна' },
+    };
+    const result = calcDiff(
+      { ...DEFAULTS, ventilationType: 'roofBottom' },
+      { ...DEFAULTS, ventilationType: undefined },
+      ventilationCatalog
+    );
+    expect(result[0].value).toBe('Вентиляция крыши и дна');
+  });
+
+  it('falls back to hardcoded name if catalog entry has no name', () => {
+    const ventilationCatalog = { roofBottom: {} };
+    const result = calcDiff(
+      { ...DEFAULTS, ventilationType: 'roofBottom' },
+      { ...DEFAULTS, ventilationType: undefined },
+      ventilationCatalog
+    );
     expect(result[0].value).toBe('Крыша + дно');
   });
 

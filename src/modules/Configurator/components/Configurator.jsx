@@ -149,7 +149,9 @@ export default function Configurator() {
 		bodyColorName: defaults.bodyColorName ?? DEFAULT_COLOR_NAME,
 		doorColorName: defaults.doorColorName ?? DEFAULT_COLOR_NAME,
 	} : null;
-	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff).map(spec => {
+	// DEBUG: remove after fix verified
+	console.log('[DEBUG calcDiff] ventilationType:', config.ventilationType, 'ventilationCatalog:', catalog.priceRules?.ventilation, 'entry:', catalog.priceRules?.ventilation?.[config.ventilationType]);
+	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff, catalog.priceRules?.ventilation).map(spec => {
 		if (spec.label === 'Цвет корпуса:') return { ...spec, colorHex: config.bodyColor?.color ?? getColorHex(spec.value) };
 		if (spec.label === 'Цвет двери:') return { ...spec, colorHex: config.doorColor?.color ?? getColorHex(spec.value) };
 		return spec;

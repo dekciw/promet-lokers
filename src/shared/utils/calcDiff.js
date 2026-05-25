@@ -1,24 +1,31 @@
-const SPEC_FIELDS = [
-  { key: 'width',         label: 'Ширина:',          format: v => `${v} мм` },
-  { key: 'height',        label: 'Высота:',          format: v => `${v} мм` },
-  { key: 'depth',         label: 'Глубина:',         format: v => `${v} мм` },
-  { key: 'bodyThickness', label: 'Толщина корпуса:', format: v => `${v} мм` },
-  { key: 'doorThickness', label: 'Толщина двери:',   format: v => `${v} мм` },
-  { key: 'lockName',        label: 'Замок:',      format: v => v },
-  { key: 'ventilationType', label: 'Вентиляция:', format: v => {
-    if (v === 'roof') return 'Крыша';
-    if (v === 'roofBottom') return 'Крыша + дно';
-    if (v === 'roofBottomPipe') return 'Крыша + дно + труба';
-    return 'Нет';
-  }},
-  { key: 'bodyColorName', label: 'Цвет корпуса:', format: v => v },
-  { key: 'doorColorName', label: 'Цвет двери:',      format: v => v },
-];
+const VENT_FALLBACK = {
+  roof: 'Крыша',
+  roofBottom: 'Крыша + дно',
+  roofBottomPipe: 'Крыша + дно + труба',
+};
 
-export function calcDiff(current, defaults) {
+function buildSpecFields(ventilationCatalog) {
+  return [
+    { key: 'width',         label: 'Ширина:',          format: v => `${v} мм` },
+    { key: 'height',        label: 'Высота:',          format: v => `${v} мм` },
+    { key: 'depth',         label: 'Глубина:',         format: v => `${v} мм` },
+    { key: 'bodyThickness', label: 'Толщина корпуса:', format: v => `${v} мм` },
+    { key: 'doorThickness', label: 'Толщина двери:',   format: v => `${v} мм` },
+    { key: 'lockName',        label: 'Замок:',      format: v => v },
+    { key: 'ventilationType', label: 'Вентиляция:', format: v => {
+      if (ventilationCatalog) return ventilationCatalog[v]?.name ?? VENT_FALLBACK[v] ?? v;
+      return VENT_FALLBACK[v] ?? v;
+    }},
+    { key: 'bodyColorName', label: 'Цвет корпуса:', format: v => v },
+    { key: 'doorColorName', label: 'Цвет двери:',      format: v => v },
+  ];
+}
+
+export function calcDiff(current, defaults, ventilationCatalog) {
   if (!defaults) return [];
 
-  return SPEC_FIELDS.reduce((acc, field) => {
+  const specFields = buildSpecFields(ventilationCatalog);
+  return specFields.reduce((acc, field) => {
     const currentVal = current[field.key];
     const defaultVal = defaults[field.key];
 
