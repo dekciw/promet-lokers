@@ -421,14 +421,14 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const lockLabel = (catalog.locks?.[config.lockId]?.name ?? '')
     .replace(/\s*([-/])\s*/g, '$1');
   if (lockLabel) {
-    const lockX = (LOCK_X[config.lockId] ?? X_LOCK) - (!isNonStd && !isLS ? 20 : isLS ? 25 : 22) + (isNonStd && !isLS && config.lockId === 'd111x' ? 5 : 0);
+    const lockX = (LOCK_X[config.lockId] ?? X_LOCK) - 20 + (isNonStd && !isLS && config.lockId === 'd111x' ? 1 : 0) - (isNonStd && !isLS && config.lockId === 'euro_locks' ? 3 : 0) - (isNonStd && !isLS && config.lockId === 'praktik_el_mifare' ? 4 : 0) - (isNonStd && !isLS && config.lockId === 'praktik_el_code' ? 3 : 0) - (isLS && config.lockId === 'euro_locks' ? 3 : 0) - (isLS && config.lockId === 'praktik_el_mifare' ? 5 : 0) - (isLS && config.lockId === 'praktik_el_code' ? 3 : 0) - (!isNonStd && !isLS && config.lockId === 'euro_locks' ? 2 : 0) - (!isNonStd && !isLS && config.lockId === 'praktik_el_mifare' ? 5 : 0) - (!isNonStd && !isLS && config.lockId === 'praktik_el_code' ? 3 : 0);
     const lockY = (LOCK_Y[config.lockId] ?? Y_LOCK) - (isNonStd ? 5 : 0) - (isLS && nonStandardCount === 0 ? 5 : 0);
     drawInterMixed(lockLabel, lockX, lockY, 10, BLACK);
   }
 
   // Количество — 3 цифры на X_QTY, 1-2 цифры +5 вправо
   const qtyLabel = String(config.quantity ?? 10);
-  const qtyX = (qtyLabel.length >= 3 ? X_QTY : X_QTY + 7) - (!isNonStd && !isLS ? 3 : isMl1 ? 3 : (isMl2 || isMl3) ? 3 : 2);
+  const qtyX = (qtyLabel.length >= 3 ? X_QTY : X_QTY + 7) - (!isNonStd && !isLS ? 3 : isMl1 ? 3 : (isMl2 || isMl3) ? 3 : (isLS && nonStandardCount === 0) ? 3 : 2);
   const qtyY = isNonStd ? Y_QTY - 6.3 : Y_QTY - (isLS && nonStandardCount === 0 ? 7 : 0);
   drawInterMixed(qtyLabel, qtyX, qtyY, 10, BLACK);
 
