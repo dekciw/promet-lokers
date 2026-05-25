@@ -1,21 +1,32 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth } from './shared/lib/firebase';
 import { LoginScreen } from './modules/Auth';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
 import ErrorBoundary from './shared/components/ErrorBoundary/ErrorBoundary';
+import LoadingScreen from './shared/components/LoadingScreen/LoadingScreen';
 import './index.css';
 
 export default function App() {
-  const [isAuth, setIsAuth] = useState(() => localStorage.getItem('promet_auth') === '1');
-  const [username, setUsername] = useState(() => localStorage.getItem('promet_user') ?? '');
+  const [authState, setAuthState] = useState('loading');
+  const [user, setUser] = useState(null);
 
-  if (!isAuth) return <LoginScreen onAuth={login => { setUsername(login); setIsAuth(true); }} />;
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setAuthState(firebaseUser ? 'authenticated' : 'anonymous');
+    });
+    return unsubscribe;
+  }, []);
 
-  function handleLogout() {
-    localStorage.removeItem('promet_auth');
-    localStorage.removeItem('promet_user');
-    setIsAuth(false);
-    setUsername('');
+  async function handleLogout() {
+    await signOut(auth);
   }
+
+  if (authState === 'loading') return <LoadingScreen />;
+  if (authState === 'anonymous') return <LoginScreen />;
+
+  const username = user.displayName || user.email;
 
   return (
     <ErrorBoundary>

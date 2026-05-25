@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../../shared/lib/firebase';
 import styles from './LoginScreen.module.css';
 
-const LOGIN = 'admin';
-const PASSWORD = '1787810';
-
-export default function LoginScreen({ onAuth }) {
+export default function LoginScreen() {
   const [shake, setShake] = useState(false);
 
   const {
@@ -13,16 +12,14 @@ export default function LoginScreen({ onAuth }) {
     handleSubmit,
     setError,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = useForm();
 
-  function onSubmit({ login, password }) {
-    if (login === LOGIN && password === PASSWORD) {
-      localStorage.setItem('promet_auth', '1');
-      localStorage.setItem('promet_user', login);
-      onAuth(login);
-    } else {
-      setError('root', { message: 'Неверный логин или пароль' });
+  async function onSubmit({ email, password }) {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch {
+      setError('root', { message: 'Неверный email или пароль' });
       setShake(true);
       setTimeout(() => setShake(false), 400);
     }
@@ -42,14 +39,15 @@ export default function LoginScreen({ onAuth }) {
 
         <form className={styles.loginForm} onSubmit={handleSubmit(onSubmit)} noValidate>
           <div className={styles.loginField}>
-            <label className={styles.loginLabel} htmlFor='login'>Логин</label>
+            <label className={styles.loginLabel} htmlFor='email'>Email</label>
             <input
               className={`${styles.loginInput}${errors.root ? ` ${styles.loginInputError}` : ''}`}
-              id='login'
-              type='text'
-              autoComplete='username'
+              id='email'
+              type='email'
+              autoComplete='email'
               autoFocus
-              {...register('login', { required: true, onChange: () => clearErrors('root') })}
+              disabled={isSubmitting}
+              {...register('email', { required: true, onChange: () => clearErrors('root') })}
             />
           </div>
 
@@ -60,6 +58,7 @@ export default function LoginScreen({ onAuth }) {
               id='password'
               type='password'
               autoComplete='current-password'
+              disabled={isSubmitting}
               {...register('password', { required: true, onChange: () => clearErrors('root') })}
             />
           </div>
@@ -68,8 +67,8 @@ export default function LoginScreen({ onAuth }) {
             <p className={styles.loginError}>{errors.root.message}</p>
           )}
 
-          <button className={styles.loginBtn} type='submit'>
-            Войти
+          <button className={styles.loginBtn} type='submit' disabled={isSubmitting}>
+            {isSubmitting ? 'Вход…' : 'Войти'}
           </button>
         </form>
       </div>
