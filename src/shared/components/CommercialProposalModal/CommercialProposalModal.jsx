@@ -179,7 +179,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 											id='proposal-price'
 											type='text'
 											inputMode='numeric'
-											placeholder='Введите сумму в рублях'
+											placeholder='Цена от экономиста'
 											disabled={isSubmitting}
 											readOnly={initialPrice != null}
 											value={field.value ? parseInt(field.value.replace(/\D/g, '') || '0', 10).toLocaleString('ru-RU') : ''}

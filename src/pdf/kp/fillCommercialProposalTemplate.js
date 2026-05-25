@@ -272,6 +272,18 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
         currentX += advW;
         continue;
       }
+      if (ch === '×') {
+        flush();
+        const advW = 0.52 * size;
+        const cx = currentX + advW / 2;
+        const cy = y + 0.28 * size;
+        const half = 0.18 * size;
+        const barT = Math.max(0.5, 0.085 * size);
+        page.drawLine({ start: { x: cx - half, y: cy - half }, end: { x: cx + half, y: cy + half }, color, thickness: barT });
+        page.drawLine({ start: { x: cx - half, y: cy + half }, end: { x: cx + half, y: cy - half }, color, thickness: barT });
+        currentX += advW;
+        continue;
+      }
       const f = interFontFor(ch);
       if (segFont !== null && f !== segFont) flush();
       seg += ch;
@@ -412,9 +424,9 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const w = config.width  || model?.defaultSpecs?.width  || '';
   const h = config.height || model?.defaultSpecs?.height || '';
   const d = config.depth  || model?.defaultSpecs?.depth  || '';
-  const dimsText = `${w}x${h}x${d}`;
+  const dimsText = `${h}×${w}×${d}`;
   const dimsY = isNonStd ? Y_DIMS - 1 : Y_DIMS;
-  const dimsX = X_DIMS - 17;
+  const dimsX = X_DIMS - 7;
   drawInterMixed(dimsText, dimsX, dimsY, 10, BLACK);
 
   // Замок — индивидуальная X для каждого замка
@@ -472,7 +484,7 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
 
   // Цена за 1 шт — метка + значение
   const priceY = isMl3 ? Y_PRICE - 90 : isMl2 ? Y_PRICE - 62 : isMl1 ? Y_PRICE - 37 : Y_PRICE - (isLS && nonStandardCount === 0 ? 7 : 0);
-  drawInterMixed('Итоговая цена за 1 шт.', X_PRICE, priceY, 10, GRAY_PRICE);
+  drawInterMixed('Итоговая цена за 1 шт. (без НДС)', X_PRICE, priceY, 10, GRAY_PRICE);
   if (price) {
     const priceStr = `${Number(price).toLocaleString('ru-RU')} ₽`;
     drawInterMixed(priceStr, X_PRICE + 228 + (isLS && nonStandardCount >= 1 ? 2 : 0) + (!isNonStd && !isLS ? 1 : 0), priceY, 10, BLACK);
