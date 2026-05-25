@@ -5,16 +5,7 @@ import ColorPicker from './ColorPicker/ColorPicker';
 import StepperInput from './StepperInput';
 import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
-import { COLORS } from '../../../shared/utils/colors';
 import styles from './Parameters.module.css';
-
-const COLOR_OPTIONS = [
-	{ value: null, label: 'Стандарт (без изменений)' },
-	...COLORS.flatMap(g => g.items.map(item => ({ value: item.name, label: item.name, swatch: item.color }))),
-];
-
-const COLOR_MAP = new Map(COLORS.flatMap(g => g.items.map(i => [i.name, i])));
-
 
 
 const HEIGHT_MIN = 1400;
@@ -53,7 +44,6 @@ export default function Parameters() {
 		setDoorColor,
 		setQuantity,
 		setProfitability,
-		onReset,
 	} = setters;
 	const {
 		seriesId,
@@ -75,7 +65,6 @@ export default function Parameters() {
 	const [displayStep, setDisplayStep] = useState(() => (modelId ? 3 : seriesId ? 2 : 1));
 	const [direction, setDirection] = useState(1);
 	const [isSliding, setIsSliding] = useState(false);
-	const [modelConfirmed, setModelConfirmed] = useState(() => !!modelId);
 	const backAnimTimersRef = useRef([]);
 
 const [openSelectId, setOpenSelectId] = useState(null);
@@ -86,15 +75,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 	const handleDoorColorOpen = useCallback(v => setOpenSelectId(v ? 'doorColor' : null), []);
 	const handleBodyColorOpen = useCallback(v => setOpenSelectId(v ? 'bodyColor' : null), []);
 
-	function handleDoorColorChange(name) {
-		setDoorColor(name ? (COLOR_MAP.get(name) ?? null) : null);
-	}
-
-	function handleBodyColorChange(name) {
-		setBodyColor(name ? (COLOR_MAP.get(name) ?? null) : null);
-	}
-
-	const stepperStepRef = useRef(stepperStep);
+const stepperStepRef = useRef(stepperStep);
 	// eslint-disable-next-line react-hooks/refs -- ref для актуального значения в таймерах goToStep, избегает stale closure
 	stepperStepRef.current = stepperStep;
 
@@ -115,7 +96,6 @@ const [openSelectId, setOpenSelectId] = useState(null);
 
 	function handleModelSelect(newModelId) {
 		setParametersUnlocked(false);
-		setModelConfirmed(false);
 		onModelChange(newModelId);
 	}
 
@@ -161,10 +141,15 @@ const [openSelectId, setOpenSelectId] = useState(null);
 		return 'inactive';
 	}
 
-	function getCircleStyle(status) {
-		if (status === 'active') return { background: 'var(--c-primary)', boxShadow: 'none', transform: 'scale(1.1)' };
-		if (status === 'complete') return { background: 'var(--c-primary)', boxShadow: 'none', transform: 'scale(1)' };
-		return { background: 'transparent', boxShadow: 'none', transform: 'scale(1)' };
+function handleFullReset() {
+		setSeriesId('');
+		setQuantity(10);
+		setProfitability(30);
+		setParametersUnlocked(false);
+		setOpenSelectId(null);
+		setDirection(-1);
+		startTransition(() => setStepperStep(1));
+		setDisplayStep(1);
 	}
 
 	return (
@@ -174,13 +159,24 @@ const [openSelectId, setOpenSelectId] = useState(null);
 					<img className={styles.titleIcon} src='/img/icons/icon-gear.svg' alt='' width='24' height='24' />
 					<h2 className={styles.title}>Параметры</h2>
 				</div>
+				{seriesId && (
+					<motion.button
+						type='button'
+						className={styles.resetBtn}
+						onClick={handleFullReset}
+						whileTap={{ scale: 0.96 }}
+						transition={{ duration: 0.1 }}
+					>
+						Сбросить параметры
+					</motion.button>
+				)}
 			</div>
 
 			<div className={styles.breadcrumbs}>
 				{STEP_LABELS.map((label, i) => {
 					const step = i + 1;
 					const status = getStepStatus(step);
-					const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && modelConfirmed);
+					const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && !!modelId);
 
 					return (
 						<button
@@ -295,7 +291,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 											<motion.button
 												type='button'
 												className={styles.nextBtn}
-												onClick={() => { setModelConfirmed(true); goToStep(3); }}
+												onClick={() => goToStep(3)}
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>

@@ -40,52 +40,33 @@
   color: var(--c-brand);
 }
 
-/* ── Кнопка сброса — чистая, без трюков ── */
+/* ── Кнопка сброса ── */
 .resetBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--r-sm);
-  border: 1.5px solid #fca5a5;
-  background: #fff5f5;
-  color: #dc2626;
+  padding: 0;
+  height: auto;
+  border: none;
+  background: none;
+  color: var(--c-text-faint);
   cursor: pointer;
   flex-shrink: 0;
-  transition:
-    background 0.15s,
-    border-color 0.15s,
-    transform 0.1s;
+  font-family: var(--f-main);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  transition: color 0.15s;
 }
 
 .resetBtn:hover {
-  background: #fee2e2;
-  border-color: #f87171;
-}
-
-.resetBtn:active {
-  transform: scale(0.93);
+  color: var(--c-text-muted);
 }
 
 .resetBtn:focus-visible {
   outline: none;
-  box-shadow:
-    0 0 0 2px #fff,
-    0 0 0 4px #dc2626;
-  border-radius: var(--r-sm);
-}
-
-.resetBtnSign {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Скрываем expand-текст — убираем дешёвый трюк */
-.resetBtnText {
-  display: none;
+  box-shadow: 0 0 0 2px var(--c-primary);
+  border-radius: 2px;
 }
 
 /* ── Tabs ── */
