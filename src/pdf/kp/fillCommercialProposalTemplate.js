@@ -394,7 +394,7 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   drawMixed('ШКАФЫ ДЛЯ РАЗДЕВАЛОК', X_CATEGORY, Y_CATEGORY);
   drawMixed(seriesLabel, X_SERIES, Y_SERIES);
 
-  const modelLines = wrapText(model?.name ?? '', MODEL_MAX_WIDTH, FONT_SIZE);
+  const modelLines = wrapText((model?.name ?? '').toUpperCase(), MODEL_MAX_WIDTH, FONT_SIZE);
   modelLines.forEach((line, i) => {
     drawMixed(line, X_MODEL, Y_MODEL - i * MODEL_LINE_HEIGHT);
   });
@@ -414,22 +414,23 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const d = config.depth  || model?.defaultSpecs?.depth  || '';
   const dimsText = `${w}x${h}x${d}`;
   const dimsY = isNonStd ? Y_DIMS - 1 : Y_DIMS;
-  drawInterMixed(dimsText, X_DIMS, dimsY, 8, BLACK);
+  const dimsX = !isNonStd && !isLS ? X_DIMS - 17 : X_DIMS;
+  drawInterMixed(dimsText, dimsX, dimsY, 10, BLACK);
 
   // Замок — индивидуальная X для каждого замка
   const lockLabel = (catalog.locks?.[config.lockId]?.name ?? '')
     .replace(/\s*([-/])\s*/g, '$1');
   if (lockLabel) {
-    const lockX = LOCK_X[config.lockId] ?? X_LOCK;
+    const lockX = (LOCK_X[config.lockId] ?? X_LOCK) - (!isNonStd && !isLS ? 20 : 0);
     const lockY = (LOCK_Y[config.lockId] ?? Y_LOCK) - (isNonStd ? 5 : 0) - (isLS && nonStandardCount === 0 ? 5 : 0);
-    drawInterMixed(lockLabel, lockX, lockY, 8, BLACK);
+    drawInterMixed(lockLabel, lockX, lockY, 10, BLACK);
   }
 
   // Количество — 3 цифры на X_QTY, 1-2 цифры +5 вправо
   const qtyLabel = String(config.quantity ?? 10);
-  const qtyX = qtyLabel.length >= 3 ? X_QTY : X_QTY + 7;
+  const qtyX = (qtyLabel.length >= 3 ? X_QTY : X_QTY + 7) - (!isNonStd && !isLS ? 2 : 0);
   const qtyY = isNonStd ? Y_QTY - 6.3 : Y_QTY - (isLS && nonStandardCount === 0 ? 7 : 0);
-  drawInterMixed(qtyLabel, qtyX, qtyY, 8, BLACK);
+  drawInterMixed(qtyLabel, qtyX, qtyY, 10, BLACK);
 
   // ML-1/ML-2 — нестандартные параметры (стек: каждый следующий ниже на ROW_STEP)
   if (isNonStd) {
@@ -453,10 +454,10 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
       drawInterMixed(row.label, X_PRICE, labelY, 10, GRAY_PRICE);
       if (row.isVent) {
         const ventValY = rowY + (isMl3 ? 7 : isMl1 ? 8 : 0);
-        const ventLines = wrapInterText(row.value, FRAME_RIGHT_X - ventValX - 3, 8);
-        ventLines.forEach((line, li) => drawInterMixed(line, ventValX, ventValY - li * 10, 8, BLACK));
+        const ventLines = wrapInterText(row.value, FRAME_RIGHT_X - ventValX - 3, 10);
+        ventLines.forEach((line, li) => drawInterMixed(line, ventValX, ventValY - li * 12, 10, BLACK));
       } else {
-        drawInterMixed(row.value, X_BODY_THICKNESS_VAL_1, rowY, 8, BLACK);
+        drawInterMixed(row.value, X_BODY_THICKNESS_VAL_1, rowY, 10, BLACK);
       }
     });
   }
@@ -466,7 +467,7 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   drawInterMixed('Итоговая цена за 1 шт.', X_PRICE, priceY, 10, GRAY_PRICE);
   if (price) {
     const priceStr = `${Number(price).toLocaleString('ru-RU')} ₽`;
-    drawInterMixed(priceStr, X_PRICE + 235 + (isLS && nonStandardCount >= 1 ? 2 : 0), priceY, 8, BLACK);
+    drawInterMixed(priceStr, X_PRICE + 235 + (isLS && nonStandardCount >= 1 ? 2 : 0) - (!isNonStd && !isLS ? 7 : 0), priceY, 10, BLACK);
   }
 
   // Фото модели
