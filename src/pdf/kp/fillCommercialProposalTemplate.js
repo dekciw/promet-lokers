@@ -421,14 +421,14 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const lockLabel = (catalog.locks?.[config.lockId]?.name ?? '')
     .replace(/\s*([-/])\s*/g, '$1');
   if (lockLabel) {
-    const lockX = (LOCK_X[config.lockId] ?? X_LOCK) - (!isNonStd && !isLS ? 20 : isMl1 ? 22 : 25);
+    const lockX = (LOCK_X[config.lockId] ?? X_LOCK) - (!isNonStd && !isLS ? 20 : isLS ? 25 : 22) + (isNonStd && !isLS && config.lockId === 'd111x' ? 5 : 0);
     const lockY = (LOCK_Y[config.lockId] ?? Y_LOCK) - (isNonStd ? 5 : 0) - (isLS && nonStandardCount === 0 ? 5 : 0);
     drawInterMixed(lockLabel, lockX, lockY, 10, BLACK);
   }
 
   // Количество — 3 цифры на X_QTY, 1-2 цифры +5 вправо
   const qtyLabel = String(config.quantity ?? 10);
-  const qtyX = (qtyLabel.length >= 3 ? X_QTY : X_QTY + 7) - (!isNonStd && !isLS ? 3 : isMl1 ? 3 : 2);
+  const qtyX = (qtyLabel.length >= 3 ? X_QTY : X_QTY + 7) - (!isNonStd && !isLS ? 3 : isMl1 ? 3 : (isMl2 || isMl3) ? 3 : 2);
   const qtyY = isNonStd ? Y_QTY - 6.3 : Y_QTY - (isLS && nonStandardCount === 0 ? 7 : 0);
   drawInterMixed(qtyLabel, qtyX, qtyY, 10, BLACK);
 
@@ -446,11 +446,19 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     if (config.ventilationType)
       rows.push({ label: 'Вентиляция', value: catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType, isVent: true });
 
+    // ML-2: определяем комбинацию
+    const hasBody = rows.some(r => r.label.includes('корпуса'));
+    const hasDoor = rows.some(r => r.label.includes('двери'));
+    const hasVent = rows.some(r => r.isVent);
+    const isMl2_BodyDoor = isMl2 && hasBody && hasDoor && !hasVent;
+    const isMl2_BodyVent = isMl2 && hasBody && hasVent && !hasDoor;
+    const isMl2_DoorVent = isMl2 && hasDoor && hasVent && !hasBody;
+
     rows.forEach((row, i) => {
       const isDoorRow = row.label.includes('двери');
       const isBodyRow = row.label.includes('корпуса');
-      const rowY = baseY - i * ROW_STEP - (isMl3 && row.isVent ? 12 : 0) - (isMl3 && isDoorRow ? 4 : 0) + (isMl3 && isBodyRow ? 2 : 0) + (isMl1 && isDoorRow ? 2 : 0) + (isMl1 && isBodyRow ? 2 : 0);
-      const labelY = rowY + (row.isVent ? 2 : 0);
+      const rowY = baseY - i * ROW_STEP - (isMl3 && row.isVent ? 12 : 0) - (isMl3 && isDoorRow ? 4 : 0) + (isMl3 && isBodyRow ? 2 : 0) + (isMl1 && isDoorRow ? 2 : 0) + (isMl1 && isBodyRow ? 2 : 0) - (isMl2_BodyDoor && isDoorRow ? 6 : 0);
+      const labelY = rowY + (row.isVent ? 2 : 0) - (isMl2_DoorVent && row.isVent ? 6 : 0) - (isMl2_BodyVent && row.isVent ? 6 : 0);
       drawInterMixed(row.label, X_PRICE, labelY, 10, GRAY_PRICE);
       if (row.isVent) {
         const ventValY = rowY + (isMl3 ? 7 : isMl1 ? 8 : 0);
@@ -527,7 +535,7 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   }
 
   // ─── DEBUG: координатная сетка ─────────────────────────────────────────
-  const DEBUG = true;
+  const DEBUG = false;
   if (DEBUG) {
     const { width, height } = page.getSize();
     const GREEN = rgb(0, 0.78, 0.2);
