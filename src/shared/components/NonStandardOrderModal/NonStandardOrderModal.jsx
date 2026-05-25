@@ -32,6 +32,16 @@ function IconChevron() {
 	);
 }
 
+function IconPrint() {
+	return (
+		<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+			<polyline points='6 9 6 2 18 2 18 9' />
+			<path d='M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2' />
+			<rect x='6' y='14' width='12' height='8' />
+		</svg>
+	);
+}
+
 function SummaryRow({ label, value }) {
 	return (
 		<div className={styles.summaryItem}>
@@ -41,21 +51,24 @@ function SummaryRow({ label, value }) {
 	);
 }
 
-export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summary }) {
+export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPrint, summary }) {
 	const titleId = useId();
 	const [summaryOpen, setSummaryOpen] = useState(false);
+	const [isPrinting, setIsPrinting] = useState(false);
 	const {
 		register,
 		handleSubmit,
 		reset,
-		formState: { errors, isSubmitting },
+		trigger,
+		getValues,
+		formState: { errors, isSubmitting, isValid },
 	} = useForm({
 		mode: 'onChange',
 		defaultValues: { managerName: '', clientName: '', nzNumber: '', calcNumber: '' },
 	});
 
 	useEffect(() => {
-		if (!isOpen) { reset(); setSummaryOpen(false); }
+		if (!isOpen) { reset(); setSummaryOpen(false); setIsPrinting(false); }
 	}, [isOpen, reset]);
 
 	useEffect(() => {
@@ -64,14 +77,16 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 		return () => { document.body.style.overflow = ''; };
 	}, [isOpen]);
 
+	const busy = isSubmitting || isPrinting;
+
 	useEffect(() => {
 		if (!isOpen) return;
 		function onKey(e) {
-			if (e.key === 'Escape' && !isSubmitting) onClose();
+			if (e.key === 'Escape' && !busy) onClose();
 		}
 		window.addEventListener('keydown', onKey);
 		return () => window.removeEventListener('keydown', onKey);
-	}, [isOpen, isSubmitting, onClose]);
+	}, [isOpen, busy, onClose]);
 
 	async function handleFormSubmit(data) {
 		await onSubmit({
@@ -82,12 +97,29 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 		});
 	}
 
+	async function handlePrint() {
+		const valid = await trigger();
+		if (!valid) return;
+		const data = getValues();
+		setIsPrinting(true);
+		try {
+			await onPrint?.({
+				managerName: data.managerName.trim(),
+				clientName: data.clientName.trim(),
+				nzNumber: data.nzNumber.trim(),
+				calcNumber: data.calcNumber.trim(),
+			});
+		} finally {
+			setIsPrinting(false);
+		}
+	}
+
 	return createPortal(
 		<AnimatePresence>
 			{isOpen && (
 				<motion.div
 					className={styles.overlay}
-					onClick={() => { if (!isSubmitting) onClose(); }}
+					onClick={() => { if (!busy) onClose(); }}
 					role='presentation'
 					variants={overlayVariants}
 					initial='hidden'
@@ -117,7 +149,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 								type='button'
 								className={styles.closeBtn}
 								onClick={onClose}
-								disabled={isSubmitting}
+								disabled={busy}
 								aria-label='Закрыть'
 							>
 								<IconClose />
@@ -187,7 +219,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 									type='text'
 									placeholder='Введите Ф.И.О.'
 									autoComplete='name'
-									disabled={isSubmitting}
+									disabled={busy}
 									className={cx(styles.input, errors.managerName && styles.inputError)}
 									aria-invalid={errors.managerName ? 'true' : 'false'}
 									aria-describedby='nz-manager-err'
@@ -210,7 +242,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 									type='text'
 									placeholder='Введите название'
 									autoComplete='organization'
-									disabled={isSubmitting}
+									disabled={busy}
 									className={cx(styles.input, errors.clientName && styles.inputError)}
 									aria-invalid={errors.clientName ? 'true' : 'false'}
 									aria-describedby='nz-client-err'
@@ -231,7 +263,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 										type='text'
 										placeholder='Например, 123'
 										autoComplete='off'
-										disabled={isSubmitting}
+										disabled={busy}
 										className={cx(styles.input, errors.nzNumber && styles.inputError)}
 										aria-invalid={errors.nzNumber ? 'true' : 'false'}
 										aria-describedby='nz-number-err'
@@ -249,7 +281,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 										type='text'
 										placeholder='Например, 456'
 										autoComplete='off'
-										disabled={isSubmitting}
+										disabled={busy}
 										className={cx(styles.input, errors.calcNumber && styles.inputError)}
 										aria-invalid={errors.calcNumber ? 'true' : 'false'}
 										aria-describedby='nz-calc-err'
@@ -267,15 +299,38 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, summa
 								type='button'
 								className={cx(styles.btn, styles.btnSecondary)}
 								onClick={onClose}
-								disabled={isSubmitting}
+								disabled={busy}
 							>
 								Отмена
 							</button>
+							{onPrint && (
+								<button
+									type='button'
+									className={cx(styles.btn, styles.btnPrint)}
+									onClick={handlePrint}
+									disabled={busy || !isValid}
+								>
+									{isPrinting ? (
+										<>
+											<svg className={styles.spinner} viewBox='0 0 20 20' fill='none' aria-hidden='true' width='14' height='14'>
+												<circle cx='10' cy='10' r='7' stroke='currentColor' strokeWidth='2.5' strokeOpacity='0.25' />
+												<path d='M10 3a7 7 0 0 1 7 7' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+											</svg>
+											Генерация…
+										</>
+									) : (
+										<>
+											<IconPrint />
+											Распечатать
+										</>
+									)}
+								</button>
+							)}
 							<button
 								type='submit'
 								form='nz-form'
 								className={cx(styles.btn, styles.btnPrimary)}
-								disabled={isSubmitting}
+								disabled={busy || !isValid}
 							>
 								{isSubmitting ? (
 									<>

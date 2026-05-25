@@ -11,7 +11,7 @@ import { calcPrice } from '../../shared/utils/calcPrice';
 
 export default function ConfiguratorPage({ onLogout, username }) {
   const { catalog, catalogError, isLoading, retry } = useCatalog();
-  const { config, setters, isResetting, resetKey } = useConfig(catalog);
+  const { config, setters, isResetting, resetKey, loadConfig } = useConfig(catalog);
   const [parametersUnlocked, setParametersUnlocked] = useState(false);
 
   if (catalogError) {
@@ -45,7 +45,12 @@ export default function ConfiguratorPage({ onLogout, username }) {
             transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
           >
             <AppProvider value={ctx}>
-              <Header onLogout={onLogout} username={username} />
+              <Header
+                onLogout={onLogout}
+                username={username}
+                config={config}
+                onImport={loadConfig}
+              />
               <div className='main-scroll'>
                 <motion.div
                   className='layout'

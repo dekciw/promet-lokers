@@ -414,6 +414,17 @@
   background: var(--c-border-subtle);
 }
 
+.btnPrint {
+  background: transparent;
+  color: var(--c-text-mid);
+  border: 1.5px solid var(--c-border);
+  flex: 1;
+}
+
+.btnPrint:hover:not(:disabled) {
+  background: var(--c-border-subtle);
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

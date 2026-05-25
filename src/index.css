@@ -68,6 +68,9 @@ html {
 	--s-primary-btn: 0 4px 14px rgba(0, 53, 158, 0.28);
 	--s-orange-btn: 0 4px 14px rgba(245, 130, 20, 0.32);
 
+	/* Поверхности */
+	--c-surface: #f5f7fb;
+
 	/* Карточки */
 	--card-bg: #ffffff;
 	--card-border: #dde4f0;
@@ -211,6 +214,25 @@ body {
 	}
 }
 
+/* Клавиатура и touch */
+[data-tooltip]:focus-within::after,
+[data-tooltip]:focus-within::before {
+	opacity: 1;
+}
+[data-tooltip]:focus-within::after {
+	transform: translateX(-50%) translateY(0) scale(1);
+}
+@media (hover: none) {
+	[data-tooltip]:active::after,
+	[data-tooltip]:active::before {
+		opacity: 1;
+	}
+	[data-tooltip]:active::after {
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
+}
+
+
 /* Отключаем анимации */
 @media (prefers-reduced-motion: reduce) {
 	*,
@@ -288,4 +310,13 @@ body {
 	.layout__content {
 		min-width: 0;
 	}
+}
+
+/* ── Печать ── */
+@media print {
+	[data-no-print] { display: none !important; }
+	header { display: none !important; }
+	.main-scroll { overflow: visible !important; }
+	.layout { flex-direction: column !important; }
+	body { background: #fff !important; }
 }

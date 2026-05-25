@@ -111,6 +111,24 @@ export function useConfig(catalog) {
     profitability,
   };
 
+  function loadConfig(saved) {
+    if (!saved) return;
+    if (saved.seriesId != null) setSeriesId(saved.seriesId);
+    if (saved.modelId != null) setModelId(saved.modelId);
+    if (saved.width != null) setWidth(String(saved.width));
+    if (saved.height != null) setHeight(String(saved.height));
+    if (saved.depth != null) setDepth(String(saved.depth));
+    if (saved.bodyThickness != null) setBodyThickness(saved.bodyThickness);
+    if (saved.doorThickness != null) setDoorThickness(saved.doorThickness);
+    if (saved.lockId != null) setLockId(saved.lockId);
+    if ('ventilationType' in saved) setVentilationType(saved.ventilationType);
+    if ('bodyColor' in saved) setBodyColor(saved.bodyColor);
+    if ('doorColor' in saved) setDoorColor(saved.doorColor);
+    if (saved.quantity != null) setQuantity(Number(saved.quantity));
+    if (saved.profitability != null) setProfitability(Number(saved.profitability));
+    setResetKey(k => k + 1);
+  }
+
   const setters = {
     setSeriesId: handleSeriesChange,
     onModelChange: handleModelChange,
@@ -128,5 +146,5 @@ export function useConfig(catalog) {
     onReset: handleReset,
   };
 
-  return { config, setters, isResetting, resetKey };
+  return { config, setters, isResetting, resetKey, loadConfig };
 }

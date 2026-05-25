@@ -6,7 +6,11 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  align-self: stretch;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: calc(100dvh - 80px);
+  overflow-y: auto;
   overflow-x: hidden;
   background: var(--c-white);
   border-left: 1px solid var(--c-border-subtle);

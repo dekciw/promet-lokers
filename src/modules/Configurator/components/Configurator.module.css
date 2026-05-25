@@ -166,13 +166,13 @@
 .heroBadge {
   display: inline-flex;
   align-items: center;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.78);
   letter-spacing: 0.5px;
@@ -184,12 +184,12 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 20px;
   background: rgba(230, 151, 24, 0.88);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.3px;
@@ -282,12 +282,12 @@
 
 .photoCardImgLocker {
   object-fit: contain;
-  padding: 0 16px 32px;
+  padding: 0 16px 16px;
 }
 
 .photoCardImgLock {
   object-fit: contain;
-  padding: 0 24px 16px;
+  padding: 0 16px 16px;
 }
 
 .photoCardBody {
@@ -732,4 +732,5 @@
   .topRow { flex-direction: column; align-items: flex-start; gap: 4px; }
   .currentModelLabel { display: none; }
 }
+
 

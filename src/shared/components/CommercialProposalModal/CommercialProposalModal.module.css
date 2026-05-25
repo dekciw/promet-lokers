@@ -92,7 +92,7 @@
   display: flex;
   align-items: center;
   padding: 14px 20px;
-  margin: 14px 24px 0;
+  margin: 14px 24px;
   background: var(--c-brand);
   border-radius: var(--r-md);
   flex-shrink: 0;
@@ -188,7 +188,7 @@
 
 .summaryItem {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 9px 14px;
@@ -215,6 +215,18 @@
   letter-spacing: -0.1px;
   line-height: 1.4;
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.colorSwatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 /* ── Форма ── */
@@ -419,6 +431,17 @@
 }
 
 .btnSecondary:hover:not(:disabled) {
+  background: var(--c-border-subtle);
+}
+
+.btnPrint {
+  background: transparent;
+  color: var(--c-text-mid);
+  border: 1.5px solid var(--c-border);
+  flex: 1;
+}
+
+.btnPrint:hover:not(:disabled) {
   background: var(--c-border-subtle);
 }
 

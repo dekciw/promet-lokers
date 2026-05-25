@@ -153,7 +153,7 @@ function handleFullReset() {
 	}
 
 	return (
-		<aside className={styles.parameters}>
+		<aside className={styles.parameters} data-no-print>
 			<div className={styles.titleRow}>
 				<div className={styles.titleGroup}>
 					<img className={styles.titleIcon} src='/img/icons/icon-gear.svg' alt='' width='24' height='24' />

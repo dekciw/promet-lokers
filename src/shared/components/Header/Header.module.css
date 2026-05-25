@@ -70,11 +70,56 @@
 .userArea {
 	display: flex;
 	align-items: center;
+	gap: 12px;
 	position: absolute;
 	right: 40px;
 	top: 50%;
 	transform: translateY(-50%);
 	z-index: 1;
+}
+
+.headerActions {
+	display: flex;
+	align-items: center;
+	gap: 2px;
+}
+
+.actionBtn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	border: none;
+	background: transparent;
+	color: rgba(255, 255, 255, 0.5);
+	cursor: pointer;
+	transition: background 0.15s, color 0.15s;
+	flex-shrink: 0;
+}
+
+.actionBtn:hover {
+	background: rgba(255, 255, 255, 0.1);
+	color: rgba(255, 255, 255, 0.9);
+}
+
+.actionBtn:disabled {
+	opacity: 0.3;
+	cursor: default;
+}
+
+.actionBtn:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.fileInput {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
 }
 
 .userChip {
@@ -139,6 +184,29 @@
 .logoutBtn:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+/* ── Тултипы хедера — направление вниз ── */
+.actionBtn[data-tooltip]::after,
+.logoutBtn[data-tooltip]::after {
+	bottom: auto;
+	top: calc(100% + 8px);
+	transform: translateX(-50%) translateY(-4px) scale(0.96);
+}
+
+.actionBtn[data-tooltip]::before,
+.logoutBtn[data-tooltip]::before {
+	bottom: auto;
+	top: calc(100% + 3px);
+	border-top-color: transparent;
+	border-bottom-color: #0c1529;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.actionBtn[data-tooltip]:hover::after,
+	.logoutBtn[data-tooltip]:hover::after {
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
 }
 
 /* ──────────── АДАПТИВ ──────────── */

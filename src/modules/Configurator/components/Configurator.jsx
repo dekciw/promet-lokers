@@ -93,6 +93,16 @@ export default function Configurator() {
 		}
 	}
 
+	async function handleProposalPrint({ price: enteredPrice }) {
+		try {
+			const { printCommercialProposal } = await import('@/pdf/kp/generateCommercialProposal.js');
+			await printCommercialProposal({ config, catalog, price: enteredPrice });
+		} catch (err) {
+			console.error('Ошибка печати КП:', err);
+			setNotify({ visible: true, status: 'error', title: 'Не удалось напечатать PDF', message: err?.message ?? String(err) });
+		}
+	}
+
 	async function handleOrderSubmit({ managerName, clientName, nzNumber, calcNumber }) {
 		try {
 			const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
@@ -102,6 +112,16 @@ export default function Configurator() {
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);
 			setNotify({ visible: true, status: 'error', title: 'Не удалось создать PDF', message: err?.message ?? String(err) });
+		}
+	}
+
+	async function handleOrderPrint({ managerName, clientName, nzNumber, calcNumber }) {
+		try {
+			const { printNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
+			await printNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+		} catch (err) {
+			console.error('Ошибка печати НЗ:', err);
+			setNotify({ visible: true, status: 'error', title: 'Не удалось напечатать PDF', message: err?.message ?? String(err) });
 		}
 	}
 
@@ -123,17 +143,23 @@ export default function Configurator() {
 		: !parametersUnlocked ? 'Перейдите к параметрам'
 		: undefined;
 
+	const totalPriceDisplay = price && !price.manual
+		? `${(price.clientPrice * qty).toLocaleString('ru-RU')} ₽`
+		: unitPriceDisplay;
+
 	const orderSummary = model && defaults ? {
 		model: modelDisplay,
 		dims,
 		thickness: `${config.bodyThickness} / ${config.doorThickness} мм`,
 		lock: lock?.name ?? '—',
 		qty: `${qty} шт.`,
-		price: unitPriceDisplay,
+		price: totalPriceDisplay,
 		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? DEFAULT_COLOR_NAME,
 		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? DEFAULT_COLOR_NAME,
 	} : null;
 
+	const proposalDoorColorName = config.doorColor?.name ?? defaults?.doorColorName ?? DEFAULT_COLOR_NAME;
+	const proposalBodyColorName = config.bodyColor?.name ?? defaults?.bodyColorName ?? DEFAULT_COLOR_NAME;
 	const proposalSummary = model && defaults ? {
 		model: modelDisplay,
 		dims,
@@ -142,8 +168,11 @@ export default function Configurator() {
 		lock: lock?.name ?? '—',
 		ventilation: config.ventilationType ? (catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType) : null,
 		qty: `${qty} шт.`,
-		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? DEFAULT_COLOR_NAME,
-		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? DEFAULT_COLOR_NAME,
+		unitPrice: price && !price.manual ? `${price.clientPrice.toLocaleString('ru-RU')} ₽` : null,
+		doorColor: proposalDoorColorName,
+		doorColorHex: config.doorColor?.color ?? getColorHex(proposalDoorColorName),
+		bodyColor: proposalBodyColorName,
+		bodyColorHex: config.bodyColor?.color ?? getColorHex(proposalBodyColorName),
 	} : null;
 
 	const changesLabel = changesCount === 1 ? '1 изменение' : changesCount < 5 ? `${changesCount} изменения` : `${changesCount} изменений`;
@@ -458,24 +487,32 @@ export default function Configurator() {
 									</div>
 
 									<div className={styles.priceCardActions}>
-										<div data-tooltip={tooltipMsg}>
+										<div
+											data-tooltip={tooltipMsg}
+											onClick={!canAction && tooltipMsg ? () => setNotify({ visible: true, status: 'ok', title: '', message: tooltipMsg }) : undefined}
+										>
 											<motion.button
 												className={cx(styles.btn, styles.btnKP)}
 												disabled={!canAction}
 												onClick={() => setIsProposalOpen(true)}
 												type='button'
+												style={!canAction ? { pointerEvents: 'none' } : undefined}
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
 												КП для клиента
 											</motion.button>
 										</div>
-										<div data-tooltip={tooltipMsg}>
+										<div
+											data-tooltip={tooltipMsg}
+											onClick={!canAction && tooltipMsg ? () => setNotify({ visible: true, status: 'ok', title: '', message: tooltipMsg }) : undefined}
+										>
 											<motion.button
 												className={cx(styles.btn, styles.btnGhost)}
 												disabled={!canAction || isOrderOpen}
 												onClick={openOrderModal}
 												type='button'
+												style={!canAction ? { pointerEvents: 'none' } : undefined}
 												whileTap={{ scale: 0.96 }}
 												transition={{ duration: 0.1 }}
 											>
@@ -491,13 +528,15 @@ export default function Configurator() {
 				</AnimatePresence>
 			</div>
 
-			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} summary={orderSummary} />
+			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} onPrint={handleOrderPrint} summary={orderSummary} />
 			<CommercialProposalModal
 				isOpen={isProposalOpen}
 				onClose={() => setIsProposalOpen(false)}
 				onSubmit={handleProposalSubmit}
+				onPrint={handleProposalPrint}
 				summary={proposalSummary}
-				initialPrice={price && !price.manual ? price.clientPrice : null}
+				initialPrice={price && !price.manual ? price.clientPrice * qty : null}
+				qty={qty}
 			/>
 			<Notification
 				visible={notify.visible}
