@@ -100,7 +100,8 @@ const LOCK_IMAGE_MAP = {
   praktik_el_code:   'Замок_Практик_EL_code.jpg',
   praktik_el_mifare: 'Замок_Практик_EL_Mifare.jpg',
   euro_locks:        'Замок_Euro_Locks_A129.jpg',
-  // key_basic и d111x — картинок нет, пропускаем
+  key_basic:         'Ключевой_(Базовый).jpg',
+  d111x:             'Замок_D111x-20-1.jpg',
 };
 
 // Индивидуальные боксы для конкретных моделей (переопределяют PHOTO_BOX)
