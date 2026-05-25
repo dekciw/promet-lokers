@@ -22,17 +22,27 @@ export const LOCK_PHOTOS = Object.fromEntries(
 	}),
 );
 
+function normalizeLockName(s) {
+	return s.toLowerCase().replace(/^замок\s+/i, '').replace(/[\s\-_/]+/g, '');
+}
+
 /**
  * Возвращает URL фото замка по его имени (из lock.name каталога).
- * Сначала точное совпадение, потом частичное.
+ * Сначала точное совпадение, потом нормализованное (без слешей/дефисов/префикса).
  */
 export function getLockPhoto(lockName) {
 	if (!lockName) return null;
 	if (LOCK_PHOTOS[lockName]) return LOCK_PHOTOS[lockName];
 
-	const lower = lockName.toLowerCase();
+	const normTarget = normalizeLockName(lockName);
 	const entry = Object.entries(LOCK_PHOTOS).find(([k]) =>
+		normalizeLockName(k) === normTarget,
+	);
+	if (entry) return entry[1];
+
+	const lower = lockName.toLowerCase();
+	const partial = Object.entries(LOCK_PHOTOS).find(([k]) =>
 		k.toLowerCase().includes(lower) || lower.includes(k.toLowerCase()),
 	);
-	return entry ? entry[1] : null;
+	return partial ? partial[1] : null;
 }
