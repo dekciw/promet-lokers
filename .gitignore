@@ -26,6 +26,9 @@ CLAUDE.md
 .planning/
 prd.md
 
+# Firebase
+.firebase/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
