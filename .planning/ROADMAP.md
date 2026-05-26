@@ -158,7 +158,7 @@ _Конфигуратор шкафов-локеров «Промет»_
 ### Phases
 
 - [ ] **Phase 7: Foundation** — React Router, ролевой доступ и Security Rules
-- [ ] **Phase 8: Catalog CRUD** — Полный список, поиск, фильтр, попап редактирования, добавление и удаление
+- [x] **Phase 8: Catalog CRUD** — Полный список, поиск, фильтр, попап редактирования, добавление и удаление (completed 2026-05-26)
 - [ ] **Phase 9: Media & Ordering** — Загрузка фото в Firebase Storage, drag & drop сортировка
 - [ ] **Phase 10: Price Coefficients** — Вкладка редактирования коэффициентов цены
 - [ ] **Phase 11: Users & History** — Управление пользователями и история КП
@@ -243,7 +243,7 @@ Plans:
 | 5. Дизайн Figma | v1.0 | 1/1 | Complete | 2026-05-23 |
 | 6. Auth + History | v1.0 | 0/? | Deferred | — |
 | 7. Foundation | v1.1 | 0/2 | Not started | — |
-| 8. Catalog CRUD | v1.1 | 1/2 | In Progress|  |
+| 8. Catalog CRUD | v1.1 | 2/2 | Complete   | 2026-05-26 |
 | 9. Media & Ordering | v1.1 | 0/? | Not started | — |
 | 10. Price Coefficients | v1.1 | 0/? | Not started | — |
 | 11. Users & History | v1.1 | 0/? | Not started | — |

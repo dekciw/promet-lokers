@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
-status: executing
-stopped_at: "Checkpoint: Task 4 human-verify in 08-02-PLAN.md"
-last_updated: "2026-05-26T15:16:30.900Z"
+status: verifying
+stopped_at: Completed 08-02-PLAN.md
+last_updated: "2026-05-26T15:27:29.157Z"
 last_activity: 2026-05-26
 progress:
   total_phases: 5
@@ -31,7 +31,7 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 Phase: 08 (catalog-crud) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-26
 
 Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
@@ -67,6 +67,7 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 - [Phase 08-catalog-crud]: article field read-only in edit mode — prevents ghost-entries
 - [Phase 08-catalog-crud]: valueAsNumber on all numeric inputs — Firestore saves numbers not strings
 - [Phase 08-catalog-crud]: duplicate article guard in handleAdd before calling addModel
+- [Phase 08]: Firestore stores models field as object {articleKey: modelData}, not array — rawToArray/arrayToRaw converters added to useCatalogAdmin
 
 ### Pending Todos
 
@@ -79,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-26T15:16:25.251Z
-Stopped at: Checkpoint: Task 4 human-verify in 08-02-PLAN.md
+Last session: 2026-05-26T15:27:29.153Z
+Stopped at: Completed 08-02-PLAN.md
 Resume file: None

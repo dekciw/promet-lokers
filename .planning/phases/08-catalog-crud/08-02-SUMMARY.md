@@ -15,7 +15,8 @@ provides:
   - DeleteConfirmModal component (alertdialog confirmation)
   - AdminPage CRUD screen (filter/search/add/edit/delete with Notification feedback)
 affects:
-  - 08-03 (if any: photo upload, drag-drop sort — consumers of AdminPage)
+  - Phase 09 (photo upload, drag-drop sort — consumers of AdminPage)
+  - Phase 10 (price coefficients tab — will be added to AdminPage)
 
 # Tech tracking
 tech-stack:
@@ -26,6 +27,7 @@ tech-stack:
     - article field read-only/disabled in edit mode (prevents ghost-entries)
     - duplicate article guard before addModel (client-side validation)
     - useMemo for filtered+sorted visibleModels (performance with ~100 models)
+    - rawToArray/arrayToRaw converters in useCatalogAdmin for Firestore object-format models field
 
 key-files:
   created:
@@ -38,6 +40,8 @@ key-files:
   modified:
     - src/pages/AdminPage/AdminPage.jsx
     - src/pages/AdminPage/AdminPage.module.css
+    - src/shared/hooks/useCatalogAdmin.js
+    - src/shared/hooks/__tests__/useCatalogAdmin.test.js
 
 key-decisions:
   - "article field read-only/disabled in edit mode — prevents ghost-entries (Open Question #1 from RESEARCH.md)"
@@ -45,24 +49,26 @@ key-decisions:
   - "duplicate article guard in handleAdd — client-side check before calling addModel (Pitfall #5)"
   - "role=alertdialog for DeleteConfirmModal, role=dialog for CatalogEditModal — correct ARIA semantics"
   - "isDeleting managed by parent (AdminPage) not DeleteConfirmModal — single source of truth"
+  - "Firestore stores models field as object {articleKey: modelData}, not array — rawToArray/arrayToRaw converters added to useCatalogAdmin"
+
+requirements-completed: [CATALOG-01, CATALOG-02, CATALOG-03, CATALOG-04, CATALOG-05, CATALOG-06, CATALOG-07, CATALOG-08]
 
 # Metrics
-duration: ~4min
+duration: ~60min (including human verification and bug fix)
 completed: 2026-05-26
-status: checkpoint-pending (Task 4: human-verify in browser)
 ---
 
 # Phase 08 Plan 02: Admin UI — CatalogEditModal + DeleteConfirmModal + AdminPage Summary
 
-**Full CRUD UI for catalog admin: CatalogEditModal (14-field add/edit form), DeleteConfirmModal (alertdialog), AdminPage rewritten with filter/search/cards grid + notification feedback — build clean, 74/74 tests passing. Awaiting human verification in browser (Task 4).**
+**Full CRUD UI for catalog admin: CatalogEditModal (14-field add/edit form), DeleteConfirmModal (alertdialog), AdminPage rewritten with filter/search/cards grid + notification feedback — verified in browser by admin user (all 25+ checklist items passed).**
 
 ## Performance
 
-- **Duration:** ~4 min
+- **Duration:** ~60 min (tasks 1-3: ~4 min; human verify + bug fix: ~56 min)
 - **Started:** 2026-05-26T15:11:20Z
-- **Completed (Tasks 1-3):** 2026-05-26T15:15:28Z
-- **Tasks:** 3 of 4 completed (Task 4 = human-verify checkpoint)
-- **Files created/modified:** 8
+- **Completed:** 2026-05-26
+- **Tasks:** 4 of 4 completed
+- **Files created/modified:** 10
 
 ## Accomplishments
 
@@ -94,6 +100,13 @@ status: checkpoint-pending (Task 4: human-verify in browser)
 - All 3 operations wrapped in try/catch → Notification feedback (ok/error)
 - Header preserved as-is from placeholder
 
+### Task 4: Human verification (browser)
+- All 25+ checklist items passed: catalog loads, filter/search work, edit/add/delete confirmed
+- Bug discovered and fixed: `models.filter is not a function` — Firestore stores `models` as object `{articleKey: modelData}`, not array
+- Fix applied in `useCatalogAdmin.js`: `rawToArray` converter for reads, `arrayToRaw` for writes
+- Tests updated to match Firestore object format (`da9029a`)
+- Human approved after fix
+
 ## Task Commits
 
 Each task committed atomically:
@@ -101,6 +114,8 @@ Each task committed atomically:
 1. **Task 1: CatalogEditModal** - `60d2f5b` — `feat(08-02): add CatalogEditModal component with 14 fields and validation`
 2. **Task 2: DeleteConfirmModal** - `5453d2f` — `feat(08-02): add DeleteConfirmModal alertdialog component`
 3. **Task 3: AdminPage rewrite** - `8980691` — `feat(08-02): wire AdminPage with catalog list, filter, search, CRUD modals`
+4. **Checkpoint state** - `718c7ac` — `docs(08-02): checkpoint state — Tasks 1-3 complete, awaiting human-verify`
+5. **Task 4: Bug fix** - `da9029a` — `fix(08): handle Firestore models as object {key:model}, not array`
 
 ## Files Created/Modified
 
@@ -112,6 +127,8 @@ Each task committed atomically:
 - `src/shared/components/DeleteConfirmModal/index.js` — new, re-export
 - `src/pages/AdminPage/AdminPage.jsx` — rewritten (placeholder → CRUD screen), 200+ lines
 - `src/pages/AdminPage/AdminPage.module.css` — extended with toolbar/grid/card/state classes
+- `src/shared/hooks/useCatalogAdmin.js` — bug fix: rawToArray/arrayToRaw converters for Firestore object format
+- `src/shared/hooks/__tests__/useCatalogAdmin.test.js` — updated to match Firestore object format
 
 ## Decisions Made
 
@@ -120,30 +137,54 @@ Each task committed atomically:
 - Duplicate article checked in AdminPage `handleAdd` before calling `addModel` — client-side guard (Pitfall #5)
 - `role="alertdialog"` for DeleteConfirmModal, `role="dialog"` for CatalogEditModal — semantically correct
 - `isDeleting` state owned by AdminPage, passed down as prop — single source of truth for loading UI
+- Firestore `models` field is an object `{articleKey: modelData}`, not an array — `rawToArray`/`arrayToRaw` converters added to `useCatalogAdmin` to bridge the gap between internal array state and Firestore storage format
 
 ## Deviations from Plan
 
-None — plan executed exactly as written.
+### Auto-fixed Issues
+
+**1. [Rule 1 - Bug] Fixed `models.filter is not a function` — Firestore models stored as object, not array**
+- **Found during:** Task 4 (human browser verification)
+- **Issue:** `useCatalogAdmin.js` assumed Firestore `models` field is an array. Real Firestore document stores it as `{articleKey: modelData}` object. This caused `TypeError: models.filter is not a function` on `/admin` page load.
+- **Fix:** Added `rawToArray(raw)` converter (Object.entries → mapped array) for reads, and `arrayToRaw(arr)` (array → keyed object by `article`) for writes in `useCatalogAdmin.js`. All internal state remains as `Model[]` array — only the Firestore serialization layer changed.
+- **Files modified:** `src/shared/hooks/useCatalogAdmin.js`, `src/shared/hooks/__tests__/useCatalogAdmin.test.js`
+- **Verification:** Human verified in browser — catalog loads correctly, all CRUD operations work
+- **Committed in:** `da9029a`
+
+---
+
+**Total deviations:** 1 auto-fixed (Rule 1 - Bug)
+**Impact on plan:** Required fix for basic functionality. No scope creep — only the data format conversion layer changed.
 
 ## Known Stubs
 
-None — all 8 fields/paths connect to live `useCatalogAdmin` hook which reads/writes Firestore.
+None — all fields/paths connect to live `useCatalogAdmin` hook which reads/writes Firestore.
 
-## Checkpoint Status
+## Issues Encountered
 
-**Task 4 is a `checkpoint:human-verify` — awaiting manual browser verification.**
+- Firestore data format mismatch: `models` field stored as `{articleKey: modelData}` object, not as an array. Discovered during human browser verification (Task 4). Fixed externally and committed as `da9029a`.
 
-Human verification required:
-- CATALOG-01: model cards grid loads from Firestore
-- CATALOG-02: ML/LS/All filter tabs work
-- CATALOG-03: search by name (case-insensitive)
-- CATALOG-04/05/06: edit modal pre-fills, saves to Firestore as numbers
-- CATALOG-07: add with duplicate article guard
-- CATALOG-08: delete with confirmation dialog
-- Cache invalidation: /configurator sees fresh data after admin edits
-- Accessibility quick check: focus rings, ESC, touch targets
+## User Setup Required
+
+None — no external service configuration required beyond what Phase 7 already established.
+
+## Next Phase Readiness
+
+- AdminPage CRUD screen is complete and verified — Phase 9 (Media & Ordering) can add photo upload input and drag-drop reorder to this same AdminPage
+- `CatalogEditModal` has 14 fields wired; Phase 9 can add `photoUrl` field to the modal
+- `useCatalogAdmin` hook is stable; `rawToArray`/`arrayToRaw` handles the Firestore format correctly
+
+## Self-Check: PASSED
+
+All task commits verified in git log:
+- `60d2f5b` — CatalogEditModal
+- `5453d2f` — DeleteConfirmModal
+- `8980691` — AdminPage rewrite
+- `718c7ac` — checkpoint state
+- `da9029a` — bug fix (Firestore object format)
+
+All created files exist on disk.
 
 ---
 *Phase: 08-catalog-crud*
-*Status: checkpoint-pending*
-*Completed (Tasks 1-3): 2026-05-26*
+*Completed: 2026-05-26*
