@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-05-26T15:09:38.423Z"
+stopped_at: "Checkpoint: Task 4 human-verify in 08-02-PLAN.md"
+last_updated: "2026-05-26T15:16:30.900Z"
 last_activity: 2026-05-26
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -64,6 +64,9 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 - [Phase 08-catalog-crud]: Named hook useCatalogAdmin to avoid collision with regular-user useCatalog hook
 - [Phase 08-catalog-crud]: setDoc with merge:true for Firestore resilience (survives document recreation)
 - [Phase 08-catalog-crud]: localStorage cache invalidation (promet_catalog_v1) after every admin mutation
+- [Phase 08-catalog-crud]: article field read-only in edit mode — prevents ghost-entries
+- [Phase 08-catalog-crud]: valueAsNumber on all numeric inputs — Firestore saves numbers not strings
+- [Phase 08-catalog-crud]: duplicate article guard in handleAdd before calling addModel
 
 ### Pending Todos
 
@@ -76,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-26T15:09:38.420Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-05-26T15:16:25.251Z
+Stopped at: Checkpoint: Task 4 human-verify in 08-02-PLAN.md
 Resume file: None
