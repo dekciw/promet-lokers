@@ -310,15 +310,15 @@ describe('reorderModels (ORDER-02)', () => {
     const { result } = renderHook(() => useCatalogAdmin());
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    await expect(
-      act(async () => {
-        await result.current.reorderModels([
-          { article: 'A', sortOrder: 1 },
-          { article: 'B', sortOrder: 2 },
-        ]);
-      })
-    ).resolves.not.toThrow();
+    // Reorder with same order — should not throw and should write
+    await act(async () => {
+      await result.current.reorderModels([
+        { article: 'A', sortOrder: 1 },
+        { article: 'B', sortOrder: 2 },
+      ]);
+    });
 
+    // setDoc was called (no optimization — always writes)
     expect(firestore.setDoc).toHaveBeenCalled();
   });
 

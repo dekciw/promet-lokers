@@ -101,5 +101,23 @@ export function useCatalogAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { models, isLoading, error, loadModels, saveModel, addModel, deleteModel };
+  // ORDER-02: reorder with full-array merge to protect models outside filtered view.
+  // PITFALL #4: if admin reorders while a series/search filter is active, only the
+  // visible subset is passed here. We must read the FULL array from Firestore first
+  // and merge the updated sortOrders back — otherwise hidden models are deleted.
+  const reorderModels = useCallback(async (reorderedArr) => {
+    // Reassign sortOrder sequentially per new array position (1-indexed)
+    const withNewOrder = reorderedArr.map((m, i) => ({ ...m, sortOrder: i + 1 }));
+    // Read CURRENT full models from Firestore — critical to not lose non-visible models
+    const current = await readModels(ref);
+    const next = current.map((m) => {
+      const updated = withNewOrder.find((u) => u.article === m.article);
+      return updated ?? m;
+    });
+    await writeModels(ref, next);
+    setModels(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return { models, isLoading, error, loadModels, saveModel, addModel, deleteModel, reorderModels };
 }
