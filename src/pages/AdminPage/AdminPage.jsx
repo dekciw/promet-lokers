@@ -1,6 +1,18 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
+import {
+  DndContext, closestCenter,
+  PointerSensor, KeyboardSensor,
+  useSensor, useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext, sortableKeyboardCoordinates,
+  rectSortingStrategy, arrayMove, useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useCatalogAdmin } from '../../shared/hooks/useCatalogAdmin';
+import { useImageUpload } from '../../shared/hooks/useImageUpload';
+import { resizeImageToHeight, uploadToCloudinary } from '../../shared/lib/cloudinaryUpload';
 import CatalogEditModal from '../../shared/components/CatalogEditModal';
 import DeleteConfirmModal from '../../shared/components/DeleteConfirmModal';
 import Notification from '../../shared/components/Notification/Notification';
@@ -13,8 +25,78 @@ const SERIES_TABS = [
   { key: 'LS',  label: 'LS' },
 ];
 
+// SortableCard: individual card wrapped in useSortable.
+// IMPORTANT: drag listeners are attached ONLY to .dragHandle, NOT the whole article —
+// this keeps "Редактировать" / "Удалить" button clicks from initiating a drag.
+function SortableCard({ model, onEdit, onDelete, disabled }) {
+  const {
+    attributes, listeners, setNodeRef,
+    transform, transition, isDragging,
+  } = useSortable({ id: model.article, disabled });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <article
+      ref={setNodeRef}
+      style={style}
+      className={cx(styles.card, isDragging && styles.cardDragging, disabled && styles.cardDragDisabled)}
+    >
+      {/* Drag handle — listeners scoped here so button clicks are unaffected */}
+      <div
+        className={styles.dragHandle}
+        {...attributes}
+        {...listeners}
+        aria-label="Перетащить для изменения порядка"
+        aria-disabled={disabled}
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+          <circle cx="5" cy="4" r="1.5" fill="currentColor" />
+          <circle cx="5" cy="8" r="1.5" fill="currentColor" />
+          <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+          <circle cx="11" cy="4" r="1.5" fill="currentColor" />
+          <circle cx="11" cy="8" r="1.5" fill="currentColor" />
+          <circle cx="11" cy="12" r="1.5" fill="currentColor" />
+        </svg>
+      </div>
+      <h3 className={styles.cardName}>{model.name}</h3>
+      <span className={styles.cardArticle}>Артикул: {model.article}</span>
+      <div className={styles.cardMeta}>
+        {model.series} · {model.height}×{model.width}×{model.depth} мм
+      </div>
+      <div className={styles.cardPrice}>
+        {(model.basePrice ?? 0).toLocaleString('ru-RU')} ₽
+      </div>
+      <div className={styles.cardActions}>
+        <button
+          type="button"
+          className={styles.cardBtn}
+          onClick={() => onEdit(model)}
+          aria-label={`Редактировать ${model.name}`}
+        >
+          Редактировать
+        </button>
+        <button
+          type="button"
+          className={cx(styles.cardBtn, styles.cardBtnDanger)}
+          onClick={() => onDelete(model)}
+          aria-label={`Удалить ${model.name}`}
+        >
+          Удалить
+        </button>
+      </div>
+    </article>
+  );
+}
+
 export default function AdminPage({ onLogout, username }) {
-  const { models, isLoading, error, loadModels, saveModel, addModel, deleteModel } = useCatalogAdmin();
+  const { models, isLoading, error, loadModels, saveModel, addModel, deleteModel, reorderModels } = useCatalogAdmin();
 
   const [activeSeries, setActiveSeries] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +119,50 @@ export default function AdminPage({ onLogout, username }) {
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
   [models, activeSeries, searchQuery]);
+
+  // MEDIA-01..03: wire useImageUpload (edit flow — saveModel persists photoUrl to Firestore)
+  const { uploadPhoto } = useImageUpload({ saveModel });
+
+  // Photo upload handler — mode-aware:
+  // - EDIT mode: model exists in Firestore → full pipeline (resize + upload + saveModel)
+  // - ADD mode: model not yet in Firestore → only resize + Cloudinary (form Save will persist)
+  async function handlePhotoUpload(file, currentValues, mode) {
+    if (mode === 'edit' && currentValues.article) {
+      return await uploadPhoto(file, currentValues); // saves to Firestore + returns URL
+    }
+    // ADD mode: resize + upload but don't persist to Firestore yet
+    const blob = await resizeImageToHeight(file, 1520);
+    return await uploadToCloudinary(blob);
+  }
+
+  // ORDER-01: drag is blocked when filter or search is active
+  // Reason: reordering a filtered subset would corrupt the global order of hidden models
+  const isDragDisabled = activeSeries !== 'all' || searchQuery.trim() !== '';
+
+  // DnD sensors — PointerSensor with distance:5 avoids accidental drag on button clicks
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  // ORDER-02: persist new sortOrder to Firestore after drag
+  async function handleDragEnd(event) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;  // Pitfall #5 guard — no-op on same position
+    if (isDragDisabled) return;                   // safety net if drag somehow fires while disabled
+    const oldIndex = visibleModels.findIndex((m) => m.article === active.id);
+    const newIndex = visibleModels.findIndex((m) => m.article === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const reordered = arrayMove(visibleModels, oldIndex, newIndex);
+    try {
+      await reorderModels(reordered); // Pitfall #4 guarded inside hook: full-array merge
+      showOk('Порядок обновлён');
+    } catch (err) {
+      showError(`Ошибка сохранения порядка: ${err.message}`);
+    }
+  }
 
   // CATALOG-07: add with duplicate article guard (Pitfall #5)
   async function handleAdd(data) {
@@ -162,38 +288,29 @@ export default function AdminPage({ onLogout, username }) {
         )}
 
         {!isLoading && !error && visibleModels.length > 0 && (
-          <div className={styles.grid}>
-            {visibleModels.map((m) => (
-              <article key={m.article} className={styles.card}>
-                <h3 className={styles.cardName}>{m.name}</h3>
-                <span className={styles.cardArticle}>Артикул: {m.article}</span>
-                <div className={styles.cardMeta}>
-                  {m.series} · {m.height}×{m.width}×{m.depth} мм
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext
+              items={visibleModels.map((m) => m.article)}
+              strategy={rectSortingStrategy}
+            >
+              {isDragDisabled && (
+                <div className={styles.dragHint} role="status">
+                  Очистите фильтр и поиск, чтобы изменять порядок
                 </div>
-                <div className={styles.cardPrice}>
-                  {(m.basePrice ?? 0).toLocaleString('ru-RU')} ₽
-                </div>
-                <div className={styles.cardActions}>
-                  <button
-                    type="button"
-                    className={styles.cardBtn}
-                    onClick={() => setEditTarget(m)}
-                    aria-label={`Редактировать ${m.name}`}
-                  >
-                    Редактировать
-                  </button>
-                  <button
-                    type="button"
-                    className={cx(styles.cardBtn, styles.cardBtnDanger)}
-                    onClick={() => setDeleteTarget(m)}
-                    aria-label={`Удалить ${m.name}`}
-                  >
-                    Удалить
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+              )}
+              <div className={styles.grid}>
+                {visibleModels.map((m) => (
+                  <SortableCard
+                    key={m.article}
+                    model={m}
+                    onEdit={setEditTarget}
+                    onDelete={setDeleteTarget}
+                    disabled={isDragDisabled}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
         )}
       </main>
 
@@ -203,6 +320,7 @@ export default function AdminPage({ onLogout, username }) {
         model={null}
         onClose={() => setAddOpen(false)}
         onSave={handleAdd}
+        onPhotoUpload={handlePhotoUpload}
       />
 
       <CatalogEditModal
@@ -211,6 +329,7 @@ export default function AdminPage({ onLogout, username }) {
         model={editTarget}
         onClose={() => setEditTarget(null)}
         onSave={handleSave}
+        onPhotoUpload={handlePhotoUpload}
       />
 
       <DeleteConfirmModal

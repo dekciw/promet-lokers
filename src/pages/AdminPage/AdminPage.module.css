@@ -197,6 +197,7 @@
 }
 
 .card {
+  position: relative;
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -211,6 +212,65 @@
   border-color: #0c53b3;
   box-shadow: 0 6px 20px rgba(12, 83, 179, 0.10);
   transform: translateY(-1px);
+}
+
+/* DnD states */
+.cardDragging {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.cardDragDisabled .dragHandle {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+/* Drag handle — six-dot grip icon, top-right of each card */
+.dragHandle {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: #718096;
+  border-radius: 6px;
+  touch-action: none;   /* prevent browser scroll interference on touch drag */
+}
+
+.dragHandle:hover {
+  background: #f7fafc;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle:focus-visible {
+  outline: 2px solid #0c53b3;
+  outline-offset: 2px;
+}
+
+/* Hint shown when drag is disabled due to active filter/search */
+.dragHint {
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none !important;
+  }
 }
 
 .cardName {
