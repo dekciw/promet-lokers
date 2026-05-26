@@ -196,6 +196,68 @@
   background: #f7fafc;
 }
 
+/* ── Photo upload field ── */
+.photoField {
+  /* full-width row — gridFull handles column span */
+}
+
+.photoRow {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.photoPreview {
+  width: 100px;
+  height: 130px;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f7fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photoPreviewImg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.photoPlaceholder {
+  color: #a0aec0;
+  font-size: 12px;
+}
+
+.photoControls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.photoBtn {
+  position: relative;
+  min-height: 44px;    /* touch target per CLAUDE.md UI/UX Pro Max */
+  min-width: 44px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+
+.photoFileInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.photoFileInput:focus-visible + * {
+  outline: 2px solid #0c53b3; /* matches project brand color */
+  outline-offset: 2px;
+}
+
 @media (max-width: 640px) {
   .grid {
     grid-template-columns: 1fr;

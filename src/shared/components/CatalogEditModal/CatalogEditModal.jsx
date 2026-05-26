@@ -1,4 +1,4 @@
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { useForm } from 'react-hook-form';
@@ -20,6 +20,7 @@ const EMPTY_MODEL = {
   doorCount: 1,
   weight: 0,
   cpBezNDS: 0,
+  photoUrl: '',
 };
 
 const overlayVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
@@ -37,16 +38,31 @@ function IconClose() {
   );
 }
 
-export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, onClose, onSave }) {
+// Architecture note: CatalogEditModal is a pure form component — it does NOT import
+// useImageUpload or call Firestore directly. Photo upload is delegated to onPhotoUpload
+// prop provided by the parent (AdminPage), keeping the modal decoupled and testable.
+// onPhotoUpload(file, currentFormValues, mode) → Promise<photoUrl>
+
+export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, onClose, onSave, onPhotoUpload }) {
   const titleId = useId();
   const {
-    register, handleSubmit, reset,
+    register, handleSubmit, reset, setValue, getValues, watch,
     formState: { errors, isSubmitting, isValid },
   } = useForm({ mode: 'onChange', defaultValues: EMPTY_MODEL });
 
+  // Local state for upload progress + error — mirrors state from the hook in AdminPage
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState(null);
+
+  // Watch photoUrl to drive preview rendering
+  const photoUrl = watch('photoUrl');
+
   // Populate / reset form on open (RESEARCH.md Pitfall #3 — guard on isOpen is mandatory)
   useEffect(() => {
-    if (isOpen) reset(model ?? EMPTY_MODEL);
+    if (isOpen) {
+      reset(model ?? EMPTY_MODEL);
+      setPhotoError(null);
+    }
   }, [isOpen, model, reset]);
 
   // Scroll lock
@@ -66,6 +82,25 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
 
   async function handleFormSubmit(data) {
     await onSave(data);
+  }
+
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoError(null);
+    setIsUploadingPhoto(true);
+    try {
+      // ADD mode: model not yet in Firestore — onPhotoUpload only uploads to Cloudinary
+      // EDIT mode: model exists — onPhotoUpload uploads and persists to Firestore via saveModel
+      const currentValues = getValues();
+      const newUrl = await onPhotoUpload(file, currentValues, mode);
+      setValue('photoUrl', newUrl, { shouldDirty: true, shouldValidate: false });
+    } catch (err) {
+      setPhotoError(err.message ?? 'Ошибка загрузки');
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = ''; // allow reselecting same file
+    }
   }
 
   const isEdit = mode === 'edit';
@@ -109,7 +144,51 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
             </div>
 
             <form id="catalog-form" className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
+              {/* Hidden field — registers photoUrl so it submits with the form */}
+              <input type="hidden" {...register('photoUrl')} />
+
               <div className={styles.grid}>
+                {/* Фото модели — full-width row at the top */}
+                <div className={cx(styles.field, styles.gridFull, styles.photoField)}>
+                  <label className={styles.label}>Фото модели</label>
+                  <div className={styles.photoRow}>
+                    <div className={styles.photoPreview}>
+                      {photoUrl ? (
+                        <img src={photoUrl} alt="Превью фото модели" className={styles.photoPreviewImg} />
+                      ) : (
+                        <span className={styles.photoPlaceholder} aria-hidden="true">нет фото</span>
+                      )}
+                    </div>
+                    <div className={styles.photoControls}>
+                      <label className={cx(styles.btn, styles.btnSecondary, styles.photoBtn)}>
+                        {isUploadingPhoto ? 'Загрузка…' : 'Загрузить фото'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className={styles.photoFileInput}
+                          onChange={handlePhotoChange}
+                          disabled={isUploadingPhoto || isSubmitting}
+                          aria-label="Выбрать файл фото модели"
+                        />
+                      </label>
+                      {photoUrl && (
+                        <button
+                          type="button"
+                          className={cx(styles.btn, styles.btnSecondary, styles.photoBtn)}
+                          onClick={() => setValue('photoUrl', '', { shouldDirty: true })}
+                          disabled={isUploadingPhoto || isSubmitting}
+                          aria-label="Удалить фото"
+                        >
+                          Удалить
+                        </button>
+                      )}
+                      {photoError && (
+                        <span className={styles.errorMsg} role="alert">{photoError}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* sortOrder */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-sortOrder">Порядок</label>
