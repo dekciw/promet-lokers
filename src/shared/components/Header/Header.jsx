@@ -1,6 +1,7 @@
+import { Link } from 'react-router';
 import styles from './Header.module.css';
 
-export default function Header({ onLogout, username }) {
+export default function Header({ onLogout, username, isAdmin }) {
 	const initial = username ? username[0].toUpperCase() : '?';
 
 	return (
@@ -22,6 +23,11 @@ export default function Header({ onLogout, username }) {
 			/>
 
 			<div className={styles.userArea}>
+				{isAdmin && (
+					<Link to="/admin" className={styles.adminLink}>
+						Админ
+					</Link>
+				)}
 				<div className={styles.userChip}>
 					<span className={styles.userAvatar}>{initial}</span>
 					<span className={styles.userName}>{username}</span>

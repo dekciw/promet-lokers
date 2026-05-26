@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
+import { Routes, Route, Navigate } from 'react-router';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { auth } from './shared/lib/firebase';
+import { isAdmin } from './shared/utils/isAdmin';
 import { LoginScreen } from './modules/Auth';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
+import AdminPage from './pages/AdminPage';
+import ProtectedRoute from './shared/components/ProtectedRoute/ProtectedRoute';
 import ErrorBoundary from './shared/components/ErrorBoundary/ErrorBoundary';
 import LoadingScreen from './shared/components/LoadingScreen/LoadingScreen';
 import './index.css';
@@ -27,10 +31,30 @@ export default function App() {
   if (authState === 'anonymous') return <LoginScreen />;
 
   const username = user.displayName || user.email;
+  const adminAllowed = isAdmin(user.email);
 
   return (
     <ErrorBoundary>
-      <ConfiguratorPage onLogout={handleLogout} username={username} />
+      <Routes>
+        <Route path="/" element={<Navigate to="/configurator" replace />} />
+        <Route
+          path="/configurator"
+          element={
+            <ConfiguratorPage
+              onLogout={handleLogout}
+              username={username}
+              isAdmin={adminAllowed}
+            />
+          }
+        />
+        <Route element={<ProtectedRoute isAllowed={adminAllowed} redirectPath="/configurator" />}>
+          <Route
+            path="/admin/*"
+            element={<AdminPage onLogout={handleLogout} username={username} />}
+          />
+        </Route>
+        <Route path="*" element={<Navigate to="/configurator" replace />} />
+      </Routes>
     </ErrorBoundary>
   );
 }

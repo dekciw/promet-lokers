@@ -141,6 +141,44 @@
 	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
+/* ── Admin link ── */
+.adminLink {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  letter-spacing: 0.1px;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  margin-right: 8px;
+}
+
+.adminLink:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.adminLink:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 480px) {
+  .adminLink {
+    padding: 0 10px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+}
+
 /* ──────────── АДАПТИВ ──────────── */
 
 @media (max-width: 1279px) {
