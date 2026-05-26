@@ -63,9 +63,13 @@ describe('useCatalogAdmin', () => {
       await result.current.saveModel({ article: 'A1', name: 'New', sortOrder: 1 });
     });
 
+    // Firestore хранит models как объект {key: modelData}
     expect(firestore.setDoc).toHaveBeenCalledWith(
       expect.anything(),
-      { models: [{ article: 'A1', name: 'New', sortOrder: 1 }, { article: 'A2', name: 'Keep' }] },
+      { models: {
+        'A1': { article: 'A1', name: 'New', sortOrder: 1 },
+        'A2': { article: 'A2', name: 'Keep' },
+      } },
       { merge: true }
     );
     expect(result.current.models[0].name).toBe('New');
@@ -85,8 +89,8 @@ describe('useCatalogAdmin', () => {
     });
 
     const callArgs = firestore.setDoc.mock.calls[0][1].models;
-    expect(callArgs).toHaveLength(2);
-    expect(callArgs[1]).toMatchObject({ article: 'A2', sortOrder: 2 });
+    expect(Object.keys(callArgs)).toHaveLength(2);
+    expect(callArgs['A2']).toMatchObject({ article: 'A2', sortOrder: 2 });
     expect(localStorage.removeItem).toHaveBeenCalledWith('promet_catalog_v1');
   });
 
@@ -100,7 +104,7 @@ describe('useCatalogAdmin', () => {
       await result.current.addModel({ article: 'A1', name: 'First' });
     });
     const callArgs = firestore.setDoc.mock.calls[0][1].models;
-    expect(callArgs[0].sortOrder).toBe(1);
+    expect(callArgs['A1'].sortOrder).toBe(1);
   });
 
   it('deleteModel removes by article (CATALOG-08)', async () => {
@@ -116,7 +120,7 @@ describe('useCatalogAdmin', () => {
     });
 
     const callArgs = firestore.setDoc.mock.calls[0][1].models;
-    expect(callArgs).toEqual([{ article: 'A2' }]);
+    expect(callArgs).toEqual({ 'A2': { article: 'A2' } });
     expect(result.current.models).toEqual([{ article: 'A2' }]);
     expect(localStorage.removeItem).toHaveBeenCalledWith('promet_catalog_v1');
   });

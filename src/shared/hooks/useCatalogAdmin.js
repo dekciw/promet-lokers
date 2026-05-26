@@ -6,16 +6,33 @@ import { db } from '../lib/firebase';
 // Каждая admin-мутация должна сбрасывать его, чтобы конфигуратор увидел свежие данные.
 const CACHE_KEY = 'promet_catalog_v1';
 
+// Firestore хранит models как объект {articleKey: modelData}, а не массив.
+// Конвертируем в массив для удобной фильтрации/сортировки в UI.
+function rawToArray(raw) {
+  if (!raw || typeof raw !== 'object') return [];
+  if (Array.isArray(raw)) return raw;
+  return Object.entries(raw).map(([key, m]) => ({ article: key, ...m }));
+}
+
+// Конвертируем массив обратно в объект перед записью в Firestore.
+function arrayToRaw(arr) {
+  const obj = {};
+  arr.forEach((m) => {
+    if (m.article) obj[m.article] = m;
+  });
+  return obj;
+}
+
 // Helper: получить актуальный массив моделей из Firestore.
 async function readModels(ref) {
   const snap = await getDoc(ref);
   if (!snap.exists()) return [];
-  return snap.data().models ?? [];
+  return rawToArray(snap.data().models);
 }
 
 // Helper: записать массив моделей с merge:true (сохраняет другие поля документа: locks, series).
-async function writeModels(ref, models) {
-  await setDoc(ref, { models }, { merge: true });
+async function writeModels(ref, modelsArr) {
+  await setDoc(ref, { models: arrayToRaw(modelsArr) }, { merge: true });
   try {
     localStorage.removeItem(CACHE_KEY);
   } catch (err) {
