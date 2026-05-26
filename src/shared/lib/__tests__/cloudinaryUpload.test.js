@@ -4,6 +4,14 @@
 // we use dynamic import() inside each test after vi.stubEnv() calls.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
+// jsdom doesn't implement URL.createObjectURL/revokeObjectURL — define stubs at module level
+if (!URL.createObjectURL) {
+  URL.createObjectURL = vi.fn(() => 'blob:fake');
+}
+if (!URL.revokeObjectURL) {
+  URL.revokeObjectURL = vi.fn();
+}
+
 beforeEach(() => {
   vi.stubEnv('VITE_CLOUDINARY_CLOUD_NAME', 'test_cloud');
   vi.stubEnv('VITE_CLOUDINARY_UPLOAD_PRESET', 'test_preset');
@@ -174,7 +182,9 @@ describe('uploadToCloudinary', () => {
 
     expect(capturedUrl).toBe('https://api.cloudinary.com/v1_1/test_cloud/image/upload');
     expect(capturedBody).toBeInstanceOf(FormData);
-    expect(capturedBody.get('file')).toBe(blob);
+    // jsdom wraps Blob in File when appended to FormData — check instanceof Blob (File extends Blob)
+    expect(capturedBody.get('file')).toBeInstanceOf(Blob);
+    expect(capturedBody.get('file').size).toBe(blob.size);
     expect(capturedBody.get('upload_preset')).toBe('test_preset');
   });
 
