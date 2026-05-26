@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
-status: verifying
-stopped_at: Completed 08-02-PLAN.md
-last_updated: "2026-05-26T15:27:29.157Z"
+status: executing
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-05-26T20:04:04.990Z"
 last_activity: 2026-05-26
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
   percent: 0
 ---
 
@@ -25,13 +25,13 @@ _GSD workflow state для Конфигуратор «Промет»_
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Любой сотрудник за 3 минуты собирает конфигурацию и получает готовые документы — без Excel, без Word, без ошибок.
-**Current focus:** Phase 08 — catalog-crud
+**Current focus:** Phase 09 — media-ordering
 
 ## Current Position
 
-Phase: 08 (catalog-crud) — EXECUTING
+Phase: 09 (media-ordering) — EXECUTING
 Plan: 2 of 2
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-05-26
 
 Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
@@ -68,6 +68,8 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 - [Phase 08-catalog-crud]: valueAsNumber on all numeric inputs — Firestore saves numbers not strings
 - [Phase 08-catalog-crud]: duplicate article guard in handleAdd before calling addModel
 - [Phase 08]: Firestore stores models field as object {articleKey: modelData}, not array — rawToArray/arrayToRaw converters added to useCatalogAdmin
+- [Phase 09-media-ordering]: vi.stubEnv + vi.resetModules + dynamic import() for module-load-time env vars in tests
+- [Phase 09-media-ordering]: Cloudinary unsigned upload (no Firebase Storage — Spark plan blocked); Canvas API for resize (no npm lib)
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-26T15:27:29.153Z
-Stopped at: Completed 08-02-PLAN.md
+Last session: 2026-05-26T20:04:04.986Z
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None

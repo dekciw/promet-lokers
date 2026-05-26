@@ -29,15 +29,15 @@
 
 ### Photo Upload (MEDIA)
 
-- [ ] **MEDIA-01**: При добавлении или редактировании шкафа администратор может загрузить фото
-- [ ] **MEDIA-02**: Фото авторесайзится до высоты 1520px (ширина пропорционально) на клиенте перед загрузкой
-- [ ] **MEDIA-03**: Фото сохраняется в Firebase Storage, URL записывается в поле `photoUrl` модели в Firestore
+- [x] **MEDIA-01**: При добавлении или редактировании шкафа администратор может загрузить фото
+- [x] **MEDIA-02**: Фото авторесайзится до высоты 1520px (ширина пропорционально) на клиенте перед загрузкой
+- [x] **MEDIA-03**: Фото сохраняется в Firebase Storage, URL записывается в поле `photoUrl` модели в Firestore
 - [ ] **MEDIA-04**: Генератор КП проверяет `photoUrl` и использует его; fallback — `/img/models/{modelId}.png`
 
 ### Drag & Drop Ordering (ORDER)
 
 - [ ] **ORDER-01**: Администратор может менять порядок шкафов перетаскиванием в списке
-- [ ] **ORDER-02**: Новый порядок сохраняется в Firestore через поле `sortOrder` каждой модели
+- [x] **ORDER-02**: Новый порядок сохраняется в Firestore через поле `sortOrder` каждой модели
 - [ ] **ORDER-03**: Список моделей в конфигураторе отображается в порядке `sortOrder`
 
 ### Price Coefficients (PRICE)
@@ -109,12 +109,12 @@
 | CATALOG-06 | Phase 8 | Complete |
 | CATALOG-07 | Phase 8 | Complete |
 | CATALOG-08 | Phase 8 | Complete |
-| MEDIA-01 | Phase 9 | Pending |
-| MEDIA-02 | Phase 9 | Pending |
-| MEDIA-03 | Phase 9 | Pending |
+| MEDIA-01 | Phase 9 | Complete |
+| MEDIA-02 | Phase 9 | Complete |
+| MEDIA-03 | Phase 9 | Complete |
 | MEDIA-04 | Phase 9 | Pending |
 | ORDER-01 | Phase 9 | Pending |
-| ORDER-02 | Phase 9 | Pending |
+| ORDER-02 | Phase 9 | Complete |
 | ORDER-03 | Phase 9 | Pending |
 | PRICE-01 | Phase 10 | Pending |
 | PRICE-02 | Phase 10 | Pending |
