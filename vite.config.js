@@ -13,8 +13,6 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: false,
-    environmentOptions: {
-      jsdom: {},
-    },
+    exclude: ['**/node_modules/**', '**/.claude/worktrees/**'],
   },
 })
