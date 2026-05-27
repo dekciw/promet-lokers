@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-05-27T04:45:15.602Z"
+stopped_at: Completed 11-02-PLAN.md
+last_updated: "2026-05-27T04:47:23.035Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 12
-  completed_plans: 9
+  completed_plans: 10
   percent: 80
 ---
 
@@ -76,6 +76,8 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 - [Phase 11-users-history]: firebaseConfig exported via simple const keyword change — no duplication of env vars, enables secondary Firebase App pattern
 - [Phase 11-users-history]: Secondary app name uses Date.now() suffix for uniqueness — avoids Firebase App name collision pitfall on rapid repeated calls
 - [Phase 11-users-history]: Firestore doc mapping: { ...d.data(), uid: d.id } — doc ID always wins over any uid field in document data
+- [Phase 11-users-history]: saveToHistory is module-level fire-and-forget — caller does .catch(console.warn); avoids blocking PDF download UX
+- [Phase 11-users-history]: restoreConfig passes empty onAdvance callback to setSeriesId — avoids stepper animation side-effect on programmatic restore
 
 ### Pending Todos
 
@@ -89,6 +91,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-27T04:45:15.599Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-05-27T04:47:23.031Z
+Stopped at: Completed 11-02-PLAN.md
 Resume file: None

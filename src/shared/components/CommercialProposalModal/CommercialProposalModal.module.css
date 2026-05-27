@@ -215,6 +215,18 @@
   letter-spacing: -0.1px;
   line-height: 1.4;
   text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.colorSwatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
 }
 
 /* ── Форма ── */
@@ -419,6 +431,17 @@
 }
 
 .btnSecondary:hover:not(:disabled) {
+  background: var(--c-border-subtle);
+}
+
+.btnPrint {
+  background: transparent;
+  color: var(--c-text-mid);
+  border: 1.5px solid var(--c-border);
+  flex: 1;
+}
+
+.btnPrint:hover:not(:disabled) {
   background: var(--c-border-subtle);
 }
 

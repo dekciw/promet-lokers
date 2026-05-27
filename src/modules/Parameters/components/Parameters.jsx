@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, startTransition } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useRef, useCallback, startTransition, useEffect } from 'react';
+import { motion, AnimatePresence, useAnimationControls } from 'motion/react';
 import CustomSelect from './CustomSelect';
 import ColorPicker from './ColorPicker/ColorPicker';
 import StepperInput from './StepperInput';
@@ -26,10 +26,39 @@ const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
 
 const STEP_LABELS = ['Серия', 'Модель', 'Параметры'];
 
+const HEIGHT_SNAP_POINTS = [HEIGHT_MIN, ...HEIGHT_SNAPS, HEIGHT_MAX].sort((a, b) => a - b);
+
+function buildHeightPath(from, to) {
+	if (from === to) return [];
+	const isDown = from > to;
+	const pts = HEIGHT_SNAP_POINTS.filter(v => isDown ? (v < from && v >= to) : (v > from && v <= to));
+	pts.sort((a, b) => isDown ? b - a : a - b);
+	if (!pts.includes(to)) pts.push(to);
+	return pts;
+}
+
+const ANIM_STEP_MS = 130;
+const animSleep = ms => new Promise(r => setTimeout(r, ms));
+
 const slideVariants = {
-	initial: dir => ({ x: dir > 0 ? '-45%' : '45%', opacity: 0, scale: 1 }),
+	initial: dir => ({ x: dir > 0 ? '28%' : '-28%', opacity: 0, scale: 0.96 }),
 	animate: { x: 0, opacity: 1, scale: 1 },
-	exit: dir => ({ x: dir > 0 ? '45%' : '-45%', opacity: 0, scale: 1 }),
+	exit: dir => ({ x: dir > 0 ? '-18%' : '18%', opacity: 0, scale: 0.97 }),
+};
+
+const resetStagger = {
+	hidden: {},
+	visible: { transition: { staggerChildren: 0.04 } },
+};
+
+const resetItem = {
+	hidden: { opacity: 0, y: 18, scale: 0.96 },
+	visible: {
+		opacity: 1,
+		y: 0,
+		scale: 1,
+		transition: { type: 'spring', stiffness: 480, damping: 26, mass: 0.8 },
+	},
 };
 
 function buildThicknessOptions(baseVal) {
@@ -78,6 +107,14 @@ export default function Parameters() {
 	const [modelConfirmed, setModelConfirmed] = useState(() => !!modelId);
 	const backAnimTimersRef = useRef([]);
 
+	const step3Controls = useAnimationControls();
+	const resetAnimRef = useRef(false); // блокирует повторное нажатие пока идёт анимация высоты
+
+
+	useEffect(() => {
+		if (!modelId) setModelConfirmed(false);
+	}, [modelId]);
+
 const [openSelectId, setOpenSelectId] = useState(null);
 	const handleSeriesOpen = useCallback(v => setOpenSelectId(v ? 'series' : null), []);
 	const handleModelOpen = useCallback(v => setOpenSelectId(v ? 'model' : null), []);
@@ -122,6 +159,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 	function handleStepClick(step) {
 		if (step === 2 && !seriesId) return;
 		if (step === 3 && !modelId) return;
+		if (step === 3) setModelConfirmed(true);
 		goToStep(step);
 	}
 
@@ -133,7 +171,11 @@ const [openSelectId, setOpenSelectId] = useState(null);
 
 	const priceRules = catalog.priceRules ?? {};
 
-	const modelEntries = seriesId ? Object.entries(catalog.models).filter(([, m]) => m.seriesId === seriesId) : [];
+	const modelEntries = seriesId
+		? Object.entries(catalog.models)
+			.filter(([, m]) => m.seriesId === seriesId)
+			.sort(([, a], [, b]) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+		: [];
 	const lockEntries = Object.entries(catalog.locks).sort((a, b) => (Number(a[1].perSection) ?? 0) - (Number(b[1].perSection) ?? 0));
 	const currentModel = modelId ? catalog.models[modelId] : null;
 	const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness);
@@ -167,6 +209,30 @@ const [openSelectId, setOpenSelectId] = useState(null);
 		return { background: 'transparent', boxShadow: 'none', transform: 'scale(1)' };
 	}
 
+	async function handleAnimatedReset() {
+		if (resetAnimRef.current) return;
+		if (!specs) { onReset(); return; }
+
+		const curHeight = Number(height);
+		const targetHeight = Number(specs.height);
+		const heightPath = buildHeightPath(curHeight, targetHeight);
+
+		if (heightPath.length === 0) { onReset(); return; }
+
+		resetAnimRef.current = true;
+		// onReset ставит height в дефолт, сразу восстанавливаем для анимации —
+		// React 18 батчит всё в один кадр, флика нет
+		onReset();
+		setHeight(String(curHeight));
+
+		for (const v of heightPath) {
+			setHeight(String(v));
+			await animSleep(ANIM_STEP_MS);
+		}
+
+		resetAnimRef.current = false;
+	}
+
 	return (
 		<aside className={styles.parameters}>
 			<div className={styles.titleRow}>
@@ -174,13 +240,23 @@ const [openSelectId, setOpenSelectId] = useState(null);
 					<img className={styles.titleIcon} src='/img/icons/icon-gear.svg' alt='' width='24' height='24' />
 					<h2 className={styles.title}>Параметры</h2>
 				</div>
+				{stepperStep === 3 && (
+					<button
+						type='button'
+						className={styles.resetBtn}
+						onClick={handleAnimatedReset}
+						disabled={false}
+					>
+						Сбросить параметры
+					</button>
+				)}
 			</div>
 
 			<div className={styles.breadcrumbs}>
 				{STEP_LABELS.map((label, i) => {
 					const step = i + 1;
 					const status = getStepStatus(step);
-					const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && modelConfirmed);
+					const canClick = step === 1 || (step === 2 && !!seriesId) || (step === 3 && !!modelId);
 
 					return (
 						<button
@@ -209,7 +285,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 						initial='initial'
 						animate='animate'
 						exit='exit'
-						transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
+						transition={{ type: 'spring', stiffness: 380, damping: 36, mass: 0.85 }}
 						style={{ width: '100%' }}
 					>
 						{stepperStep === 1 && (
@@ -308,8 +384,13 @@ const [openSelectId, setOpenSelectId] = useState(null);
 						)}
 
 						{stepperStep === 3 && (
-							<div className={styles.stepPane}>
-								<div className={styles.paramGroup}>
+							<motion.div
+								className={styles.stepPane}
+								variants={resetStagger}
+								initial='visible'
+								animate={step3Controls}
+							>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
 									<span className={styles.groupLabel}>Изменение габаритов</span>
 									<div className={styles.dimFields}>
 										<div className={styles.dimField}>
@@ -351,107 +432,105 @@ const [openSelectId, setOpenSelectId] = useState(null);
 											/>
 										</div>
 									</div>
-								</div>
+								</motion.div>
 
-								<div className={styles.paramsGrid}>
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
-										<div className={styles.toggleGroup}>
-											{bodyThicknessOptions.map(t => {
-												const isActive = bodyThickness === t;
-												return (
-													<motion.button
-														key={t}
-														className={cx(styles.toggleBtn, isActive && styles.toggleBtnActive)}
-														onClick={() => setBodyThickness(t)}
-														whileTap={{ scale: 0.94 }}
-														transition={{ duration: 0.1 }}
-													>
-														<img src={isActive ? '/img/icons/icon-thickness-active.svg' : '/img/icons/icon-thickness.svg'} alt='' width='16' height='16' />
-														{t}
-													</motion.button>
-												);
-											})}
-										</div>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Толщина металла корпуса (мм)</span>
+									<div className={styles.toggleGroup}>
+										{bodyThicknessOptions.map(t => {
+											const isActive = bodyThickness === t;
+											return (
+												<motion.button
+													key={t}
+													className={cx(styles.toggleBtn, isActive && styles.toggleBtnActive)}
+													onClick={() => setBodyThickness(t)}
+													whileTap={{ scale: 0.94 }}
+													transition={{ duration: 0.1 }}
+												>
+													<img src={isActive ? '/img/icons/icon-thickness-active.svg' : '/img/icons/icon-thickness.svg'} alt='' width='16' height='16' />
+													{t}
+												</motion.button>
+											);
+										})}
 									</div>
+								</motion.div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Толщина металла двери (мм)</span>
-										<div className={styles.toggleGroup}>
-											{doorThicknessOptions.map(t => {
-												const isActive = doorThickness === t;
-												return (
-													<motion.button
-														key={t}
-														className={cx(styles.toggleBtn, isActive && styles.toggleBtnActive)}
-														onClick={() => setDoorThickness(t)}
-														whileTap={{ scale: 0.94 }}
-														transition={{ duration: 0.1 }}
-													>
-														<img src={isActive ? '/img/icons/icon-thickness-active.svg' : '/img/icons/icon-thickness.svg'} alt='' width='16' height='16' />
-														{t}
-													</motion.button>
-												);
-											})}
-										</div>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Толщина металла двери (мм)</span>
+									<div className={styles.toggleGroup}>
+										{doorThicknessOptions.map(t => {
+											const isActive = doorThickness === t;
+											return (
+												<motion.button
+													key={t}
+													className={cx(styles.toggleBtn, isActive && styles.toggleBtnActive)}
+													onClick={() => setDoorThickness(t)}
+													whileTap={{ scale: 0.94 }}
+													transition={{ duration: 0.1 }}
+												>
+													<img src={isActive ? '/img/icons/icon-thickness-active.svg' : '/img/icons/icon-thickness.svg'} alt='' width='16' height='16' />
+													{t}
+												</motion.button>
+											);
+										})}
 									</div>
+								</motion.div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Выбор замка</span>
-										<CustomSelect
-											id='lock'
-											value={lockId}
-											onChange={setLockId}
-											options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name.replace(/^Замок\s+/i, '') }))}
-											isOpen={openSelectId === 'lock'}
-											onOpenChange={handleLockOpen}
-											leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
-											modified={lockModified}
-										/>
-									</div>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Выбор замка</span>
+									<CustomSelect
+										id='lock'
+										value={lockId}
+										onChange={setLockId}
+										options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name.replace(/^Замок\s+/i, '') }))}
+										isOpen={openSelectId === 'lock'}
+										onOpenChange={handleLockOpen}
+										leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
+										modified={lockModified}
+									/>
+								</motion.div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Вентиляция</span>
-										<CustomSelect
-											id='ventilation'
-											value={ventilationType}
-											onChange={setVentilationType}
-											options={[
-												{ value: null, label: 'Нет' },
-												...Object.entries(priceRules.ventilation ?? {}).map(([id, v]) => ({ value: id, label: v.name || id })),
-											]}
-											isOpen={openSelectId === 'ventilation'}
-											onOpenChange={handleVentilationOpen}
-											leftIcon={<img src='/img/icons/icon-ventilation.svg' alt='' width='16' height='16' />}
-											modified={ventilationModified}
-										/>
-									</div>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Вентиляция</span>
+									<CustomSelect
+										id='ventilation'
+										value={ventilationType}
+										onChange={setVentilationType}
+										options={[
+											{ value: null, label: 'Нет' },
+											...Object.entries(priceRules.ventilation ?? {}).map(([id, v]) => ({ value: id, label: v.name || id })),
+										]}
+										isOpen={openSelectId === 'ventilation'}
+										onOpenChange={handleVentilationOpen}
+										leftIcon={<img src='/img/icons/icon-ventilation.svg' alt='' width='16' height='16' />}
+										modified={ventilationModified}
+									/>
+								</motion.div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Изменение цвета двери</span>
-										<ColorPicker
-											placeholder='Стандарт (без изменений)'
-											selected={doorColor}
-											onSelect={setDoorColor}
-											isOpen={openSelectId === 'doorColor'}
-											onOpenChange={handleDoorColorOpen}
-											modified={doorColorModified}
-										/>
-									</div>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Изменение цвета двери</span>
+									<ColorPicker
+										placeholder='Стандарт (без изменений)'
+										selected={doorColor}
+										onSelect={setDoorColor}
+										isOpen={openSelectId === 'doorColor'}
+										onOpenChange={handleDoorColorOpen}
+										modified={doorColorModified}
+									/>
+								</motion.div>
 
-									<div className={styles.paramGroup}>
-										<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
-										<ColorPicker
-											placeholder='Стандарт (без изменений)'
-											selected={bodyColor}
-											onSelect={setBodyColor}
-											isOpen={openSelectId === 'bodyColor'}
-											onOpenChange={handleBodyColorOpen}
-											modified={bodyColorModified}
-										/>
-									</div>
-								</div>
-							</div>
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
+									<ColorPicker
+										placeholder='Стандарт (без изменений)'
+										selected={bodyColor}
+										onSelect={setBodyColor}
+										isOpen={openSelectId === 'bodyColor'}
+										onOpenChange={handleBodyColorOpen}
+										modified={bodyColorModified}
+									/>
+								</motion.div>
+							</motion.div>
 						)}
 					</motion.div>
 				</AnimatePresence>

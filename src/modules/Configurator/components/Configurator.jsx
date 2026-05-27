@@ -139,7 +139,7 @@ function IconFinal() {
 export default function Configurator() {
 	const { config, price, catalog, isResetting, resetKey, parametersUnlocked } = useAppContext();
 	const model = config.modelId ? catalog.models[config.modelId] : null;
-	const series = model ? (catalog.series ?? []).find(s => s.id === model.seriesId) : null;
+	const series = config.seriesId ? (catalog.series ?? []).find(s => s.id === config.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
 
@@ -184,6 +184,16 @@ export default function Configurator() {
 		}
 	}
 
+	async function handleProposalPrint({ price: enteredPrice }) {
+		try {
+			const { printCommercialProposal } = await import('@/pdf/kp/generateCommercialProposal.js');
+			await printCommercialProposal({ config, catalog, price: enteredPrice });
+		} catch (err) {
+			console.error('Ошибка печати КП:', err);
+			setNotify({ visible: true, status: 'error', title: 'Не удалось напечатать PDF', message: err?.message ?? String(err) });
+		}
+	}
+
 	async function handleOrderSubmit({ managerName, clientName, nzNumber, calcNumber }) {
 		try {
 			const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
@@ -193,6 +203,16 @@ export default function Configurator() {
 		} catch (err) {
 			console.error('Ошибка генерации НЗ:', err);
 			setNotify({ visible: true, status: 'error', title: 'Не удалось создать PDF', message: err?.message ?? String(err) });
+		}
+	}
+
+	async function handleOrderPrint({ managerName, clientName, nzNumber, calcNumber }) {
+		try {
+			const { printNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
+			await printNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+		} catch (err) {
+			console.error('Ошибка печати НЗ:', err);
+			setNotify({ visible: true, status: 'error', title: 'Не удалось напечатать PDF', message: err?.message ?? String(err) });
 		}
 	}
 
@@ -206,6 +226,11 @@ export default function Configurator() {
 
 	const modelDisplay = series && model ? `${series.name} — ${model.name}` : null;
 
+	const bodyColorName = config.bodyColor?.name ?? defaults?.bodyColorName ?? 'RAL 7038';
+	const doorColorName = config.doorColor?.name ?? defaults?.doorColorName ?? 'RAL 7038';
+	const bodyColorHex = config.bodyColor?.color ?? getColorHex(bodyColorName);
+	const doorColorHex = config.doorColor?.color ?? getColorHex(doorColorName);
+
 	const orderSummary = model && defaults ? {
 		model: modelDisplay,
 		dims: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
@@ -213,8 +238,10 @@ export default function Configurator() {
 		lock: lock?.name ?? '—',
 		qty: `${qty} шт.`,
 		price: unitPriceDisplay,
-		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038',
-		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038',
+		bodyColor: bodyColorName,
+		bodyColorHex,
+		doorColor: doorColorName,
+		doorColorHex,
 	} : null;
 
 	const proposalSummary = model && defaults ? {
@@ -227,8 +254,10 @@ export default function Configurator() {
 			? (catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType)
 			: null,
 		qty: `${qty} шт.`,
-		doorColor: config.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038',
-		bodyColor: config.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038',
+		doorColor: doorColorName,
+		doorColorHex,
+		bodyColor: bodyColorName,
+		bodyColorHex,
 	} : null;
 
 	return (
@@ -240,25 +269,20 @@ export default function Configurator() {
 							<h1 className={styles.title}>Конфигурация</h1>
 						</div>
 					</div>
-					<AnimatePresence mode='wait'>
-						{modelDisplay && (
-							<motion.div
-								key={modelDisplay}
-								className={styles.currentModel}
-								initial={{ opacity: 0, x: 10 }}
-								animate={{ opacity: 1, x: 0 }}
-								exit={{ opacity: 0, x: -6 }}
-								transition={{ duration: 0.2, ease: [0.23, 1, 0.32, 1] }}
-							>
-								<span className={styles.currentModelLabel}>Текущая модель:</span>
-								<span className={styles.currentModelValue}>{modelDisplay}</span>
-							</motion.div>
-						)}
-					</AnimatePresence>
 				</div>
 
-				<div className={styles.productImage}>
-					<img src='/img/brand/product.png' alt='Шкафы ПРОМЕТ' className={styles.productImg} />
+				<div className={styles.modelHero}>
+					<img src='/img/brand/product.png' alt='' className={styles.heroPlaceholderImg} />
+					<div className={styles.heroOverlay}>
+						<div className={styles.heroTop}>
+							{series && <span className={styles.heroBadge}>{series.name}</span>}
+						</div>
+						{model && (
+							<div className={styles.heroBottom}>
+								<h2 className={styles.heroName}>{model.name}</h2>
+							</div>
+						)}
+					</div>
 				</div>
 
 				<AnimatePresence mode='wait'>
@@ -322,7 +346,7 @@ export default function Configurator() {
 									</div>
 									<motion.ul
 										className={styles.specList}
-										key={`${config.modelId}-${resetKey}`}
+										key={config.modelId}
 										initial='hidden'
 										animate='visible'
 									>
@@ -379,7 +403,7 @@ export default function Configurator() {
 										</AnimatePresence>
 									</div>
 									<motion.ul className={styles.diffList} layout>
-										<AnimatePresence initial={false} mode='popLayout' key={`${config.modelId}-${resetKey}`}>
+										<AnimatePresence initial={false} mode='popLayout' key={config.modelId}>
 											{changedSpecs.length === 0 && (
 												<motion.li
 													key='empty-diff'
@@ -441,7 +465,7 @@ export default function Configurator() {
 									</div>
 									<motion.ul
 										className={styles.finalSpec}
-										key={`${config.modelId}-${resetKey}`}
+										key={config.modelId}
 										initial='hidden'
 										animate='visible'
 									>
@@ -532,11 +556,12 @@ export default function Configurator() {
 			</div>
 
 
-			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} summary={orderSummary} />
+			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} onPrint={handleOrderPrint} summary={orderSummary} />
 			<CommercialProposalModal
 				isOpen={isProposalOpen}
 				onClose={() => setIsProposalOpen(false)}
 				onSubmit={handleProposalSubmit}
+				onPrint={handleProposalPrint}
 				summary={proposalSummary}
 				initialPrice={price && !price.manual ? price.clientPrice : null}
 			/>

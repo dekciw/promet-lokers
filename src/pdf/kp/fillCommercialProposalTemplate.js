@@ -490,18 +490,18 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     drawInterMixed(priceStr, X_PRICE + 228 + (isLS && nonStandardCount >= 1 ? 2 : 0) + (!isNonStd && !isLS ? 1 : 0), priceY, 10, BLACK);
   }
 
-  // Фото модели — приоритет: photoUrl из Firestore (Cloudinary JPEG), иначе локальный PNG-fallback
-  // pdf-lib: embedJpg и embedPng оба принимают ArrayBuffer — используем нужный в зависимости от источника.
+  // Фото модели — приоритет: photoUrl из Firestore, иначе локальный PNG-fallback
+  // pdf-lib: формат определяется по расширению URL (.jpg/.jpeg → embedJpg, иначе → embedPng).
+  // Cloudinary сохраняет в том формате что загружен — нельзя предполагать JPEG для всех remote.
   if (config.modelId) {
     try {
       const modelData = catalog?.models?.[config.modelId];
       const photoSrc = modelData?.photoUrl ?? `/img/models/${config.modelId}.png`;
-      // Remote Cloudinary URL → JPEG; локальный путь → PNG
-      const isRemote = typeof photoSrc === 'string' && photoSrc.startsWith('http');
+      const isJpeg = /\.(jpe?g)$/i.test(photoSrc);
       const imgResp = await fetch(photoSrc);
       if (imgResp.ok) {
         const imgBytes = await imgResp.arrayBuffer();
-        const img = isRemote
+        const img = isJpeg
           ? await doc.embedJpg(imgBytes)
           : await doc.embedPng(imgBytes);
         const box = PHOTO_BOX_OVERRIDE[config.modelId] ?? PHOTO_BOX;

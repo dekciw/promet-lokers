@@ -65,34 +65,26 @@ export function useConfig(catalog) {
   }
 
   function handleSeriesChange(newSeriesId, onAdvance) {
+    setSeriesId(newSeriesId);
+    setModelId('');
+    clearParams();
     if (onAdvance) onAdvance();
-    setIsResetting(true);
-    setTimeout(() => {
-      setSeriesId(newSeriesId);
-      setModelId('');
-      clearParams();
-      setIsResetting(false);
-    }, 330);
   }
 
   function handleReset() {
-    setIsResetting(true);
-    setTimeout(() => {
-      if (modelId && catalog?.models[modelId]) {
-        const specs = catalog.models[modelId].defaultSpecs;
-        applySpecs(specs);
-        setLockId(specs.lockId ?? 'key_basic');
-      } else {
-        clearParams();
-      }
-      setVentilationType(null);
-      setBodyColor(null);
-      setDoorColor(null);
-      setQuantity(10);
-      setProfitability(30);
-      setResetKey(k => k + 1);
-      setIsResetting(false);
-    }, 330);
+    if (modelId && catalog?.models[modelId]) {
+      const specs = catalog.models[modelId].defaultSpecs;
+      applySpecs(specs);
+      setLockId(specs.lockId ?? 'key_basic');
+    } else {
+      clearParams();
+    }
+    setVentilationType(null);
+    setBodyColor(null);
+    setDoorColor(null);
+    setQuantity(10);
+    setProfitability(30);
+    setResetKey(k => k + 1);
   }
 
   const config = {

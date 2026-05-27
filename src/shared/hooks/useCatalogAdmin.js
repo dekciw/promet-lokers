@@ -8,10 +8,22 @@ const CACHE_KEY = 'promet_catalog_v1';
 
 // Firestore хранит models как объект {articleKey: modelData}, а не массив.
 // Конвертируем в массив для удобной фильтрации/сортировки в UI.
+// Дедупликация: если в Firestore остались цифровые ключи (0, 1, 2...) от старого
+// формата РЯДОМ с новыми строковыми ключами — предпочитаем article-keyed записи.
 function rawToArray(raw) {
   if (!raw || typeof raw !== 'object') return [];
   if (Array.isArray(raw)) return raw;
-  return Object.entries(raw).map(([key, m]) => ({ article: key, ...m }));
+  const byArticle = new Map();
+  for (const [key, m] of Object.entries(raw)) {
+    if (!m || typeof m !== 'object') continue;
+    const article = m.article ?? key;
+    const existing = byArticle.get(article);
+    // Canonical entry: key === article (article-keyed) takes priority over numeric key
+    if (!existing || key === article) {
+      byArticle.set(article, { article, ...m });
+    }
+  }
+  return Array.from(byArticle.values());
 }
 
 // Конвертируем массив обратно в объект перед записью в Firestore.

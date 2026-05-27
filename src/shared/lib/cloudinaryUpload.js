@@ -45,7 +45,7 @@ export function resizeImageToHeight(file, targetHeight = 1520) {
             reject(new Error('Canvas toBlob returned null'));
           }
         },
-        'image/png',
+        'image/jpeg',
         0.92
       );
     };

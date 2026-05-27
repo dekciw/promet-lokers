@@ -46,7 +46,7 @@ function IconClose() {
 export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, onClose, onSave, onPhotoUpload }) {
   const titleId = useId();
   const {
-    register, handleSubmit, reset, setValue, getValues, watch,
+    register, handleSubmit, reset, setValue, getValues, watch, trigger,
     formState: { errors, isSubmitting, isValid },
   } = useForm({ mode: 'onChange', defaultValues: EMPTY_MODEL });
 
@@ -58,12 +58,15 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
   const photoUrl = watch('photoUrl');
 
   // Populate / reset form on open (RESEARCH.md Pitfall #3 — guard on isOpen is mandatory)
+  // trigger() after reset: mode:'onChange' doesn't auto-validate on reset, so isValid stays
+  // false until first user interaction — call trigger() to unblock the Save button immediately.
   useEffect(() => {
     if (isOpen) {
       reset(model ?? EMPTY_MODEL);
       setPhotoError(null);
+      trigger();
     }
-  }, [isOpen, model, reset]);
+  }, [isOpen, model, reset, trigger]);
 
   // Scroll lock
   useEffect(() => {
@@ -243,7 +246,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     type="text"
                     className={cx(styles.input, errors.article && styles.inputError, isEdit && styles.inputDisabled)}
                     readOnly={isEdit}
-                    disabled={isEdit}
                     {...register('article', {
                       required: 'Обязательно',
                       validate: trimRequired('Не должно быть пустым'),
@@ -425,7 +427,7 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                 type="submit"
                 form="catalog-form"
                 className={cx(styles.btn, styles.btnPrimary)}
-                disabled={isSubmitting || !isValid}
+                disabled={isSubmitting || isUploadingPhoto}
               >
                 {isSubmitting ? 'Сохранение…' : 'Сохранить'}
               </button>

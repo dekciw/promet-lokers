@@ -32,16 +32,29 @@ function IconChevron() {
 	);
 }
 
-export default function CommercialProposalModal({ isOpen, onClose, onSubmit, summary, initialPrice }) {
+function IconPrint() {
+	return (
+		<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+			<polyline points='6 9 6 2 18 2 18 9' />
+			<path d='M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2' />
+			<rect x='6' y='14' width='12' height='8' />
+		</svg>
+	);
+}
+
+export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onPrint, summary, initialPrice }) {
 	const titleId = useId();
 	const [summaryOpen, setSummaryOpen] = useState(true);
+	const [isPrinting, setIsPrinting] = useState(false);
 	const {
 		control,
 		handleSubmit,
 		reset,
-		formState: { errors, isSubmitting },
+		trigger,
+		getValues,
+		formState: { errors, isSubmitting, isValid },
 	} = useForm({
-		mode: 'onSubmit',
+		mode: 'onChange',
 		defaultValues: { price: '' },
 	});
 
@@ -49,6 +62,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 		if (!isOpen) {
 			reset({ price: '' });
 			setSummaryOpen(true);
+			setIsPrinting(false);
 		} else {
 			reset({ price: initialPrice != null ? String(initialPrice) : '' });
 		}
@@ -60,17 +74,35 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 		return () => { document.body.style.overflow = ''; };
 	}, [isOpen]);
 
+	const busy = isSubmitting || isPrinting;
+
 	useEffect(() => {
 		if (!isOpen) return;
 		function onKey(e) {
-			if (e.key === 'Escape' && !isSubmitting) onClose();
+			if (e.key === 'Escape' && !busy) onClose();
 		}
 		window.addEventListener('keydown', onKey);
 		return () => window.removeEventListener('keydown', onKey);
-	}, [isOpen, isSubmitting, onClose]);
+	}, [isOpen, busy, onClose]);
 
 	async function handleFormSubmit(data) {
 		await onSubmit({ price: Number(data.price.replace(/\D/g, '')) });
+	}
+
+	async function handlePrint() {
+		if (initialPrice == null) {
+			const valid = await trigger();
+			if (!valid) return;
+		}
+		const price = initialPrice != null
+			? initialPrice
+			: Number(getValues('price').replace(/\D/g, ''));
+		setIsPrinting(true);
+		try {
+			await onPrint?.({ price });
+		} finally {
+			setIsPrinting(false);
+		}
 	}
 
 	const summaryItems = summary ? [
@@ -81,8 +113,8 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 		{ label: 'Замок', value: summary.lock },
 		{ label: 'Вентиляция', value: summary.ventilation },
 		{ label: 'Количество', value: summary.qty },
-		{ label: 'Цвет двери', value: summary.doorColor },
-		{ label: 'Цвет корпуса', value: summary.bodyColor },
+		{ label: 'Цвет двери', value: summary.doorColor, colorHex: summary.doorColorHex },
+		{ label: 'Цвет корпуса', value: summary.bodyColor, colorHex: summary.bodyColorHex },
 	].filter(i => i.value) : [];
 
 	return createPortal(
@@ -90,7 +122,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 			{isOpen && (
 				<motion.div
 					className={styles.overlay}
-					onClick={() => { if (!isSubmitting) onClose(); }}
+					onClick={() => { if (!busy) onClose(); }}
 					role='presentation'
 					variants={overlayVariants}
 					initial='hidden'
@@ -119,7 +151,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 								type='button'
 								className={styles.closeBtn}
 								onClick={onClose}
-								disabled={isSubmitting}
+								disabled={busy}
 								aria-label='Закрыть'
 							>
 								<IconClose />
@@ -148,10 +180,18 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 											style={{ overflow: 'hidden' }}
 										>
 											<div className={styles.summaryGrid}>
-												{summaryItems.map(({ label, value }) => (
+												{summaryItems.map(({ label, value, colorHex }) => (
 													<div key={label} className={styles.summaryItem}>
 														<span className={styles.summaryLabel}>{label}</span>
-														<span className={styles.summaryValue}>{value}</span>
+														<span className={styles.summaryValue}>
+																{colorHex && (
+																	<span
+																		className={styles.colorSwatch}
+																		style={{ background: colorHex, border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.1)' }}
+																	/>
+																)}
+																{value}
+															</span>
 													</div>
 												))}
 											</div>
@@ -180,7 +220,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 											type='text'
 											inputMode='numeric'
 											placeholder='Цена от экономиста'
-											disabled={isSubmitting}
+											disabled={busy}
 											readOnly={initialPrice != null}
 											value={field.value ? parseInt(field.value.replace(/\D/g, '') || '0', 10).toLocaleString('ru-RU') : ''}
 											onChange={e => {
@@ -204,15 +244,38 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, sum
 								type='button'
 								className={cx(styles.btn, styles.btnSecondary)}
 								onClick={onClose}
-								disabled={isSubmitting}
+								disabled={busy}
 							>
 								Отмена
 							</button>
+							{onPrint && (
+								<button
+									type='button'
+									className={cx(styles.btn, styles.btnPrint)}
+									onClick={handlePrint}
+									disabled={busy || (!isValid && initialPrice == null)}
+								>
+									{isPrinting ? (
+										<>
+											<svg className={styles.spinner} viewBox='0 0 20 20' fill='none' aria-hidden='true' width='14' height='14'>
+												<circle cx='10' cy='10' r='7' stroke='currentColor' strokeWidth='2.5' strokeOpacity='0.25' />
+												<path d='M10 3a7 7 0 0 1 7 7' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' />
+											</svg>
+											Генерация…
+										</>
+									) : (
+										<>
+											<IconPrint />
+											Распечатать
+										</>
+									)}
+								</button>
+							)}
 							<button
 								type='submit'
 								form='proposal-form'
 								className={cx(styles.btn, styles.btnPrimary)}
-								disabled={isSubmitting}
+								disabled={busy || (!isValid && initialPrice == null)}
 							>
 								{isSubmitting ? (
 									<>

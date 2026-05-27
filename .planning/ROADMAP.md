@@ -230,7 +230,7 @@ Plans:
 **Plans**: 4 plans
 Plans:
 - [x] 11-01-PLAN.md — useUsersAdmin hook + secondary Firebase App pattern + tests (USERS-01..04)
-- [ ] 11-02-PLAN.md — useHistory hook + Firestore subcollection + tests (HIST-01..04)
+- [x] 11-02-PLAN.md — useHistory hook + Firestore subcollection + tests (HIST-01..04)
 - [ ] 11-03-PLAN.md — UsersTab UI + AdminPage tab + LoginScreen status gate (USERS-01..03)
 - [ ] 11-04-PLAN.md — HistoryPage + saveToHistory in Configurator + uid flow + Header link (HIST-01..04)
 **UI hint**: yes
@@ -251,7 +251,7 @@ Plans:
 | 8. Catalog CRUD | v1.1 | 2/2 | Complete   | 2026-05-26 |
 | 9. Media & Ordering | v1.1 | 0/? | Not started | — |
 | 10. Price Coefficients | v1.1 | 2/2 | Complete    | 2026-05-27 |
-| 11. Users & History | v1.1 | 1/4 | In Progress|  |
+| 11. Users & History | v1.1 | 2/4 | In Progress|  |
 
 ---
 
