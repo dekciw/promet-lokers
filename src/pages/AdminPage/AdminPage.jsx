@@ -56,25 +56,25 @@ function SortableCard({ model, onEdit, onDelete, disabled, position, total }) {
       style={style}
       className={cx(styles.card, isDragging && styles.cardDragging, disabled && styles.cardDragDisabled)}
     >
-      {/* Drag handle — listeners scoped here so button clicks are unaffected */}
-      <div
-        className={styles.dragHandle}
-        {...attributes}
-        {...listeners}
-        aria-label="Перетащить для изменения порядка"
-        aria-disabled={disabled}
-        role="button"
-        tabIndex={disabled ? -1 : 0}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-          <circle cx="5" cy="4" r="1.5" fill="currentColor" />
-          <circle cx="5" cy="8" r="1.5" fill="currentColor" />
-          <circle cx="5" cy="12" r="1.5" fill="currentColor" />
-          <circle cx="11" cy="4" r="1.5" fill="currentColor" />
-          <circle cx="11" cy="8" r="1.5" fill="currentColor" />
-          <circle cx="11" cy="12" r="1.5" fill="currentColor" />
-        </svg>
-      </div>
+      {!disabled && (
+        <div
+          className={styles.dragHandle}
+          {...attributes}
+          {...listeners}
+          aria-label="Перетащить для изменения порядка"
+          role="button"
+          tabIndex={0}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="5" cy="4" r="1.5" fill="currentColor" />
+            <circle cx="5" cy="8" r="1.5" fill="currentColor" />
+            <circle cx="5" cy="12" r="1.5" fill="currentColor" />
+            <circle cx="11" cy="4" r="1.5" fill="currentColor" />
+            <circle cx="11" cy="8" r="1.5" fill="currentColor" />
+            <circle cx="11" cy="12" r="1.5" fill="currentColor" />
+          </svg>
+        </div>
+      )}
       {position != null && (
         <div className={styles.positionBadge} aria-label={`Позиция ${position} из ${total}`}>
           {position} <span className={styles.positionTotal}>/ {total}</span>
@@ -359,11 +359,6 @@ export default function AdminPage({ onLogout, username = '' }) {
               items={visibleModels.map((m) => m.article)}
               strategy={rectSortingStrategy}
             >
-              {activeSeries === 'all' && (
-                <div className={styles.dragHint} role="status">
-                  Выберите серию ML или LS, чтобы менять порядок карточек
-                </div>
-              )}
               {searchQuery.trim() !== '' && activeSeries !== 'all' && (
                 <div className={styles.dragHint} role="status">
                   Очистите поиск, чтобы изменять порядок
