@@ -72,5 +72,11 @@ export function useUsersAdmin() {
     setUsers((prev) => prev.map((u) => (u.uid === uid ? { ...u, status: 'disabled' } : u)));
   }, []);
 
-  return { users, isLoading, error, isCreating, loadUsers, createUser, disableUser };
+  // Реактивация деактивированного пользователя
+  const enableUser = useCallback(async (uid) => {
+    await updateDoc(doc(db, 'users', uid), { status: 'active' });
+    setUsers((prev) => prev.map((u) => (u.uid === uid ? { ...u, status: 'active' } : u)));
+  }, []);
+
+  return { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser };
 }

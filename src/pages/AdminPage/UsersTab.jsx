@@ -5,9 +5,10 @@ import { cx } from '../../shared/utils/cx.js';
 import styles from './UsersTab.module.css';
 
 export default function UsersTab({ onNotify }) {
-  const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser } = useUsersAdmin();
+  const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser } = useUsersAdmin();
   const [addOpen, setAddOpen] = useState(false);
   const [disableTarget, setDisableTarget] = useState(null);
+  const [enableTarget, setEnableTarget] = useState(null);
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onChange' });
 
@@ -33,6 +34,17 @@ export default function UsersTab({ onNotify }) {
       await disableUser(disableTarget.uid);
       onNotify?.('ok', `Пользователь ${disableTarget.email} деактивирован`);
       setDisableTarget(null);
+    } catch (err) {
+      onNotify?.('error', `Ошибка: ${err.message}`);
+    }
+  }
+
+  async function handleEnable() {
+    if (!enableTarget) return;
+    try {
+      await enableUser(enableTarget.uid);
+      onNotify?.('ok', `Пользователь ${enableTarget.email} реактивирован`);
+      setEnableTarget(null);
     } catch (err) {
       onNotify?.('error', `Ошибка: ${err.message}`);
     }
@@ -88,7 +100,7 @@ export default function UsersTab({ onNotify }) {
                     </span>
                   </td>
                   <td>
-                    {u.status !== 'disabled' && (
+                    {u.status !== 'disabled' ? (
                       <button
                         type="button"
                         className={cx(styles.actionBtn, styles.actionBtnDanger)}
@@ -96,6 +108,15 @@ export default function UsersTab({ onNotify }) {
                         aria-label={`Деактивировать ${u.email}`}
                       >
                         Деактивировать
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className={cx(styles.actionBtn, styles.actionBtnSuccess)}
+                        onClick={() => setEnableTarget(u)}
+                        aria-label={`Реактивировать ${u.email}`}
+                      >
+                        Реактивировать
                       </button>
                     )}
                   </td>
@@ -158,6 +179,33 @@ export default function UsersTab({ onNotify }) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {enableTarget && (
+        <div className={styles.overlay} onClick={() => setEnableTarget(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Подтвердить реактивацию">
+            <h3 className={styles.modalTitle}>Реактивировать пользователя?</h3>
+            <p className={styles.modalText}>
+              Пользователь <strong>{enableTarget.email}</strong> снова сможет войти в систему.
+            </p>
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={cx(styles.actionBtn, styles.actionBtnSecondary)}
+                onClick={() => setEnableTarget(null)}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className={cx(styles.actionBtn, styles.actionBtnSuccess)}
+                onClick={handleEnable}
+              >
+                Реактивировать
+              </button>
+            </div>
           </div>
         </div>
       )}

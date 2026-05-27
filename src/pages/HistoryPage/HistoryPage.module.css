@@ -144,6 +144,55 @@
   background: #cbd5e0;
 }
 
+.actionBtnDanger {
+  background: #fc8181;
+  color: #fff;
+}
+
+.actionBtnDanger:hover {
+  background: #f56565;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  padding: 28px;
+  border-radius: 12px;
+  max-width: 480px;
+  width: 90vw;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0c1e4a;
+  margin: 0 0 12px 0;
+}
+
+.modalText {
+  font-size: 14px;
+  color: #4a5568;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
 @media (max-width: 767px) {
   .main {
     padding: 20px 16px;

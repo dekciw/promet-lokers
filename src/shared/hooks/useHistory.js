@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
-  collection, addDoc, getDocs, query, orderBy, serverTimestamp,
+  collection, addDoc, getDocs, query, orderBy, serverTimestamp, deleteDoc, doc,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -61,6 +61,10 @@ async function redownloadKP(entry, catalog) {
   });
 }
 
+async function deleteHistoryEntry(uid, entryId) {
+  await deleteDoc(doc(db, 'users', uid, 'history', entryId));
+}
+
 export function useHistory(uid) {
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,11 +84,17 @@ export function useHistory(uid) {
     }
   }, [uid]);
 
+  const removeEntry = useCallback(async (entryId) => {
+    await deleteHistoryEntry(uid, entryId);
+    setHistory((prev) => prev.filter((e) => e.id !== entryId));
+  }, [uid]);
+
   return {
     history, isLoading, error,
     loadHistory,
     saveToHistory,
     restoreConfig,
     redownloadKP,
+    removeEntry,
   };
 }

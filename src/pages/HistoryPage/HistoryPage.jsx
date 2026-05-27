@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import Header from '../../shared/components/Header/Header';
 import { useHistory } from '../../shared/hooks/useHistory';
@@ -18,7 +18,8 @@ function formatDate(ts) {
 }
 
 export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
-  const { history, isLoading, error, loadHistory, redownloadKP } = useHistory(uid);
+  const { history, isLoading, error, loadHistory, redownloadKP, removeEntry } = useHistory(uid);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const { catalog } = useCatalog();
   const navigate = useNavigate();
 
@@ -27,6 +28,16 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
   function handleRestore(entry) {
     sessionStorage.setItem(RESTORE_KEY, JSON.stringify(entry.configSnapshot));
     navigate('/configurator');
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    try {
+      await removeEntry(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch (err) {
+      alert(`Ошибка удаления: ${err?.message ?? err}`);
+    }
   }
 
   async function handleRedownload(entry) {
@@ -105,6 +116,14 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
                       >
                         Скачать заново
                       </button>
+                      <button
+                        type="button"
+                        className={cx(styles.actionBtn, styles.actionBtnDanger)}
+                        onClick={() => setDeleteTarget(e)}
+                        aria-label={`Удалить запись ${e.modelName}`}
+                      >
+                        Удалить
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -112,7 +131,34 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
             </table>
           </div>
         )}
-      </main>
+        </main>
+
+      {deleteTarget && (
+        <div className={styles.overlay} onClick={() => setDeleteTarget(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+            <h3 className={styles.modalTitle}>Удалить запись из истории?</h3>
+            <p className={styles.modalText}>
+              Запись <strong>{deleteTarget.modelName}</strong> от {formatDate(deleteTarget.downloadedAt)} будет удалена без возможности восстановления.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={cx(styles.actionBtn, styles.actionBtnSecondary)}
+                onClick={() => setDeleteTarget(null)}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className={cx(styles.actionBtn, styles.actionBtnDanger)}
+                onClick={handleDelete}
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

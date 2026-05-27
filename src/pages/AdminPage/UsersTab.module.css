@@ -141,6 +141,15 @@
   background: #f56565;
 }
 
+.actionBtnSuccess {
+  background: #48bb78;
+  color: #fff;
+}
+
+.actionBtnSuccess:hover:not(:disabled) {
+  background: #38a169;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
