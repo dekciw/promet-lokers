@@ -63,8 +63,8 @@
 	height: auto;
 	pointer-events: none;
 	mix-blend-mode: luminosity;
-	-webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
-	mask-image: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
+	-webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
+	mask-image: linear-gradient(to left, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
 }
 
 /* ── Правая часть ── */
