@@ -16,6 +16,7 @@ import { resizeImageToHeight, uploadToCloudinary } from '../../shared/lib/cloudi
 import CatalogEditModal from '../../shared/components/CatalogEditModal';
 import DeleteConfirmModal from '../../shared/components/DeleteConfirmModal';
 import Notification from '../../shared/components/Notification/Notification';
+import PriceCoefficientsTab from './PriceCoefficientsTab';
 import { cx } from '../../shared/utils/cx.js';
 import styles from './AdminPage.module.css';
 
@@ -23,6 +24,11 @@ const SERIES_TABS = [
   { key: 'all', label: 'Все' },
   { key: 'ML',  label: 'ML' },
   { key: 'LS',  label: 'LS' },
+];
+
+const ADMIN_TABS = [
+  { key: 'catalog', label: 'Каталог' },
+  { key: 'prices',  label: 'Коэффициенты' },
 ];
 
 // SortableCard: individual card wrapped in useSortable.
@@ -98,6 +104,7 @@ function SortableCard({ model, onEdit, onDelete, disabled }) {
 export default function AdminPage({ onLogout, username }) {
   const { models, isLoading, error, loadModels, saveModel, addModel, deleteModel, reorderModels } = useCatalogAdmin();
 
+  const [activeTab, setActiveTab] = useState('catalog');
   const [activeSeries, setActiveSeries] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -212,6 +219,20 @@ export default function AdminPage({ onLogout, username }) {
           ← Конфигуратор
         </Link>
         <span className={styles.title}>Панель администратора</span>
+        <nav className={styles.adminTabs} role="tablist" aria-label="Раздел администрирования">
+          {ADMIN_TABS.map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === t.key}
+              className={cx(styles.adminTab, activeTab === t.key && styles.adminTabActive)}
+              onClick={() => setActiveTab(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </nav>
         <div className={styles.userArea}>
           <span className={styles.username}>{username}</span>
           <button
@@ -225,40 +246,49 @@ export default function AdminPage({ onLogout, username }) {
         </div>
       </header>
 
-      <div className={styles.toolbar}>
-        <input
-          type="text"
-          className={styles.search}
-          placeholder="Поиск по названию"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          aria-label="Поиск по названию"
-        />
-        <div className={styles.tabs} role="tablist" aria-label="Фильтр по серии">
-          {SERIES_TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              role="tab"
-              aria-selected={activeSeries === t.key}
-              className={cx(styles.tab, activeSeries === t.key && styles.tabActive)}
-              onClick={() => setActiveSeries(t.key)}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <button
-          type="button"
-          className={styles.addBtn}
-          onClick={() => setAddOpen(true)}
-          aria-label="Добавить модель"
-        >
-          + Добавить
-        </button>
-      </div>
+      {activeTab === 'prices' && (
+        <PriceCoefficientsTab onNotify={(status, title) => {
+          if (status === 'ok') showOk(title);
+          else showError(title);
+        }} />
+      )}
 
-      <main className={styles.listWrap}>
+      {activeTab === 'catalog' && (
+        <>
+        <div className={styles.toolbar}>
+          <input
+            type="text"
+            className={styles.search}
+            placeholder="Поиск по названию"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Поиск по названию"
+          />
+          <div className={styles.tabs} role="tablist" aria-label="Фильтр по серии">
+            {SERIES_TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={activeSeries === t.key}
+                className={cx(styles.tab, activeSeries === t.key && styles.tabActive)}
+                onClick={() => setActiveSeries(t.key)}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className={styles.addBtn}
+            onClick={() => setAddOpen(true)}
+            aria-label="Добавить модель"
+          >
+            + Добавить
+          </button>
+        </div>
+
+        <main className={styles.listWrap}>
         {isLoading && (
           <div className={styles.stateBlock}>Загрузка каталога…</div>
         )}
@@ -313,6 +343,8 @@ export default function AdminPage({ onLogout, username }) {
           </DndContext>
         )}
       </main>
+        </>
+      )}
 
       <CatalogEditModal
         isOpen={addOpen}

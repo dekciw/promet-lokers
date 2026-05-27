@@ -1,0 +1,161 @@
+.tab {
+  padding: 24px 40px;
+  max-width: 1200px;
+}
+
+.state {
+  padding: 60px 40px;
+  text-align: center;
+  color: #4a5568;
+  font-size: 14px;
+}
+
+.stateError {
+  color: #e53e3e;
+}
+
+.retryBtn {
+  margin-top: 12px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1px solid #0c53b3;
+  background: #fff;
+  color: #0c53b3;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0c1e4a;
+  margin: 0 0 16px 0;
+}
+
+.minQtyRow {
+  margin-bottom: 12px;
+}
+
+.minQtyLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th {
+  text-align: left;
+  padding: 8px 10px;
+  background: #f7fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+  color: #4a5568;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.rowLabel {
+  font-weight: 600;
+  color: #0c1e4a;
+  white-space: nowrap;
+}
+
+.rateInput {
+  min-height: 44px;
+  min-width: 96px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a202c;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.rateInput:focus {
+  outline: none;
+  border-color: #0c53b3;
+  box-shadow: 0 0 0 3px rgba(12, 83, 179, 0.15);
+}
+
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  padding: 16px 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.saveBtn {
+  min-height: 44px;
+  padding: 0 28px;
+  border-radius: 8px;
+  border: none;
+  background: #0c53b3;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #094192;
+}
+
+.saveBtn:focus-visible {
+  outline: 2px solid #0c53b3;
+  outline-offset: 2px;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 767px) {
+  .tab {
+    padding: 16px;
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .rateInput {
+    min-width: 80px;
+  }
+}

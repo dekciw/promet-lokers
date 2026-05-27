@@ -370,6 +370,44 @@
   color: #fff;
 }
 
+/* ── Admin top-level tabs (Catalog / Prices) ── */
+.adminTabs {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  padding: 4px;
+  margin: 0 16px;
+}
+
+.adminTab {
+  min-height: 44px;
+  padding: 0 20px;
+  border: none;
+  background: transparent;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.adminTab:hover {
+  color: #fff;
+}
+
+.adminTab:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.adminTabActive {
+  background: #fff;
+  color: #0c1e4a;
+}
+
 /* ── Responsive ── */
 @media (max-width: 767px) {
   .header {
@@ -404,6 +442,17 @@
 
   .tab {
     flex: 1;
+  }
+
+  .adminTabs {
+    order: 3;
+    width: 100%;
+    margin: 8px 0 0;
+  }
+
+  .adminTab {
+    flex: 1;
+    min-height: 44px;
   }
 }
 
