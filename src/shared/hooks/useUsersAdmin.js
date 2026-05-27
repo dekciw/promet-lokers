@@ -9,7 +9,7 @@ import { db, auth, firebaseConfig } from '../lib/firebase';
 // Решение: отдельный FirebaseApp с уникальным именем → создание → signOut + deleteApp.
 // Pitfall: имя должно быть уникальным (Date.now()), и deleteApp ОБЯЗАТЕЛЬНО в finally —
 // иначе при повторном вызове получим "Firebase App named X already exists".
-async function createUserViaSecondaryApp(email, password, displayName, role, adminUid) {
+async function createUserViaSecondaryApp(email, password, displayName, role, company, adminUid) {
   const appName = `secondary-${Date.now()}`;
   const secondaryApp = initializeApp(firebaseConfig, appName);
   const secondaryAuth = getAuth(secondaryApp);
@@ -20,11 +20,12 @@ async function createUserViaSecondaryApp(email, password, displayName, role, adm
       email,
       displayName: displayName || '',
       role: role || 'user',
+      company: company || '',
       status: 'active',
       createdAt: serverTimestamp(),
       createdBy: adminUid,
     });
-    return { uid, email, displayName: displayName || '', role: role || 'user', status: 'active' };
+    return { uid, email, displayName: displayName || '', role: role || 'user', company: company || '', status: 'active' };
   } finally {
     // Cleanup ВСЕГДА — даже если create или setDoc упали
     try { await signOut(secondaryAuth); } catch { /* ignore */ }
@@ -56,11 +57,11 @@ export function useUsersAdmin() {
   useEffect(() => { loadUsers(); }, [loadUsers]);
 
   // USERS-02: create user via secondary app + Firestore mirror doc
-  const createUser = useCallback(async (email, password, displayName, role) => {
+  const createUser = useCallback(async (email, password, displayName, role, company) => {
     setIsCreating(true);
     try {
       const adminUid = auth.currentUser?.uid ?? 'admin';
-      const newUser = await createUserViaSecondaryApp(email, password, displayName, role, adminUid);
+      const newUser = await createUserViaSecondaryApp(email, password, displayName, role, company, adminUid);
       // Optimistic local update — list refresh
       setUsers((prev) => [...prev, newUser]);
     } finally {

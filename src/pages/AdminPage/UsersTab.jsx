@@ -20,9 +20,9 @@ export default function UsersTab({ onNotify }) {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onChange' });
 
-  async function handleCreate({ email, password, displayName, role }) {
+  async function handleCreate({ email, password, displayName, role, company }) {
     try {
-      await createUser(email, password, displayName, role);
+      await createUser(email, password, displayName, role, company);
       reset();
       setAddOpen(false);
       onNotify?.('ok', `Пользователь ${email} создан`);
@@ -133,6 +133,7 @@ export default function UsersTab({ onNotify }) {
               <tr>
                 <th>Email</th>
                 <th>ФИО</th>
+                <th>Компания</th>
                 <th>Роль</th>
                 <th>Статус</th>
                 <th>Действия</th>
@@ -143,6 +144,7 @@ export default function UsersTab({ onNotify }) {
                 <tr key={u.uid}>
                   <td>{u.email}</td>
                   <td>{u.displayName || '—'}</td>
+                  <td>{u.company || '—'}</td>
                   <td>
                     <span className={cx(styles.badge, u.role === 'admin' ? styles.badgeAdmin : styles.badgeUser)}>
                       {u.role === 'admin' ? 'Администратор' : 'Пользователь'}
@@ -198,6 +200,16 @@ export default function UsersTab({ onNotify }) {
                   {...register('displayName', { required: 'Введите ФИО' })}
                 />
                 {errors.displayName && <span className={styles.errMsg}>{errors.displayName.message}</span>}
+              </label>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Компания</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  disabled={isCreating}
+                  placeholder="ООО Ромашка"
+                  {...register('company')}
+                />
               </label>
               <label className={styles.field}>
                 <span className={styles.fieldLabel}>Email</span>
