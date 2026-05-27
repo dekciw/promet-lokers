@@ -4,11 +4,19 @@ import { useUsersAdmin } from '../../shared/hooks/useUsersAdmin';
 import { cx } from '../../shared/utils/cx.js';
 import styles from './UsersTab.module.css';
 
+const STATUS_TABS = [
+  { key: 'active',    label: 'Активные' },
+  { key: 'disabled',  label: 'Деактивированные' },
+  { key: 'all',       label: 'Все' },
+];
+
 export default function UsersTab({ onNotify }) {
   const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser } = useUsersAdmin();
   const [addOpen, setAddOpen] = useState(false);
   const [disableTarget, setDisableTarget] = useState(null);
   const [enableTarget, setEnableTarget] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('active');
+  const [search, setSearch] = useState('');
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onChange' });
 
@@ -50,6 +58,13 @@ export default function UsersTab({ onNotify }) {
     }
   }
 
+  const visibleUsers = users
+    .filter(u => statusFilter === 'all' || u.status === statusFilter || (statusFilter === 'active' && u.status !== 'disabled'))
+    .filter(u => !search || u.email.toLowerCase().includes(search.toLowerCase()) || (u.displayName ?? '').toLowerCase().includes(search.toLowerCase()));
+
+  const activeCount   = users.filter(u => u.status !== 'disabled').length;
+  const disabledCount = users.filter(u => u.status === 'disabled').length;
+
   if (isLoading) return <div className={styles.state}>Загрузка пользователей…</div>;
   if (error) {
     return (
@@ -78,8 +93,39 @@ export default function UsersTab({ onNotify }) {
         </button>
       </div>
 
+      <div className={styles.filterBar}>
+        <div className={styles.filterTabs} role="tablist" aria-label="Фильтр по статусу">
+          {STATUS_TABS.map(t => {
+            const count = t.key === 'active' ? activeCount : t.key === 'disabled' ? disabledCount : users.length;
+            return (
+              <button
+                key={t.key}
+                type="button"
+                role="tab"
+                aria-selected={statusFilter === t.key}
+                className={cx(styles.filterTab, statusFilter === t.key && styles.filterTabActive)}
+                onClick={() => setStatusFilter(t.key)}
+              >
+                {t.label}
+                <span className={cx(styles.filterCount, statusFilter === t.key && styles.filterCountActive)}>{count}</span>
+              </button>
+            );
+          })}
+        </div>
+        <input
+          type="text"
+          className={styles.search}
+          placeholder="Поиск по имени или email"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          aria-label="Поиск пользователей"
+        />
+      </div>
+
       {users.length === 0 ? (
         <div className={styles.state}>Пользователей пока нет</div>
+      ) : visibleUsers.length === 0 ? (
+        <div className={styles.state}>Никого не найдено</div>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
@@ -93,7 +139,7 @@ export default function UsersTab({ onNotify }) {
               </tr>
             </thead>
             <tbody>
-              {users.map((u) => (
+              {visibleUsers.map((u) => (
                 <tr key={u.uid}>
                   <td>{u.email}</td>
                   <td>{u.displayName || '—'}</td>
