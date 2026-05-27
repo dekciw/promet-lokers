@@ -1,7 +1,13 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { Navigate, Outlet } from 'react-router';
 
-export default function ProtectedRoute({ isAllowed, redirectPath = '/configurator', children }) {
+export default function ProtectedRoute({ isAllowed, redirectPath = '/configurator', children, openAuthModal }) {
+  useEffect(() => {
+    if (!isAllowed && openAuthModal) {
+      openAuthModal(null, 'login');
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!isAllowed) {
     return <Navigate to={redirectPath} replace />;
   }

@@ -12,7 +12,7 @@ import { calcPrice } from '../../shared/utils/calcPrice';
 
 const RESTORE_KEY = 'promet_restore_snapshot_v1';
 
-export default function ConfiguratorPage({ onLogout, username, isAdmin, uid }) {
+export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, user, openAuthModal }) {
   const { catalog, catalogError, isLoading, retry } = useCatalog();
   const { config, setters, isResetting, resetKey } = useConfig(catalog);
   const [parametersUnlocked, setParametersUnlocked] = useState(false);
@@ -45,7 +45,7 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid }) {
 
   const price = catalog ? calcPrice(config, catalog) : null;
   const ctx = catalog
-    ? { config, setters, catalog, price, isResetting, resetKey, parametersUnlocked, setParametersUnlocked, uid }
+    ? { config, setters, catalog, price, isResetting, resetKey, parametersUnlocked, setParametersUnlocked, uid, user, openAuthModal }
     : null;
 
   return (
@@ -62,7 +62,7 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid }) {
             transition={{ duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
           >
             <AppProvider value={ctx}>
-              <Header onLogout={onLogout} username={username} isAdmin={isAdmin} />
+              <Header onLogout={onLogout} username={username} isAdmin={isAdmin} user={user} onLogin={() => openAuthModal(null, 'login')} />
               <div className='main-scroll'>
                 <motion.div
                   className='layout'

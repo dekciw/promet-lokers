@@ -147,6 +147,45 @@
 	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
+/* ── Login button (unauthenticated) ── */
+.loginBtn {
+  height: 36px;
+  padding: 0 20px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-family: var(--f-main);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.loginBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.loginBtn:active {
+  transform: scale(0.97);
+}
+
+.loginBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 480px) {
+  .loginBtn {
+    padding: 0 14px;
+    font-size: 12px;
+    min-height: 44px;
+  }
+}
+
 /* ── Admin link ── */
 .adminLink {
   display: inline-flex;

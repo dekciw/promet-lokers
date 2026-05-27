@@ -1,0 +1,257 @@
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-6px); }
+  80%       { transform: translateX(6px); }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 18, 40, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 9000;
+  backdrop-filter: blur(2px);
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 44px 44px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.55),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: relative;
+}
+
+.cardShake {
+  animation: shake 0.4s ease;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f0f4f8;
+  color: #718096;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.closeBtn:hover {
+  background: #e2e8f0;
+  color: #2d3748;
+}
+
+.closeBtn:focus-visible {
+  outline: 2px solid #0c53b3;
+  outline-offset: 2px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
+.logoImg {
+  height: 38px;
+  width: auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.title {
+  font-family: var(--f-display);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--c-brand);
+  line-height: 28px;
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--c-text-faint);
+  margin: 0;
+}
+
+/* ── Form ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--c-text-muted);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.input {
+  height: 46px;
+  padding: 0 16px;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--r-sm);
+  background: var(--c-bg);
+  font-family: var(--f-main);
+  font-size: 14px;
+  color: var(--c-text-dark);
+  outline: none;
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.input:focus {
+  background: var(--c-white);
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px var(--c-primary-bg);
+}
+
+.inputError {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.errorMsg {
+  font-size: 12px;
+  color: #dc2626;
+  margin: 0;
+  font-weight: 500;
+}
+
+.rootError {
+  font-size: 12.5px;
+  color: #dc2626;
+  text-align: center;
+  margin: -4px 0 0;
+  font-weight: 500;
+}
+
+.submitBtn {
+  margin-top: 4px;
+  height: 48px;
+  width: 100%;
+  background: var(--c-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-md);
+  font-family: var(--f-main);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.1s;
+  box-shadow: var(--s-primary-btn);
+}
+
+.submitBtn:hover {
+  background: var(--c-primary-hover);
+  box-shadow: 0 6px 20px rgba(0, 53, 158, 0.38);
+}
+
+.submitBtn:active {
+  background: var(--c-primary-active);
+  transform: scale(0.99);
+  box-shadow: none;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.footer {
+  text-align: center;
+  font-size: 13px;
+  color: var(--c-text-muted);
+  margin-top: -8px;
+}
+
+.footerLink {
+  color: var(--c-primary);
+  font-weight: 600;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  text-decoration: none;
+}
+
+.footerLink:hover {
+  text-decoration: underline;
+}
+
+/* ── Closed state ── */
+.closedMsg {
+  text-align: center;
+  font-size: 14px;
+  color: #4a5568;
+  line-height: 1.6;
+  padding: 8px 0;
+}
+
+.closedError {
+  font-size: 13px;
+  color: #dc2626;
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.loadingMsg {
+  text-align: center;
+  font-size: 13px;
+  color: var(--c-text-faint);
+  padding: 16px 0;
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 36px 24px 32px;
+  }
+}
+
+@media (max-width: 375px) {
+  .card {
+    padding: 28px 18px 24px;
+    gap: 22px;
+  }
+  .title {
+    font-size: 19px;
+  }
+}
