@@ -115,7 +115,8 @@ function SortableCard({ model, onEdit, onDelete, disabled, position, total }) {
   );
 }
 
-export default function AdminPage({ onLogout, username }) {
+export default function AdminPage({ onLogout, username = '' }) {
+  const initial = username ? username[0].toUpperCase() : '?';
   const { models, isLoading, error, loadModels, saveModel, addModel, deleteModel, reorderModels } = useCatalogAdmin();
 
   const [activeTab, setActiveTab] = useState('catalog');
@@ -253,15 +254,23 @@ export default function AdminPage({ onLogout, username }) {
           ))}
         </nav>
         <div className={styles.userArea}>
-          <span className={styles.username}>{username}</span>
-          <button
-            className={styles.logoutBtn}
-            onClick={onLogout}
-            type="button"
-            aria-label="Выйти"
-          >
-            Выйти
-          </button>
+          <div className={styles.userChip}>
+            <span className={styles.userAvatar}>{initial}</span>
+            <span className={styles.userName}>{username}</span>
+            <button
+              className={styles.logoutBtn}
+              onClick={onLogout}
+              type="button"
+              aria-label="Выйти"
+              title="Выйти"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          </div>
         </div>
       </header>
 
