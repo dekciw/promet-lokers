@@ -32,7 +32,7 @@
 .divider {
 	width: 1px;
 	height: 26px;
-	background: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.9);
 	flex-shrink: 0;
 }
 
