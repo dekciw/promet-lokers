@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import Header from '../../shared/components/Header/Header';
 import LoadingScreen from '../../shared/components/LoadingScreen/LoadingScreen';
@@ -7,12 +7,29 @@ import { Parameters } from '../../modules/Parameters';
 import { AppProvider } from '../../shared/context/AppContext';
 import { useCatalog } from '../../shared/hooks/useCatalog';
 import { useConfig } from '../../shared/hooks/useConfig';
+import { useHistory } from '../../shared/hooks/useHistory';
 import { calcPrice } from '../../shared/utils/calcPrice';
 
-export default function ConfiguratorPage({ onLogout, username, isAdmin }) {
+const RESTORE_KEY = 'promet_restore_snapshot_v1';
+
+export default function ConfiguratorPage({ onLogout, username, isAdmin, uid }) {
   const { catalog, catalogError, isLoading, retry } = useCatalog();
   const { config, setters, isResetting, resetKey } = useConfig(catalog);
   const [parametersUnlocked, setParametersUnlocked] = useState(false);
+  const { restoreConfig } = useHistory(uid);
+
+  // HIST-03: apply restore snapshot from sessionStorage (set by HistoryPage on "Восстановить")
+  useEffect(() => {
+    if (!catalog) return;
+    const raw = sessionStorage.getItem(RESTORE_KEY);
+    if (!raw) return;
+    sessionStorage.removeItem(RESTORE_KEY);
+    try {
+      restoreConfig(JSON.parse(raw), setters);
+    } catch (err) {
+      console.warn('[restore] failed to parse snapshot:', err.message);
+    }
+  }, [catalog]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (catalogError) {
     return (
@@ -28,7 +45,7 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin }) {
 
   const price = catalog ? calcPrice(config, catalog) : null;
   const ctx = catalog
-    ? { config, setters, catalog, price, isResetting, resetKey, parametersUnlocked, setParametersUnlocked }
+    ? { config, setters, catalog, price, isResetting, resetKey, parametersUnlocked, setParametersUnlocked, uid }
     : null;
 
   return (

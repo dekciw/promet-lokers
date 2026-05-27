@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
-status: executing
-stopped_at: Completed 11-02-PLAN.md
-last_updated: "2026-05-27T04:47:23.035Z"
+status: complete
+stopped_at: Completed 11-04-PLAN.md
+last_updated: "2026-05-27T09:50:00.000Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 10
-  percent: 80
+  completed_phases: 5
+  total_plans: 16
+  completed_plans: 16
+  percent: 100
 ---
 
 # Project State
@@ -29,11 +29,10 @@ See: .planning/PROJECT.md (updated 2026-05-26)
 
 ## Current Position
 
-Phase: 10 (price-coefficients) — ✅ COMPLETED 2026-05-27
-Phase: 11 (users-history) — NOT STARTED
+Phase: 11 (users-history) — ✅ COMPLETED 2026-05-27
 Last activity: 2026-05-27
 
-Progress: [████████░░] 80% (v1.1 milestone — 4/5 phases done)
+Progress: [██████████] 100% (v1.1 milestone — 5/5 phases done — SHIPPED)
 
 ## Performance Metrics
 
@@ -85,9 +84,7 @@ None.
 
 ### Blockers/Concerns
 
-- Phase 11 (Users): Cloud Function нужно развернуть в Firebase — потребуется Blaze plan
-- Phase 11 (Users): Cloud Function нужно развернуть в Firebase — потребуется настройка Functions в проекте (billing plan Blaze или Spark)
-- Phase 11 (History): зависит от того, работает ли уже Firebase Auth (Phase 6 deferred — но Auth уже подключён судя по STATE)
+Нет активных блокеров. v1.1 milestone завершён.
 
 ## Session Continuity
 

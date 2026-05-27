@@ -6,6 +6,7 @@ import { isAdmin } from './shared/utils/isAdmin';
 import { LoginScreen } from './modules/Auth';
 import { ConfiguratorPage } from './pages/ConfiguratorPage';
 import AdminPage from './pages/AdminPage';
+import HistoryPage from './pages/HistoryPage';
 import ProtectedRoute from './shared/components/ProtectedRoute/ProtectedRoute';
 import ErrorBoundary from './shared/components/ErrorBoundary/ErrorBoundary';
 import LoadingScreen from './shared/components/LoadingScreen/LoadingScreen';
@@ -44,6 +45,7 @@ export default function App() {
               onLogout={handleLogout}
               username={username}
               isAdmin={adminAllowed}
+              uid={user?.uid}
             />
           }
         />
@@ -53,6 +55,17 @@ export default function App() {
             element={<AdminPage onLogout={handleLogout} username={username} />}
           />
         </Route>
+        <Route
+          path="/history"
+          element={
+            <HistoryPage
+              uid={user?.uid}
+              onLogout={handleLogout}
+              username={username}
+              isAdmin={adminAllowed}
+            />
+          }
+        />
         <Route path="*" element={<Navigate to="/configurator" replace />} />
       </Routes>
     </ErrorBoundary>

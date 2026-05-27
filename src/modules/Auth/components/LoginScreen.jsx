@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../../shared/lib/firebase';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../../shared/lib/firebase';
 import styles from './LoginScreen.module.css';
+
+const DEACTIVATED_KEY = 'promet_login_deactivated';
 
 export default function LoginScreen() {
   const [shake, setShake] = useState(false);
@@ -15,9 +18,31 @@ export default function LoginScreen() {
     formState: { errors, isSubmitting },
   } = useForm();
 
+  // Auth State Flash workaround: after signOut the component remounts.
+  // We stash the error in sessionStorage before signOut and read it here on mount.
+  useEffect(() => {
+    const msg = sessionStorage.getItem(DEACTIVATED_KEY);
+    if (msg) {
+      sessionStorage.removeItem(DEACTIVATED_KEY);
+      setError('root', { message: msg });
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+    }
+  }, [setError]);
+
   async function onSubmit({ email, password }) {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+
+      // USERS-03 login gate: check Firestore users/{uid}.status.
+      // Admin (admin@promet.ru) has no users/{uid} doc → snap.exists() === false → passes through.
+      const userSnap = await getDoc(doc(db, 'users', cred.user.uid));
+      if (userSnap.exists() && userSnap.data().status === 'disabled') {
+        // Store error before signOut — component will remount after auth state change.
+        sessionStorage.setItem(DEACTIVATED_KEY, 'Аккаунт деактивирован. Обратитесь к администратору.');
+        await signOut(auth);
+        return;
+      }
     } catch {
       setError('root', { message: 'Неверный email или пароль' });
       setShake(true);

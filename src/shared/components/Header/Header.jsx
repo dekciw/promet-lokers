@@ -23,6 +23,9 @@ export default function Header({ onLogout, username, isAdmin }) {
 			/>
 
 			<div className={styles.userArea}>
+				<Link to="/history" className={styles.adminLink} aria-label="История скачанных КП">
+					История
+				</Link>
 				{isAdmin && (
 					<Link to="/admin" className={styles.adminLink}>
 						Админ

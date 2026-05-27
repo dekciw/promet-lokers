@@ -5,6 +5,7 @@ import Notification from '@/shared/components/Notification/Notification.jsx';
 import { getColorHex } from '@/shared/utils/colors';
 import { cx } from '@/shared/utils/cx';
 import { useAppContext } from '@/shared/context/AppContext';
+import { useHistory } from '@/shared/hooks/useHistory';
 import NonStandardOrderModal from '@/shared/components/NonStandardOrderModal/NonStandardOrderModal.jsx';
 import CommercialProposalModal from '@/shared/components/CommercialProposalModal/CommercialProposalModal.jsx';
 import styles from './Configurator.module.css';
@@ -137,8 +138,11 @@ function IconFinal() {
 }
 
 export default function Configurator() {
-	const { config, price, catalog, isResetting, resetKey, parametersUnlocked } = useAppContext();
+	const { config, price, catalog, isResetting, resetKey, parametersUnlocked, uid } = useAppContext();
+	const { saveToHistory } = useHistory(uid);
 	const model = config.modelId ? catalog.models[config.modelId] : null;
+	const modelName = model?.name ?? config.modelId ?? 'Неизвестная модель';
+	const article = model?.article ?? config.modelId ?? '';
 	const series = config.seriesId ? (catalog.series ?? []).find(s => s.id === config.seriesId) : null;
 	const lock = catalog.locks[config.lockId];
 	const defaults = model?.defaultSpecs ?? null;
@@ -176,6 +180,9 @@ export default function Configurator() {
 		try {
 			const { generateCommercialProposal } = await import('@/pdf/kp/generateCommercialProposal.js');
 			await generateCommercialProposal({ config, catalog, price: enteredPrice });
+			saveToHistory(uid, config, modelName, article, enteredPrice).catch((err) => {
+				console.warn('[history] save failed:', err?.message ?? err);
+			});
 			setIsProposalOpen(false);
 			setNotify({ visible: true, status: 'ok', title: 'КП скачано', message: 'Коммерческое предложение успешно сохранено' });
 		} catch (err) {
@@ -188,6 +195,9 @@ export default function Configurator() {
 		try {
 			const { printCommercialProposal } = await import('@/pdf/kp/generateCommercialProposal.js');
 			await printCommercialProposal({ config, catalog, price: enteredPrice });
+			saveToHistory(uid, config, modelName, article, enteredPrice).catch((err) => {
+				console.warn('[history] save failed:', err?.message ?? err);
+			});
 		} catch (err) {
 			console.error('Ошибка печати КП:', err);
 			setNotify({ visible: true, status: 'error', title: 'Не удалось напечатать PDF', message: err?.message ?? String(err) });

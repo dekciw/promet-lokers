@@ -17,6 +17,7 @@ import CatalogEditModal from '../../shared/components/CatalogEditModal';
 import DeleteConfirmModal from '../../shared/components/DeleteConfirmModal';
 import Notification from '../../shared/components/Notification/Notification';
 import PriceCoefficientsTab from './PriceCoefficientsTab';
+import UsersTab from './UsersTab';
 import { cx } from '../../shared/utils/cx.js';
 import styles from './AdminPage.module.css';
 
@@ -29,6 +30,7 @@ const SERIES_TABS = [
 const ADMIN_TABS = [
   { key: 'catalog', label: 'Каталог' },
   { key: 'prices',  label: 'Коэффициенты' },
+  { key: 'users',   label: 'Пользователи' },
 ];
 
 // SortableCard: individual card wrapped in useSortable.
@@ -248,6 +250,13 @@ export default function AdminPage({ onLogout, username }) {
 
       {activeTab === 'prices' && (
         <PriceCoefficientsTab onNotify={(status, title) => {
+          if (status === 'ok') showOk(title);
+          else showError(title);
+        }} />
+      )}
+
+      {activeTab === 'users' && (
+        <UsersTab onNotify={(status, title) => {
           if (status === 'ok') showOk(title);
           else showError(title);
         }} />

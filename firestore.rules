@@ -7,10 +7,20 @@ service cloud.firestore {
                    && request.auth.token.email == 'admin@promet.ru';
     }
 
-    // Each user can read/write only their own documents (Phase 11: /users/{uid}/history)
+    // Admin manages user accounts; any user can read their own doc (login gate)
+    match /users/{userId} {
+      allow read, write: if request.auth != null
+                         && request.auth.token.email == 'admin@promet.ru';
+      allow read: if request.auth != null
+                  && request.auth.uid == userId;
+    }
+
+    // Each user can read/write their own subcollections (history);
+    // admin can read/write all subcollections
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null
-                         && request.auth.uid == userId;
+                         && (request.auth.uid == userId
+                             || request.auth.token.email == 'admin@promet.ru');
     }
 
     match /{document=**} {
