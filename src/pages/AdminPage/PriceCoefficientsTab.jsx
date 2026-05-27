@@ -43,6 +43,25 @@ function PctInput({ value, onChange, ariaLabel }) {
   );
 }
 
+function RubleInput({ value, onChange, ariaLabel }) {
+  return (
+    <div className={styles.pctWrap}>
+      <input
+        type="number"
+        step="1"
+        min="0"
+        inputMode="numeric"
+        className={styles.rateInput}
+        value={value ?? ''}
+        aria-label={ariaLabel}
+        onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
+        onWheel={(e) => e.currentTarget.blur()}
+      />
+      <span className={styles.pctSign}>₽</span>
+    </div>
+  );
+}
+
 const QTY_LABELS = {
   qty1:   '1–9 шт',
   qty10:  '10–49 шт',
@@ -56,16 +75,18 @@ const THICKNESS_KEYS = ['0.5', '0.6', '0.7'];
 const SERIES = ['ml', 'ls'];
 
 export default function PriceCoefficientsTab({ onNotify }) {
-  const { priceRules, isLoading, error, isSaving, loadPriceRules, savePriceRules } = usePriceRulesAdmin();
+  const { priceRules, locks, isLoading, error, isSaving, loadPriceRules, savePriceRules } = usePriceRulesAdmin();
   const [local, setLocal] = useState(null);
+  const [localLocks, setLocalLocks] = useState(null);
   const [hasInit, setHasInit] = useState(false);
 
   useEffect(() => {
-    if (priceRules && !hasInit) {
+    if (priceRules && locks && !hasInit) {
       setLocal(structuredClone(priceRules));
+      setLocalLocks(structuredClone(locks));
       setHasInit(true);
     }
-  }, [priceRules, hasInit]);
+  }, [priceRules, locks, hasInit]);
 
   if (isLoading) return <div className={styles.state}>Загрузка коэффициентов…</div>;
   if (error) {
@@ -98,9 +119,16 @@ export default function PriceCoefficientsTab({ onNotify }) {
     return clone;
   }
 
+  function updateLock(id, perSection) {
+    setLocalLocks((prev) => ({
+      ...prev,
+      [id]: { ...prev[id], perSection: perSection === '' ? 0 : Number(perSection) },
+    }));
+  }
+
   async function handleSave() {
     try {
-      await savePriceRules(buildPayload(local));
+      await savePriceRules(buildPayload(local), localLocks);
       onNotify?.('ok', 'Коэффициенты сохранены');
     } catch (err) {
       onNotify?.('error', `Ошибка сохранения: ${err.message}`);
@@ -111,6 +139,9 @@ export default function PriceCoefficientsTab({ onNotify }) {
   const thickness = local.thickness   ?? { minQty: 100, ml: {}, ls: {} };
   const depth     = local.depth       ?? { ml: {}, ls: {} };
   const height    = local.height      ?? { ml: {}, ls: {} };
+
+  const lockEntries = Object.entries(localLocks ?? {})
+    .sort((a, b) => (a[1].perSection ?? 0) - (b[1].perSection ?? 0));
 
   return (
     <div className={styles.tab}>
@@ -306,6 +337,40 @@ export default function PriceCoefficientsTab({ onNotify }) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* ── Замки ── */}
+      <section className={styles.section} aria-labelledby="locks-heading">
+        <div className={styles.sectionHead}>
+          <h2 id="locks-heading" className={styles.sectionTitle}>Замки</h2>
+          <p className={styles.sectionDesc}>
+            Доплата за нестандартный замок — за одну дверную секцию. Итоговая надбавка умножается на количество дверей модели.
+          </p>
+        </div>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Замок</th>
+                <th>Доплата за секцию, ₽</th>
+              </tr>
+            </thead>
+            <tbody>
+              {lockEntries.map(([id, lock]) => (
+                <tr key={id}>
+                  <td className={styles.rowLabel}>{lock.name}</td>
+                  <td>
+                    <RubleInput
+                      value={localLocks[id]?.perSection ?? ''}
+                      onChange={(v) => updateLock(id, v)}
+                      ariaLabel={`Замок ${lock.name}`}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

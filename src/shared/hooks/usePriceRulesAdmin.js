@@ -8,6 +8,7 @@ const CACHE_KEY = 'promet_catalog_v1';
 
 export function usePriceRulesAdmin() {
   const [priceRules, setPriceRules] = useState(null);
+  const [locks, setLocks] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -21,8 +22,11 @@ export function usePriceRulesAdmin() {
       const snap = await getDoc(ref);
       if (!snap.exists()) {
         setPriceRules({});
+        setLocks({});
       } else {
-        setPriceRules(snap.data().priceRules ?? {});
+        const data = snap.data();
+        setPriceRules(data.priceRules ?? {});
+        setLocks(data.locks ?? {});
       }
     } catch (err) {
       setError(err.message ?? 'Неизвестная ошибка');
@@ -36,21 +40,28 @@ export function usePriceRulesAdmin() {
     loadPriceRules();
   }, [loadPriceRules]);
 
-  const savePriceRules = useCallback(async (updated) => {
+  const savePriceRules = useCallback(async (updatedRules, updatedLocks) => {
     setIsSaving(true);
     try {
-      await setDoc(ref, { priceRules: updated }, { merge: true });
+      const payload = updatedLocks !== undefined
+        ? { priceRules: updatedRules, locks: updatedLocks }
+        : { priceRules: updatedRules };
+      const mergeFields = updatedLocks !== undefined
+        ? ['priceRules', 'locks']
+        : undefined;
+      await setDoc(ref, payload, mergeFields ? { mergeFields } : { merge: true });
       try {
         localStorage.removeItem(CACHE_KEY);
       } catch (err) {
         console.warn('[usePriceRulesAdmin] localStorage.removeItem failed:', err.message);
       }
-      setPriceRules(updated);
+      setPriceRules(updatedRules);
+      if (updatedLocks !== undefined) setLocks(updatedLocks);
     } finally {
       setIsSaving(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { priceRules, isLoading, error, isSaving, loadPriceRules, savePriceRules };
+  return { priceRules, locks, isLoading, error, isSaving, loadPriceRules, savePriceRules };
 }
