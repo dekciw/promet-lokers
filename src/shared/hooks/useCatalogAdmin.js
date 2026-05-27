@@ -21,8 +21,8 @@ function normalizeModel(firestoreKey, m) {
     height:        specs.height        ?? m.height        ?? 0,
     width:         specs.width         ?? m.width         ?? 0,
     depth:         specs.depth         ?? m.depth         ?? 0,
-    bodyThickness: specs.bodyThickness ?? m.bodyThickness ?? 0.5,
-    doorThickness: specs.doorThickness ?? m.doorThickness ?? 0.5,
+    bodyThickness: Math.max(0.5, Number(specs.bodyThickness ?? m.bodyThickness ?? 0.5)),
+    doorThickness: Math.max(0.5, Number(specs.doorThickness ?? m.doorThickness ?? 0.5)),
     // series: uppercase for display ('ML'/'LS'), derived from seriesId if not present
     series: m.series ?? (m.seriesId ? m.seriesId.toUpperCase() : 'ML'),
     // weight: use explicit total or sum of parts
@@ -41,8 +41,8 @@ function toFirestoreModel(formData, original) {
   const height        = Number(formData.height)        || 0;
   const width         = Number(formData.width)         || 0;
   const depth         = Number(formData.depth)         || 0;
-  const bodyThickness = Number(formData.bodyThickness) || 0.5;
-  const doorThickness = Number(formData.doorThickness) || 0.5;
+  const bodyThickness = Math.max(0.5, Number(formData.bodyThickness) || 0.5);
+  const doorThickness = Math.max(0.5, Number(formData.doorThickness) || 0.5);
 
   return {
     // Start from original to preserve all Firestore-only fields

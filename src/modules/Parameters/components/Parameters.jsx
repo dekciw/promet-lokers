@@ -62,8 +62,11 @@ const resetItem = {
 };
 
 function buildThicknessOptions(baseVal) {
-	if (!baseVal || EXTRA_THICKNESS.includes(baseVal)) return EXTRA_THICKNESS;
-	return [baseVal, ...EXTRA_THICKNESS];
+	// Clamp to minimum 0.5 — production minimum; 0.45 and below treated as 0.5
+	const num = baseVal != null ? Math.max(0.5, Number(baseVal)) : 0.5;
+	const base = String(num);
+	if (EXTRA_THICKNESS.includes(base)) return EXTRA_THICKNESS;
+	return [base, ...EXTRA_THICKNESS];
 }
 
 export default function Parameters() {

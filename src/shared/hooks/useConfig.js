@@ -22,8 +22,8 @@ export function useConfig(catalog) {
     setWidth(String(specs.width));
     setHeight(String(specs.height));
     setDepth(String(specs.depth));
-    setBodyThickness(specs.bodyThickness);
-    setDoorThickness(specs.doorThickness);
+    setBodyThickness(specs.bodyThickness != null ? String(specs.bodyThickness) : DEFAULT_THICKNESS);
+    setDoorThickness(specs.doorThickness != null ? String(specs.doorThickness) : DEFAULT_THICKNESS);
   }
 
   function applyModel(newModelId) {
