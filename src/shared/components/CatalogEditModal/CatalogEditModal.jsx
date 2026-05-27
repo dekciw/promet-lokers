@@ -148,8 +148,9 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
             </div>
 
             <form id="catalog-form" className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-              {/* Hidden field — registers photoUrl so it submits with the form */}
+              {/* Hidden fields — registers photoUrl and sortOrder so they submit with the form */}
               <input type="hidden" {...register('photoUrl')} />
+              <input type="hidden" {...register('sortOrder', { valueAsNumber: true })} />
 
               <div className={styles.grid}>
                 {/* Фото модели — full-width row at the top */}
@@ -191,19 +192,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                       )}
                     </div>
                   </div>
-                </div>
-
-                {/* sortOrder */}
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="f-sortOrder">Порядок</label>
-                  <input
-                    id="f-sortOrder"
-                    type="number"
-                    step="1"
-                    className={cx(styles.input, errors.sortOrder && styles.inputError)}
-                    {...register('sortOrder', { valueAsNumber: true, required: 'Обязательно', min: { value: 0, message: 'Минимум 0' } })}
-                  />
-                  <span className={styles.errorMsg} aria-live="polite">{errors.sortOrder?.message ?? ''}</span>
                 </div>
 
                 {/* series */}
@@ -340,7 +328,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     className={cx(styles.select, errors.bodyThickness && styles.inputError)}
                     {...register('bodyThickness', { valueAsNumber: true, required: 'Обязательно' })}
                   >
-                    <option value={0.45}>0.45</option>
                     <option value={0.5}>0.5</option>
                     <option value={0.6}>0.6</option>
                     <option value={0.7}>0.7</option>
@@ -358,7 +345,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     className={cx(styles.select, errors.doorThickness && styles.inputError)}
                     {...register('doorThickness', { valueAsNumber: true, required: 'Обязательно' })}
                   >
-                    <option value={0.45}>0.45</option>
                     <option value={0.5}>0.5</option>
                     <option value={0.6}>0.6</option>
                     <option value={0.7}>0.7</option>
