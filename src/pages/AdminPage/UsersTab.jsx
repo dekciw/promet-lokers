@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useUsersAdmin } from '../../shared/hooks/useUsersAdmin';
+import { useInviteCode } from '../../shared/hooks/useInviteCode';
 import { cx } from '../../shared/utils/cx.js';
 import styles from './UsersTab.module.css';
 
@@ -11,15 +12,55 @@ const STATUS_TABS = [
 ];
 
 export default function UsersTab({ onNotify }) {
-  const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser, deleteUser } = useUsersAdmin();
+  const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser, deleteUser, updateUser } = useUsersAdmin();
+  const { code: inviteCode, isLoading: inviteLoading, loadCode, regenerateCode } = useInviteCode();
+  const [copied, setCopied] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+
+  useEffect(() => { loadCode(); }, [loadCode]);
+
+  const inviteLink = inviteCode
+    ? `${window.location.origin}/register?code=${inviteCode}`
+    : null;
+
+  async function handleCopy() {
+    if (!inviteLink) return;
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback: select the input
+    }
+  }
+
+  async function handleRegenerate() {
+    setIsRegenerating(true);
+    try {
+      await regenerateCode();
+      onNotify?.('ok', 'Новый код приглашения сгенерирован');
+    } catch (err) {
+      onNotify?.('error', `Ошибка: ${err.message}`);
+    } finally {
+      setIsRegenerating(false);
+    }
+  }
   const [disableTarget, setDisableTarget] = useState(null);
   const [enableTarget, setEnableTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editTarget, setEditTarget] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [statusFilter, setStatusFilter] = useState('active');
   const [search, setSearch] = useState('');
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onChange' });
+  const {
+    register: registerEdit,
+    handleSubmit: handleSubmitEdit,
+    reset: resetEdit,
+    formState: { errors: editErrors },
+  } = useForm({ mode: 'onChange' });
 
   async function handleCreate({ email, password, displayName, role, company }) {
     try {
@@ -67,6 +108,30 @@ export default function UsersTab({ onNotify }) {
       setDeleteTarget(null);
     } catch (err) {
       onNotify?.('error', `Ошибка: ${err.message}`);
+    }
+  }
+
+  function openEdit(u) {
+    resetEdit({
+      displayName: u.displayName || '',
+      company: u.company || '',
+      role: u.role || 'user',
+      email: u.email || '',
+    });
+    setEditTarget(u);
+  }
+
+  async function handleUpdate({ displayName, company, role, email }) {
+    if (!editTarget) return;
+    setIsUpdating(true);
+    try {
+      await updateUser(editTarget.uid, { displayName, company, role, email });
+      onNotify?.('ok', `Данные пользователя обновлены`);
+      setEditTarget(null);
+    } catch (err) {
+      onNotify?.('error', `Ошибка: ${err.message}`);
+    } finally {
+      setIsUpdating(false);
     }
   }
 
@@ -168,35 +233,45 @@ export default function UsersTab({ onNotify }) {
                     </span>
                   </td>
                   <td>
-                    {u.status !== 'disabled' ? (
+                    <div className={styles.actionGroup}>
                       <button
                         type="button"
-                        className={cx(styles.actionBtn, styles.actionBtnDanger)}
-                        onClick={() => setDisableTarget(u)}
-                        aria-label={`Деактивировать ${u.email}`}
+                        className={cx(styles.actionBtn, styles.actionBtnSecondary)}
+                        onClick={() => openEdit(u)}
+                        aria-label={`Редактировать ${u.email}`}
                       >
-                        Деактивировать
+                        Редактировать
                       </button>
-                    ) : (
-                      <div className={styles.actionGroup}>
-                        <button
-                          type="button"
-                          className={cx(styles.actionBtn, styles.actionBtnSuccess)}
-                          onClick={() => setEnableTarget(u)}
-                          aria-label={`Реактивировать ${u.email}`}
-                        >
-                          Реактивировать
-                        </button>
+                      {u.status !== 'disabled' ? (
                         <button
                           type="button"
                           className={cx(styles.actionBtn, styles.actionBtnDanger)}
-                          onClick={() => setDeleteTarget(u)}
-                          aria-label={`Удалить ${u.email}`}
+                          onClick={() => setDisableTarget(u)}
+                          aria-label={`Деактивировать ${u.email}`}
                         >
-                          Удалить
+                          Деактивировать
                         </button>
-                      </div>
-                    )}
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className={cx(styles.actionBtn, styles.actionBtnSuccess)}
+                            onClick={() => setEnableTarget(u)}
+                            aria-label={`Реактивировать ${u.email}`}
+                          >
+                            Реактивировать
+                          </button>
+                          <button
+                            type="button"
+                            className={cx(styles.actionBtn, styles.actionBtnDanger)}
+                            onClick={() => setDeleteTarget(u)}
+                            aria-label={`Удалить ${u.email}`}
+                          >
+                            Удалить
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -348,6 +423,124 @@ export default function UsersTab({ onNotify }) {
           </div>
         </div>
       )}
+
+      {editTarget && (
+        <div className={styles.overlay} onClick={() => !isUpdating && setEditTarget(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Редактировать пользователя">
+            <h3 className={styles.modalTitle}>Редактировать пользователя</h3>
+            <form onSubmit={handleSubmitEdit(handleUpdate)} noValidate>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>ФИО</span>
+                <input
+                  type="text"
+                  className={cx(styles.input, editErrors.displayName && styles.inputError)}
+                  disabled={isUpdating}
+                  autoFocus
+                  placeholder="Иванов Иван Иванович"
+                  {...registerEdit('displayName', { required: 'Введите ФИО' })}
+                />
+                {editErrors.displayName && <span className={styles.errMsg}>{editErrors.displayName.message}</span>}
+              </label>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Компания</span>
+                <input
+                  type="text"
+                  className={styles.input}
+                  disabled={isUpdating}
+                  placeholder="ООО Ромашка"
+                  {...registerEdit('company')}
+                />
+              </label>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Email</span>
+                <input
+                  type="email"
+                  className={cx(styles.input, editErrors.email && styles.inputError)}
+                  disabled={isUpdating}
+                  {...registerEdit('email', {
+                    required: 'Введите email',
+                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Неверный формат email' },
+                  })}
+                />
+                {editErrors.email && <span className={styles.errMsg}>{editErrors.email.message}</span>}
+                <span className={styles.fieldHint}>Обновляется только в базе данных, не в Firebase Auth</span>
+              </label>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Роль</span>
+                <select
+                  className={styles.input}
+                  disabled={isUpdating}
+                  {...registerEdit('role', { required: true })}
+                >
+                  <option value="user">Пользователь</option>
+                  <option value="admin">Администратор</option>
+                </select>
+              </label>
+              <div className={styles.actions}>
+                <button
+                  type="button"
+                  className={cx(styles.actionBtn, styles.actionBtnSecondary)}
+                  onClick={() => setEditTarget(null)}
+                  disabled={isUpdating}
+                >
+                  Отмена
+                </button>
+                <button
+                  type="submit"
+                  className={cx(styles.actionBtn, styles.actionBtnPrimary)}
+                  disabled={isUpdating}
+                >
+                  {isUpdating ? 'Сохраняем…' : 'Сохранить'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Invite link section ── */}
+      <div className={styles.inviteSection}>
+        <h3 className={styles.inviteSectionTitle}>Ссылка-приглашение для регистрации</h3>
+        <p className={styles.inviteSectionDesc}>
+          Отправьте эту ссылку менеджерам — только по ней можно зарегистрироваться. Сгенерируйте новый код, чтобы аннулировать старую ссылку.
+        </p>
+        <div className={styles.inviteLinkRow}>
+          {inviteLoading ? (
+            <span style={{ fontSize: 13, color: '#718096' }}>Загрузка…</span>
+          ) : inviteLink ? (
+            <>
+              <input
+                type="text"
+                readOnly
+                value={inviteLink}
+                className={styles.inviteLinkBox}
+                onClick={(e) => e.target.select()}
+                aria-label="Ссылка-приглашение"
+              />
+              <button
+                type="button"
+                className={cx(styles.inviteBtn, styles.inviteBtnPrimary)}
+                onClick={handleCopy}
+                aria-label="Скопировать ссылку"
+              >
+                {copied ? '✓ Скопировано' : 'Скопировать'}
+              </button>
+              {copied && <span className={styles.inviteCopied} aria-live="polite" />}
+            </>
+          ) : (
+            <span style={{ fontSize: 13, color: '#718096' }}>Ссылка не создана</span>
+          )}
+          <button
+            type="button"
+            className={styles.inviteBtn}
+            onClick={handleRegenerate}
+            disabled={isRegenerating}
+            aria-label="Сгенерировать новый код приглашения"
+          >
+            {isRegenerating ? 'Генерация…' : inviteCode ? '↺ Новый код' : '+ Создать ссылку'}
+          </button>
+        </div>
+      </div>
 
       {disableTarget && (
         <div className={styles.overlay} onClick={() => setDisableTarget(null)}>
