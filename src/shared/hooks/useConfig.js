@@ -24,6 +24,7 @@ export function useConfig(catalog) {
     setDepth(String(specs.depth));
     setBodyThickness(String(Number(specs.bodyThickness) || 0.5));
     setDoorThickness(String(Number(specs.doorThickness) || 0.5));
+    setLockId(specs.lockId ?? 'key_basic');
   }
 
   function applyModel(newModelId) {

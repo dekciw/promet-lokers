@@ -64,7 +64,7 @@ export function calcPrice(config, catalog) {
   const widthVal = config.width !== '' ? Number(config.width) : null;
   const widthChanged = widthVal !== null && widthVal !== Number(defaults.width);
 
-  const lockChanged = !!config.lockId && config.lockId !== 'key_basic';
+  const lockChanged = !!config.lockId && config.lockId !== (defaults.lockId ?? 'key_basic');
   const ventChanged = !!config.ventilationType;
   const doorColorChanged = !!config.doorColor;
   const bodyColorChanged = !!config.bodyColor;
@@ -160,7 +160,7 @@ export function calcPrice(config, catalog) {
   let lockSurcharge = 0;
   if (lockChanged) {
     const lock = catalog.locks?.[config.lockId];
-    const doorCount = model.doorCount ?? 2;
+    const doorCount = model.doorCount ?? 1;
     if (lock) {
       lockSurcharge = (lock.perSection ?? 0) * doorCount;
     }
@@ -174,9 +174,11 @@ export function calcPrice(config, catalog) {
   // ── 7. Вес ──────────────────────────────────────────────────────
   const effDoor = config.doorThickness || defaults.doorThickness || '0.5';
   const effBody = config.bodyThickness || defaults.bodyThickness || '0.5';
-  const weight = Math.round(
-    ((doorW * (WEIGHT_MULT[effDoor] ?? 1)) + (bodyW * (WEIGHT_MULT[effBody] ?? 1))) * 100,
-  ) / 100;
+  const defaultDoor = String(Number(defaults.doorThickness) || 0.5);
+  const defaultBody = String(Number(defaults.bodyThickness) || 0.5);
+  const doorMult = effDoor !== defaultDoor ? (WEIGHT_MULT[effDoor] ?? 1) : 1;
+  const bodyMult = effBody !== defaultBody ? (WEIGHT_MULT[effBody] ?? 1) : 1;
+  const weight = Math.round(((doorW * doorMult) + (bodyW * bodyMult)) * 100) / 100;
 
   // ── 8. Срок изготовления ────────────────────────────────────────
   let leadTime = null;

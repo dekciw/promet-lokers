@@ -70,6 +70,41 @@ describe('calcPrice', () => {
     expect(r.changeCount).toBe(0);
   });
 
+  it('не считает толщину изменённой когда defaultSpecs.bodyThickness отсутствует (legacy модель)', () => {
+    // Если в Firestore у легаси-модели нет поля bodyThickness в defaultSpecs,
+    // applySpecs ставит config.bodyThickness='0.5' через ?? 0.5.
+    // Без null-guard сравнение Number('0.5') !== Math.max(0.5, NaN)=NaN → true → неверно считается изменённым.
+    const catalogNoThickness = {
+      ...CATALOG_BASE,
+      models: {
+        'ml-01': {
+          ...MODEL_ML,
+          defaultSpecs: { width: 600, height: 1830, depth: 500, lockId: 'key_basic' },
+        },
+      },
+    };
+    const r = calcPrice(BASE_CONFIG, catalogNoThickness);
+    expect(r.changeCount).toBe(0);
+    expect(r.manual).toBe(false);
+  });
+
+  it('не считает толщину изменённой когда defaultSpecs.bodyThickness=0 (legacy legacy ноль)', () => {
+    // В Firestore хранится bodyThickness=0 — clamping в applySpecs даёт '0.5',
+    // сравнение должно быть Math.max(0.5, 0)=0.5 → не изменено.
+    const catalogZeroThickness = {
+      ...CATALOG_BASE,
+      models: {
+        'ml-01': {
+          ...MODEL_ML,
+          defaultSpecs: { ...MODEL_ML.defaultSpecs, bodyThickness: 0, doorThickness: 0 },
+        },
+      },
+    };
+    const r = calcPrice(BASE_CONFIG, catalogZeroThickness);
+    expect(r.changeCount).toBe(0);
+    expect(r.manual).toBe(false);
+  });
+
   it('returns manual:true when width changes', () => {
     const r = calcPrice({ ...BASE_CONFIG, width: '700' }, CATALOG_BASE);
     expect(r.manual).toBe(true);
@@ -117,10 +152,11 @@ describe('calcPrice', () => {
     expect(r.clientPrice).toBe(Math.round(10000 * 1.05));
   });
 
-  it('computes weight using WEIGHT_MULT for 0.5mm', () => {
+  it('computes weight with no multiplier when thickness equals model default', () => {
     const r = calcPrice(BASE_CONFIG, CATALOG_BASE);
-    // doorW=20 × 1.125 + bodyW=30 × 1.125 = 50 × 1.125 = 56.25
-    expect(r.weight).toBe(56.25);
+    // config=default(0.5) === modelDefault(0.5) → mult=1 for both
+    // doorW=20 × 1 + bodyW=30 × 1 = 50
+    expect(r.weight).toBe(50);
   });
 
   it('computes weight with upgraded door thickness', () => {
@@ -128,8 +164,8 @@ describe('calcPrice', () => {
       models: { 'ml-01': { ...MODEL_ML, defaultSpecs: { ...MODEL_ML.defaultSpecs } } },
       priceRules: { ...CATALOG_BASE.priceRules, thickness: { minQty: 100, ml: { '0.7': 0.85 }, ls: {} } },
     });
-    // door: 20 × (1+5/9) ≈ 31.11, body: 30 × 1.125 = 33.75 → total ≈ 64.86
-    const expected = Math.round((20 * (1 + 5 / 9) + 30 * 1.125) * 100) / 100;
+    // door upgraded 0.5→0.7: 20 × (1+5/9) ≈ 31.11, body stays at default: 30 × 1 = 30
+    const expected = Math.round((20 * (1 + 5 / 9) + 30 * 1) * 100) / 100;
     expect(r.weight).toBe(expected);
   });
 
