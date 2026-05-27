@@ -90,13 +90,9 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 	}
 
 	async function handlePrint() {
-		if (initialPrice == null) {
-			const valid = await trigger();
-			if (!valid) return;
-		}
-		const price = initialPrice != null
-			? initialPrice
-			: Number(getValues('price').replace(/\D/g, ''));
+		const valid = await trigger();
+		if (!valid) return;
+		const price = Number(getValues('price').replace(/\D/g, ''));
 		setIsPrinting(true);
 		try {
 			await onPrint?.({ price });
@@ -221,15 +217,13 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 											inputMode='numeric'
 											placeholder='Цена от экономиста'
 											disabled={busy}
-											readOnly={initialPrice != null}
 											value={field.value ? parseInt(field.value.replace(/\D/g, '') || '0', 10).toLocaleString('ru-RU') : ''}
 											onChange={e => {
-												if (initialPrice != null) return;
 												field.onChange(e.target.value.replace(/\D/g, ''));
 											}}
 											onBlur={field.onBlur}
 											ref={field.ref}
-											className={cx(styles.input, errors.price && styles.inputError, initialPrice != null && styles.inputReadonly)}
+											className={cx(styles.input, errors.price && styles.inputError)}
 											aria-invalid={errors.price ? 'true' : 'false'}
 											aria-describedby='proposal-price-err'
 										/>
@@ -253,7 +247,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 									type='button'
 									className={cx(styles.btn, styles.btnPrint)}
 									onClick={handlePrint}
-									disabled={busy || (!isValid && initialPrice == null)}
+									disabled={busy || !isValid}
 								>
 									{isPrinting ? (
 										<>
@@ -275,7 +269,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 								type='submit'
 								form='proposal-form'
 								className={cx(styles.btn, styles.btnPrimary)}
-								disabled={busy || (!isValid && initialPrice == null)}
+								disabled={busy || !isValid}
 							>
 								{isSubmitting ? (
 									<>

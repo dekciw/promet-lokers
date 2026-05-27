@@ -32,7 +32,7 @@ describe('useHistory', () => {
       seriesId: 'ml', modelId: '10828', width: '800', height: '2000', depth: '400',
       bodyThickness: '1.5', doorThickness: '1.2', lockId: 'key_basic',
       ventilationType: null, bodyColor: null, doorColor: null,
-      quantity: 10, profitability: 30,
+      quantity: 10,
     };
 
     await act(async () => {
@@ -128,7 +128,6 @@ describe('useHistory', () => {
       bodyColor: { name: 'RAL 9003', color: '#F4F4F4' },
       doorColor: { name: 'RAL 7016', color: '#383E42' },
       quantity: 5,
-      profitability: 25,
     };
 
     const setters = {
@@ -144,7 +143,6 @@ describe('useHistory', () => {
       setBodyColor: vi.fn(),
       setDoorColor: vi.fn(),
       setQuantity: vi.fn(),
-      setProfitability: vi.fn(),
     };
 
     act(() => {
@@ -166,7 +164,6 @@ describe('useHistory', () => {
     expect(setters.setBodyColor).toHaveBeenCalledWith(snapshot.bodyColor);
     expect(setters.setDoorColor).toHaveBeenCalledWith(snapshot.doorColor);
     expect(setters.setQuantity).toHaveBeenCalledWith(snapshot.quantity);
-    expect(setters.setProfitability).toHaveBeenCalledWith(snapshot.profitability);
   });
 
   // HIST-04: redownloadKP smoke test — function exists and returns a Promise

@@ -56,7 +56,6 @@ const BASE_CONFIG = {
   bodyColor:      null,
   doorColor:      null,
   quantity:       100,
-  profitability:  0,
 };
 
 describe('calcPrice', () => {
