@@ -29,9 +29,9 @@
 .decoIcons {
   position: absolute;
   top: 50%;
-  left: 34%;
+  left: 34.49%;
   transform: translateY(-50%);
-  width: 54%;
+  width: 53.74%;
   height: auto;
   pointer-events: none;
   mix-blend-mode: luminosity;
