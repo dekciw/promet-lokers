@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router';
+import { Routes, Route, Navigate, useNavigate, useSearchParams, useLocation } from 'react-router';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './shared/lib/firebase';
@@ -14,8 +14,9 @@ import './index.css';
 
 const MASTER_ADMIN_EMAIL = 'admin@promet.ru';
 const INVITE_CODE_KEY = 'promet_invite_code';
+const REGISTER_TRIGGER_KEY = 'promet_open_register';
 
-// Stashes the invite code from ?code= into sessionStorage, then redirects to /
+// Stashes the invite code from ?code= into sessionStorage, sets a trigger flag, then redirects to /
 function RegisterRedirect() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -24,8 +25,9 @@ function RegisterRedirect() {
     const code = searchParams.get('code');
     if (code) {
       sessionStorage.setItem(INVITE_CODE_KEY, code);
+      sessionStorage.setItem(REGISTER_TRIGGER_KEY, '1');
     }
-    navigate('/', { replace: true });
+    navigate('/configurator', { replace: true });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
@@ -36,6 +38,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [adminAllowed, setAdminAllowed] = useState(false);
   const [authModal, setAuthModal] = useState({ open: false, view: 'login', onSuccess: null });
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -65,6 +68,15 @@ export default function App() {
   const closeAuthModal = useCallback(() => {
     setAuthModal((prev) => ({ ...prev, open: false, onSuccess: null }));
   }, []);
+
+  // Auto-open register popup when arriving via invite link (/register?code=XXX)
+  useEffect(() => {
+    if (authState !== 'ready' || user) return;
+    const trigger = sessionStorage.getItem(REGISTER_TRIGGER_KEY);
+    if (!trigger) return;
+    sessionStorage.removeItem(REGISTER_TRIGGER_KEY);
+    openAuthModal(null, 'register');
+  }, [authState, location.pathname, openAuthModal]);
 
   async function handleLogout() {
     await signOut(auth);
