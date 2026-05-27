@@ -100,6 +100,8 @@ function rawToArray(raw) {
 // Write models back as keyed object.
 // Use firestoreKey to preserve original numeric keys (so configurator modelId stays valid).
 // Strip firestoreKey itself — it's an internal admin-only field.
+// Dual-write: if article differs from firestoreKey, also update the article-keyed entry so
+// withSortedModels in useCatalog always reads a fresh sortOrder from the article-keyed entry.
 function arrayToRaw(arr) {
   const obj = {};
   arr.forEach((m) => {
@@ -108,6 +110,9 @@ function arrayToRaw(arr) {
     // eslint-disable-next-line no-unused-vars
     const { firestoreKey, ...rest } = m;
     obj[key] = rest;
+    if (m.article && m.article !== key) {
+      obj[m.article] = rest;
+    }
   });
   return obj;
 }
