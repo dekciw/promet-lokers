@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router';
 import { useForm } from 'react-hook-form';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -96,6 +97,11 @@ export default function LoginScreen() {
             {isSubmitting ? 'Вход…' : 'Войти'}
           </button>
         </form>
+
+        <p className={styles.loginFooter}>
+          Нет аккаунта?
+          <Link to="/register" className={styles.loginLink}>Зарегистрироваться</Link>
+        </p>
       </div>
     </div>
   );

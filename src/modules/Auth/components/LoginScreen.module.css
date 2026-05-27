@@ -189,3 +189,27 @@
 		height: 46px;
 	}
 }
+
+.loginFooter {
+	text-align: center;
+	font-size: 13px;
+	color: var(--c-text-muted);
+	margin-top: -8px;
+}
+
+.loginLink {
+	color: var(--c-primary);
+	font-weight: 600;
+	text-decoration: none;
+	margin-left: 4px;
+}
+
+.loginLink:hover {
+	text-decoration: underline;
+}
+
+.loginInputHint {
+	font-size: 11px;
+	color: var(--c-text-faint);
+	margin-top: 2px;
+}

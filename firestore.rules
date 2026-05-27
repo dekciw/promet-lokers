@@ -7,12 +7,16 @@ service cloud.firestore {
                    && request.auth.token.email == 'admin@promet.ru';
     }
 
-    // Admin manages user accounts; any user can read their own doc (login gate)
+    // Admin can read/write all user docs.
+    // Users can read their own doc (login gate).
+    // Users can create their own doc on self-registration.
     match /users/{userId} {
       allow read, write: if request.auth != null
                          && request.auth.token.email == 'admin@promet.ru';
       allow read: if request.auth != null
                   && request.auth.uid == userId;
+      allow create: if request.auth != null
+                    && request.auth.uid == userId;
     }
 
     // Each user can read/write their own subcollections (history);
