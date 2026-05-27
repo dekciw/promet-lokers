@@ -127,7 +127,7 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
       await setDoc(doc(db, 'users', cred.user.uid), {
         email,
         displayName: displayName.trim(),
-        company: company?.trim() ?? '',
+        company: company.trim(),
         status: 'active',
         role: 'user',
         createdAt: serverTimestamp(),
@@ -181,10 +181,15 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
                 type="text"
                 autoComplete="organization"
                 disabled={isSubmitting}
-                placeholder="ООО Ромашка (необязательно)"
-                className={styles.input}
-                {...register('company', { onChange: () => clearErrors('root') })}
+                placeholder="ООО Ромашка"
+                className={`${styles.input}${errors.company ? ` ${styles.inputError}` : ''}`}
+                {...register('company', {
+                  required: 'Введите название компании',
+                  validate: (v) => v.trim().length > 0 || 'Введите название компании',
+                  onChange: () => clearErrors('root'),
+                })}
               />
+              {errors.company && <p className={styles.errorMsg}>{errors.company.message}</p>}
             </div>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="reg-email">Email</label>
