@@ -87,5 +87,11 @@ export function useUsersAdmin() {
     setUsers((prev) => prev.filter((u) => u.uid !== uid));
   }, []);
 
-  return { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser, deleteUser };
+  // Редактирование профиля пользователя (только Firestore — Auth email не меняется)
+  const updateUser = useCallback(async (uid, { displayName, company, role, email }) => {
+    await updateDoc(doc(db, 'users', uid), { displayName, company, role, email });
+    setUsers((prev) => prev.map((u) => u.uid === uid ? { ...u, displayName, company, role, email } : u));
+  }, []);
+
+  return { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser, deleteUser, updateUser };
 }

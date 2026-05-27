@@ -14,38 +14,37 @@ import { loadCatalog } from '../api/loadCatalog';
 function withSortedModels(catalog) {
   if (!catalog || !catalog.models || typeof catalog.models !== 'object') return catalog;
 
-  // Pass 1: collect sortOrder from canonical article-keyed entries
+  const entries = Object.entries(catalog.models);
+
+  // Pass 1: collect sortOrders from article-keyed entries + find which articles have a numeric twin
   const sortByArticle = {};
-  for (const [key, m] of Object.entries(catalog.models)) {
-    if (m?.article && key === m.article) {
+  const articlesWithNumericKey = new Set();
+  for (const [key, m] of entries) {
+    if (!m || typeof m !== 'object') continue;
+    if (m.article && key === m.article) {
       sortByArticle[m.article] = m.sortOrder ?? 0;
+    } else if (m.article && key !== m.article) {
+      // numeric key pointing at a model with an article field
+      articlesWithNumericKey.add(m.article);
     }
   }
 
-  // Pass 2: build deduplicated map — skip article-keyed entries when numeric-keyed exist
+  // Pass 2: deduplicate — skip article-keyed entry ONLY when a numeric-keyed twin exists.
+  // New models added via admin have no numeric twin and must NOT be skipped.
   const merged = {};
-  let hasNumericKeys = false;
-  for (const [key, m] of Object.entries(catalog.models)) {
+  for (const [key, m] of entries) {
     if (!m || typeof m !== 'object') continue;
-    if (m.article && key === m.article) continue; // skip article-keyed duplicate
-    hasNumericKeys = true;
+    if (m.article && key === m.article && articlesWithNumericKey.has(m.article)) continue;
     const sortOrder = m.article
       ? (sortByArticle[m.article] ?? m.sortOrder ?? 0)
       : (m.sortOrder ?? 0);
     merged[key] = { ...m, sortOrder };
   }
 
-  // If data is already in clean article-keyed format (no numeric keys), use as-is
-  if (!hasNumericKeys) {
-    for (const [key, m] of Object.entries(catalog.models)) {
-      if (m && typeof m === 'object') merged[key] = m;
-    }
-  }
-
-  const entries = Object.entries(merged);
-  entries.sort(([, a], [, b]) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
+  const sorted = Object.entries(merged)
+    .sort(([, a], [, b]) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0));
   const sortedModels = {};
-  for (const [k, v] of entries) sortedModels[k] = v;
+  for (const [k, v] of sorted) sortedModels[k] = v;
   return { ...catalog, models: sortedModels };
 }
 

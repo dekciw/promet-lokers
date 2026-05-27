@@ -124,7 +124,7 @@ async function readModels(ref) {
 }
 
 async function writeModels(ref, modelsArr) {
-  await setDoc(ref, { models: arrayToRaw(modelsArr) }, { merge: true });
+  await setDoc(ref, { models: arrayToRaw(modelsArr) }, { mergeFields: ['models'] });
   try {
     localStorage.removeItem(CACHE_KEY);
   } catch (err) {

@@ -70,7 +70,7 @@ describe('useCatalogAdmin', () => {
         'A1': expect.objectContaining({ article: 'A1', name: 'New', sortOrder: 1 }),
         'A2': expect.objectContaining({ article: 'A2', name: 'Keep' }),
       }) },
-      { merge: true }
+      { mergeFields: ['models'] }
     );
     expect(result.current.models[0].name).toBe('New');
     expect(localStorage.removeItem).toHaveBeenCalledWith('promet_catalog_v1');
@@ -281,7 +281,7 @@ describe('reorderModels (ORDER-02)', () => {
     expect(localStorage.removeItem).toHaveBeenCalledWith('promet_catalog_v1');
   });
 
-  it('Test 5 (setDoc called with merge:true): second arg is { merge: true }', async () => {
+  it('Test 5 (setDoc called with mergeFields): second arg is { mergeFields: ["models"] }', async () => {
     firestore.getDoc.mockResolvedValue(
       mockSnap({ models: [{ article: 'A', sortOrder: 1 }] })
     );
@@ -297,7 +297,7 @@ describe('reorderModels (ORDER-02)', () => {
     expect(firestore.setDoc).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      { merge: true }
+      { mergeFields: ['models'] }
     );
   });
 
