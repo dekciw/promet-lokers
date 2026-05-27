@@ -12,9 +12,9 @@ export default function UsersTab({ onNotify }) {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({ mode: 'onChange' });
 
-  async function handleCreate({ email, password }) {
+  async function handleCreate({ email, password, displayName, role }) {
     try {
-      await createUser(email, password);
+      await createUser(email, password, displayName, role);
       reset();
       setAddOpen(false);
       onNotify?.('ok', `Пользователь ${email} создан`);
@@ -86,6 +86,8 @@ export default function UsersTab({ onNotify }) {
             <thead>
               <tr>
                 <th>Email</th>
+                <th>ФИО</th>
+                <th>Роль</th>
                 <th>Статус</th>
                 <th>Действия</th>
               </tr>
@@ -94,6 +96,12 @@ export default function UsersTab({ onNotify }) {
               {users.map((u) => (
                 <tr key={u.uid}>
                   <td>{u.email}</td>
+                  <td>{u.displayName || '—'}</td>
+                  <td>
+                    <span className={cx(styles.badge, u.role === 'admin' ? styles.badgeAdmin : styles.badgeUser)}>
+                      {u.role === 'admin' ? 'Администратор' : 'Пользователь'}
+                    </span>
+                  </td>
                   <td>
                     <span className={cx(styles.badge, u.status === 'disabled' ? styles.badgeDisabled : styles.badgeActive)}>
                       {u.status === 'disabled' ? 'Деактивирован' : 'Активен'}
@@ -133,13 +141,25 @@ export default function UsersTab({ onNotify }) {
             <h3 className={styles.modalTitle}>Новый пользователь</h3>
             <form onSubmit={handleSubmit(handleCreate)} noValidate>
               <label className={styles.field}>
+                <span className={styles.fieldLabel}>ФИО</span>
+                <input
+                  type="text"
+                  className={cx(styles.input, errors.displayName && styles.inputError)}
+                  disabled={isCreating}
+                  autoComplete="name"
+                  autoFocus
+                  placeholder="Иванов Иван Иванович"
+                  {...register('displayName', { required: 'Введите ФИО' })}
+                />
+                {errors.displayName && <span className={styles.errMsg}>{errors.displayName.message}</span>}
+              </label>
+              <label className={styles.field}>
                 <span className={styles.fieldLabel}>Email</span>
                 <input
                   type="email"
                   className={cx(styles.input, errors.email && styles.inputError)}
                   disabled={isCreating}
                   autoComplete="off"
-                  autoFocus
                   {...register('email', {
                     required: 'Введите email',
                     pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Неверный формат email' },
@@ -160,6 +180,18 @@ export default function UsersTab({ onNotify }) {
                   })}
                 />
                 {errors.password && <span className={styles.errMsg}>{errors.password.message}</span>}
+              </label>
+              <label className={styles.field}>
+                <span className={styles.fieldLabel}>Роль</span>
+                <select
+                  className={styles.input}
+                  disabled={isCreating}
+                  {...register('role', { required: true })}
+                  defaultValue="user"
+                >
+                  <option value="user">Пользователь</option>
+                  <option value="admin">Администратор</option>
+                </select>
               </label>
               <div className={styles.actions}>
                 <button

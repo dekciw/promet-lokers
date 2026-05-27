@@ -1,6 +1,5 @@
 .tab {
   padding: 24px 40px;
-  max-width: 1200px;
 }
 
 .toolbar {
@@ -89,6 +88,16 @@
 .badgeDisabled {
   background: #fed7d7;
   color: #9b2c2c;
+}
+
+.badgeAdmin {
+  background: #ebf4ff;
+  color: #2b6cb0;
+}
+
+.badgeUser {
+  background: #f0fff4;
+  color: #276749;
 }
 
 .actionBtn {
@@ -216,6 +225,13 @@
 .input:disabled {
   background: #f7f9fc;
   color: #718096;
+}
+
+.input select,
+select.input {
+  appearance: auto;
+  cursor: pointer;
+  padding-right: 12px;
 }
 
 .inputError {
