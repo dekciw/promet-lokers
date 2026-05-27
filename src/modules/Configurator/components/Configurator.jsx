@@ -60,7 +60,7 @@ function buildCurrentForDiff(config, lock) {
 		depth: config.depth !== '' ? Number(config.depth) : undefined,
 		bodyThickness: config.bodyThickness,
 		doorThickness: config.doorThickness,
-		lockName: lock?.name,
+		lockName: config.lockId !== 'key_basic' ? lock?.name : undefined,
 		ventilationType: config.ventilationType ?? undefined,
 		bodyColorName: config.bodyColor?.name ?? undefined,
 		doorColorName: config.doorColor?.name ?? undefined,
@@ -149,12 +149,12 @@ export default function Configurator() {
 
 	const defaultsForDiff = defaults ? {
 		...defaults,
+		bodyThickness: String(Math.max(0.5, Number(defaults.bodyThickness ?? 0.5))),
+		doorThickness: String(Math.max(0.5, Number(defaults.doorThickness ?? 0.5))),
 		lockName: catalog.locks[defaults.lockId]?.name,
 		bodyColorName: defaults.bodyColorName ?? DEFAULT_COLOR_NAME,
 		doorColorName: defaults.doorColorName ?? DEFAULT_COLOR_NAME,
 	} : null;
-	// DEBUG: remove after fix verified
-	console.log('[DEBUG calcDiff] ventilationType:', config.ventilationType, 'ventilationCatalog:', catalog.priceRules?.ventilation, 'entry:', catalog.priceRules?.ventilation?.[config.ventilationType]);
 	const changedSpecs = calcDiff(buildCurrentForDiff(config, lock), defaultsForDiff, catalog.priceRules?.ventilation).map(spec => {
 		if (spec.label === 'Цвет корпуса:') return { ...spec, colorHex: config.bodyColor?.color ?? getColorHex(spec.value) };
 		if (spec.label === 'Цвет двери:') return { ...spec, colorHex: config.doorColor?.color ?? getColorHex(spec.value) };
