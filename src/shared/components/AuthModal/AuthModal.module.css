@@ -23,8 +23,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
   padding: 44px 52px 40px;
-  width: 100%;
-  max-width: 500px;
+  width: min(500px, calc(100vw - 32px));
   box-shadow:
     0 32px 100px rgba(0, 0, 0, 0.55),
     0 8px 24px rgba(0, 0, 0, 0.3);
