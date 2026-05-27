@@ -159,8 +159,8 @@ _Конфигуратор шкафов-локеров «Промет»_
 
 - [ ] **Phase 7: Foundation** — React Router, ролевой доступ и Security Rules
 - [x] **Phase 8: Catalog CRUD** — Полный список, поиск, фильтр, попап редактирования, добавление и удаление (completed 2026-05-26)
-- [ ] **Phase 9: Media & Ordering** — Загрузка фото в Firebase Storage, drag & drop сортировка
-- [ ] **Phase 10: Price Coefficients** — Вкладка редактирования коэффициентов цены
+- [x] **Phase 9: Media & Ordering** — Загрузка фото в Cloudinary, drag & drop сортировка (completed 2026-05-27)
+- [x] **Phase 10: Price Coefficients** — Вкладка редактирования коэффициентов цены (completed 2026-05-27)
 - [ ] **Phase 11: Users & History** — Управление пользователями и история КП
 
 ### Phase Details
@@ -245,9 +245,9 @@ Plans:
 | 7. Foundation | v1.1 | 0/2 | Not started | — |
 | 8. Catalog CRUD | v1.1 | 2/2 | Complete   | 2026-05-26 |
 | 9. Media & Ordering | v1.1 | 0/? | Not started | — |
-| 10. Price Coefficients | v1.1 | 0/? | Not started | — |
+| 10. Price Coefficients | v1.1 | 2/2 | Complete    | 2026-05-27 |
 | 11. Users & History | v1.1 | 0/? | Not started | — |
 
 ---
 
-*Last updated: 2026-05-26 — Phase 7 planned (2 plans). Next: `/gsd:execute-phase 7`*
+*Last updated: 2026-05-27 — Phase 10 complete. Next: Phase 11 (Users & History)*

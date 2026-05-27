@@ -25,6 +25,7 @@ function RateInput({ value, onChange, ariaLabel }) {
         const raw = e.target.value;
         onChange(raw === '' ? '' : Number(raw));
       }}
+      onWheel={(e) => e.currentTarget.blur()}
     />
   );
 }

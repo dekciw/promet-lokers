@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
 status: executing
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-05-26T20:04:04.990Z"
-last_activity: 2026-05-26
+stopped_at: Phase 10 complete — ready for Phase 11
+last_updated: "2026-05-27T05:00:00.000Z"
+last_activity: 2026-05-27
 progress:
   total_phases: 5
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 5
-  percent: 0
+  completed_phases: 4
+  total_plans: 8
+  completed_plans: 8
+  percent: 80
 ---
 
 # Project State
@@ -25,26 +25,25 @@ _GSD workflow state для Конфигуратор «Промет»_
 See: .planning/PROJECT.md (updated 2026-05-26)
 
 **Core value:** Любой сотрудник за 3 минуты собирает конфигурацию и получает готовые документы — без Excel, без Word, без ошибок.
-**Current focus:** Phase 09 — media-ordering
+**Current focus:** Phase 10 — price-coefficients
 
 ## Current Position
 
-Phase: 09 (media-ordering) — EXECUTING
-Plan: 2 of 2
-Status: Ready to execute
-Last activity: 2026-05-26
+Phase: 10 (price-coefficients) — ✅ COMPLETED 2026-05-27
+Phase: 11 (users-history) — NOT STARTED
+Last activity: 2026-05-27
 
-Progress: [░░░░░░░░░░] 0% (v1.1 milestone)
+Progress: [████████░░] 80% (v1.1 milestone — 4/5 phases done)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed (v1.1): 0
+- Total plans completed (v1.1): 6
 - Average duration: —
 - Total execution time: —
 
-**Recent Trend:** —
+**Recent Trend:** Phase 10 shipped all 6 requirements (PRICE-01..06)
 
 *Updated after each plan completion*
 
@@ -56,7 +55,7 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 
 - Email-проверка на фронте достаточна для роли admin (Custom Claims — out of scope)
 - Только одна Cloud Function: createUser/deleteUser через Admin SDK
-- Фото моделей переезжают из /public/img в Firebase Storage (с fallback)
+- Фото моделей → Cloudinary unsigned upload (NOT Firebase Storage — Spark plan заблокировал Storage)
 - sortOrder в каждом документе Firestore — порядок моделей в конфигураторе
 - [Phase 07-foundation]: Install react-router (not react-router-dom) — v7 merged all exports into the main package
 - [Phase 07-foundation]: isAdmin as named export utility — ADMIN_EMAIL constant centralized, not duplicated in App.jsx
@@ -70,18 +69,23 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 - [Phase 08]: Firestore stores models field as object {articleKey: modelData}, not array — rawToArray/arrayToRaw converters added to useCatalogAdmin
 - [Phase 09-media-ordering]: vi.stubEnv + vi.resetModules + dynamic import() for module-load-time env vars in tests
 - [Phase 09-media-ordering]: Cloudinary unsigned upload (no Firebase Storage — Spark plan blocked); Canvas API for resize (no npm lib)
+- [Phase 09-media-ordering]: isJpeg по расширению URL (.jpe?g) вместо isRemote — точнее для Cloudinary JPEG
+- [Phase 09-media-ordering]: JS numeric string keys всегда итерируются в числовом порядке — нельзя полагаться на insertion order объекта для сортировки; sort() обязателен в consumer
+- [Phase 09-media-ordering]: trigger() после reset() в RHF mode:onChange — иначе isValid=false после программного reset
+- [Phase 09-media-ordering]: onPhotoUpload prop pattern — CatalogEditModal остался decoupled от Firestore; AdminPage передаёт mode-aware handler
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
+- Phase 11 (Users): Cloud Function нужно развернуть в Firebase — потребуется Blaze plan
 - Phase 11 (Users): Cloud Function нужно развернуть в Firebase — потребуется настройка Functions в проекте (billing plan Blaze или Spark)
 - Phase 11 (History): зависит от того, работает ли уже Firebase Auth (Phase 6 deferred — но Auth уже подключён судя по STATE)
 
 ## Session Continuity
 
-Last session: 2026-05-26T20:04:04.986Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-05-27T00:14:00.000Z
+Stopped at: Phase 09 complete — all MEDIA-01..04 + ORDER-01..03 verified in browser
 Resume file: None
