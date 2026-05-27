@@ -116,6 +116,19 @@ export default function Parameters() {
 		if (!modelId) setModelConfirmed(false);
 	}, [modelId]);
 
+	// Сбрасываем степпер и конфиг при выходе из аккаунта
+	useEffect(() => {
+		if (user) return;
+		setSeriesId('', () => {});
+		setStepperStep(1);
+		setDisplayStep(1);
+		setDirection(1);
+		setIsSliding(false);
+		setModelConfirmed(false);
+		setParametersUnlocked(false);
+		setOpenSelectId(null);
+	}, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+
 const [openSelectId, setOpenSelectId] = useState(null);
 	const handleSeriesOpen = useCallback(v => setOpenSelectId(v ? 'series' : null), []);
 	const handleModelOpen = useCallback(v => setOpenSelectId(v ? 'model' : null), []);
