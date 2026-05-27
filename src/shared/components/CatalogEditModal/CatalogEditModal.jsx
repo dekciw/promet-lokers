@@ -19,7 +19,6 @@ const EMPTY_MODEL = {
   lockCount: 1,
   doorCount: 1,
   weight: 0,
-  cpBezNDS: 0,
   photoUrl: '',
 };
 
@@ -269,21 +268,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     {...register('basePrice', { valueAsNumber: true, required: 'Обязательно', min: { value: 0, message: 'Минимум 0' } })}
                   />
                   <span className={styles.errorMsg} aria-live="polite">{errors.basePrice?.message ?? ''}</span>
-                </div>
-
-                {/* cpBezNDS */}
-                <div className={styles.field}>
-                  <label className={styles.label} htmlFor="f-cpBezNDS">
-                    Цена КП (cpBezNDS) <span className={styles.required}>*</span>
-                  </label>
-                  <input
-                    id="f-cpBezNDS"
-                    type="number"
-                    step="1"
-                    className={cx(styles.input, errors.cpBezNDS && styles.inputError)}
-                    {...register('cpBezNDS', { valueAsNumber: true, required: 'Обязательно', min: { value: 0, message: 'Минимум 0' } })}
-                  />
-                  <span className={styles.errorMsg} aria-live="polite">{errors.cpBezNDS?.message ?? ''}</span>
                 </div>
 
                 {/* height */}

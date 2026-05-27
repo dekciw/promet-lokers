@@ -168,10 +168,8 @@ export function calcPrice(config, catalog) {
 
   // ── 6. Цены ─────────────────────────────────────────────────────
   const priceMin = model.basePrice ?? 0;
-  const cpBezNDS = model.cpBezNDS ?? 0;
 
-  const clientPrice  = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
-  const factoryPrice = Math.round(cpBezNDS * (1 + totalRate) + lockSurcharge);
+  const clientPrice = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
 
   // ── 7. Вес ──────────────────────────────────────────────────────
   const effDoor = config.doorThickness || defaults.doorThickness || '0.5';
@@ -191,7 +189,6 @@ export function calcPrice(config, catalog) {
     changeCount,
     totalRate,
     clientPrice,
-    factoryPrice,
     weight,
     leadTime,
     lockSurcharge,

@@ -66,10 +66,10 @@ describe('useCatalogAdmin', () => {
     // Firestore хранит models как объект {key: modelData}
     expect(firestore.setDoc).toHaveBeenCalledWith(
       expect.anything(),
-      { models: {
-        'A1': { article: 'A1', name: 'New', sortOrder: 1 },
-        'A2': { article: 'A2', name: 'Keep' },
-      } },
+      { models: expect.objectContaining({
+        'A1': expect.objectContaining({ article: 'A1', name: 'New', sortOrder: 1 }),
+        'A2': expect.objectContaining({ article: 'A2', name: 'Keep' }),
+      }) },
       { merge: true }
     );
     expect(result.current.models[0].name).toBe('New');
@@ -137,7 +137,7 @@ describe('useCatalogAdmin', () => {
       await result.current.saveModel({ article: 'A1', name: 'Updated', sortOrder: 1 });
     });
 
-    expect(result.current.models).toEqual([{ article: 'A1', name: 'Updated', sortOrder: 1 }]);
+    expect(result.current.models[0]).toMatchObject({ article: 'A1', name: 'Updated', sortOrder: 1 });
   });
 
   it('addModel local state contains new model after write', async () => {

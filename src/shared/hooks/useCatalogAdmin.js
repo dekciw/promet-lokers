@@ -52,7 +52,6 @@ function toFirestoreModel(formData, original) {
     name:       formData.name,
     article:    formData.article,
     basePrice:  Number(formData.basePrice)  || 0,
-    cpBezNDS:   Number(formData.cpBezNDS)   || 0,
     lockCount:  Number(formData.lockCount)  || 1,
     doorCount:  Number(formData.doorCount)  || 1,
     weight:     Number(formData.weight)     || 0,
