@@ -14,24 +14,6 @@ import styles from './AuthModal.module.css';
 
 const INVITE_CODE_KEY = 'promet_invite_code';
 
-function useCodeValidation(active) {
-  const [status, setStatus] = useState('idle');
-
-  useEffect(() => {
-    if (!active) { setStatus('idle'); return; }
-    const code = sessionStorage.getItem(INVITE_CODE_KEY) ?? '';
-    if (!code) { setStatus('invalid'); return; }
-    setStatus('loading');
-    let cancelled = false;
-    validateInviteCode(code)
-      .then((ok) => { if (!cancelled) setStatus(ok ? 'valid' : 'invalid'); })
-      .catch(() => { if (!cancelled) setStatus('invalid'); });
-    return () => { cancelled = true; };
-  }, [active]);
-
-  return status;
-}
-
 function CloseSvg() {
   return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -123,11 +105,23 @@ function LoginForm({ onSwitch, onSuccess, onClose }) {
 
 function RegisterForm({ onSwitch, onSuccess, onClose }) {
   const [shake, setShake] = useState(false);
-  const codeStatus = useCodeValidation(true);
   const { register, handleSubmit, watch, setError, clearErrors, formState: { errors, isSubmitting } } = useForm({ mode: 'onChange' });
   const password = watch('password');
 
   async function onSubmit({ displayName, company, email, password: pw }) {
+    const code = sessionStorage.getItem(INVITE_CODE_KEY) ?? '';
+    let codeOk = false;
+    try {
+      codeOk = await validateInviteCode(code);
+    } catch {
+      codeOk = false;
+    }
+    if (!codeOk) {
+      setError('root', { message: 'Нужна ссылка-приглашение. Обратитесь к администратору.' });
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pw);
       await setDoc(doc(db, 'users', cred.user.uid), {
@@ -160,25 +154,8 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
         <img src="/img/brand/logo.svg" alt="Промет" className={styles.logoImg} />
       </div>
 
-      {codeStatus === 'loading' && (
-        <p className={styles.loadingMsg}>Проверка ссылки…</p>
-      )}
-
-      {codeStatus === 'invalid' && (
-        <>
-          <CardHeader title="Регистрация закрыта" subtitle="Для регистрации нужна ссылка-приглашение" />
-          <p className={styles.closedError}>Обратитесь к администратору за ссылкой для регистрации.</p>
-          <p className={styles.footer}>
-            Уже есть аккаунт?
-            <button type="button" className={styles.footerLink} onClick={onSwitch}>Войти</button>
-          </p>
-        </>
-      )}
-
-      {codeStatus === 'valid' && (
-        <>
-          <CardHeader title="Регистрация" subtitle="Конфигуратор шкафов-локеров" />
-          <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
+      <CardHeader title="Регистрация" subtitle="Конфигуратор шкафов-локеров" />
+      <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
             <div className={styles.field}>
               <label className={styles.label} htmlFor="reg-name">ФИО</label>
               <input
@@ -262,12 +239,10 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
               {isSubmitting ? 'Регистрация…' : 'Зарегистрироваться'}
             </button>
           </form>
-          <p className={styles.footer}>
-            Уже есть аккаунт?
-            <button type="button" className={styles.footerLink} onClick={onSwitch}>Войти</button>
-          </p>
-        </>
-      )}
+      <p className={styles.footer}>
+        Уже есть аккаунт?
+        <button type="button" className={styles.footerLink} onClick={onSwitch}>Войти</button>
+      </p>
     </div>
   );
 }
