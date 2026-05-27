@@ -209,91 +209,97 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      {/* ── Глубина ── */}
-      {SERIES.map((s) => {
-        const depthKeys = Object.keys(depth[s] ?? {}).sort((a, b) => Number(a) - Number(b));
-        if (depthKeys.length === 0) return null;
-        return (
-          <section key={`depth-${s}`} className={styles.section} aria-labelledby={`depth-${s}-heading`}>
-            <div className={styles.sectionHead}>
-              <h2 id={`depth-${s}-heading`} className={styles.sectionTitle}>
-                Глубина — {s.toUpperCase()}
-              </h2>
-              <p className={styles.sectionDesc}>
-                Надбавка при нестандартной глубине шкафа серии {s.toUpperCase()}. При заказе менее 10 шт — цена по запросу.
-              </p>
-            </div>
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Глубина, мм</th>
-                    {DEPTH_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {depthKeys.map((d) => (
-                    <tr key={d}>
-                      <td className={styles.rowLabel}>{d}</td>
-                      {DEPTH_BRACKETS.map((q) => (
-                        <td key={q}>
-                          <PctInput
-                            value={depth[s][d]?.[q] ?? ''}
-                            onChange={(v) => update(['depth', s, d, q], v)}
-                            ariaLabel={`Глубина ${s.toUpperCase()} ${d}мм ${QTY_LABELS[q]}`}
-                          />
-                        </td>
+      {/* ── Глубина ML + LS ── */}
+      <section className={styles.section} aria-labelledby="depth-heading">
+        <div className={styles.sectionHead}>
+          <h2 id="depth-heading" className={styles.sectionTitle}>Глубина</h2>
+          <p className={styles.sectionDesc}>
+            Надбавка при нестандартной глубине шкафа. При заказе менее 10 шт — цена по запросу.
+          </p>
+        </div>
+        <div className={styles.splitTables}>
+          {SERIES.map((s) => {
+            const depthKeys = Object.keys(depth[s] ?? {}).sort((a, b) => Number(a) - Number(b));
+            if (depthKeys.length === 0) return null;
+            return (
+              <div key={s} className={styles.splitBlock}>
+                <div className={styles.splitLabel}>{s.toUpperCase()}</div>
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Глубина, мм</th>
+                        {DEPTH_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {depthKeys.map((d) => (
+                        <tr key={d}>
+                          <td className={styles.rowLabel}>{d}</td>
+                          {DEPTH_BRACKETS.map((q) => (
+                            <td key={q}>
+                              <PctInput
+                                value={depth[s][d]?.[q] ?? ''}
+                                onChange={(v) => update(['depth', s, d, q], v)}
+                                ariaLabel={`Глубина ${s.toUpperCase()} ${d}мм ${QTY_LABELS[q]}`}
+                              />
+                            </td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        );
-      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
-      {/* ── Высота ── */}
-      {SERIES.map((s) => {
-        const heightKeys = Object.keys(height[s] ?? {}).sort((a, b) => Number(a) - Number(b));
-        if (heightKeys.length === 0) return null;
-        return (
-          <section key={`height-${s}`} className={styles.section} aria-labelledby={`height-${s}-heading`}>
-            <div className={styles.sectionHead}>
-              <h2 id={`height-${s}-heading`} className={styles.sectionTitle}>
-                Высота — {s.toUpperCase()}
-              </h2>
-              <p className={styles.sectionDesc}>
-                Надбавка при нестандартной высоте шкафа серии {s.toUpperCase()}. Применяется только при заказе от 100 шт, иначе — цена по запросу.
-              </p>
-            </div>
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Высота, мм</th>
-                    <th>Надбавка</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {heightKeys.map((h) => (
-                    <tr key={h}>
-                      <td className={styles.rowLabel}>{h}</td>
-                      <td>
-                        <PctInput
-                          value={height[s][h] ?? ''}
-                          onChange={(v) => update(['height', s, h], v)}
-                          ariaLabel={`Высота ${s.toUpperCase()} ${h}мм`}
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        );
-      })}
+      {/* ── Высота ML + LS ── */}
+      <section className={styles.section} aria-labelledby="height-heading">
+        <div className={styles.sectionHead}>
+          <h2 id="height-heading" className={styles.sectionTitle}>Высота</h2>
+          <p className={styles.sectionDesc}>
+            Надбавка при нестандартной высоте шкафа. Применяется только при заказе от 100 шт, иначе — цена по запросу.
+          </p>
+        </div>
+        <div className={styles.splitTables}>
+          {SERIES.map((s) => {
+            const heightKeys = Object.keys(height[s] ?? {}).sort((a, b) => Number(a) - Number(b));
+            if (heightKeys.length === 0) return null;
+            return (
+              <div key={s} className={styles.splitBlock}>
+                <div className={styles.splitLabel}>{s.toUpperCase()}</div>
+                <div className={styles.tableWrap}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Высота, мм</th>
+                        <th>Надбавка</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {heightKeys.map((h) => (
+                        <tr key={h}>
+                          <td className={styles.rowLabel}>{h}</td>
+                          <td>
+                            <PctInput
+                              value={height[s][h] ?? ''}
+                              onChange={(v) => update(['height', s, h], v)}
+                              ariaLabel={`Высота ${s.toUpperCase()} ${h}мм`}
+                            />
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* ── Сохранить ── */}
       <div className={styles.saveBar}>
