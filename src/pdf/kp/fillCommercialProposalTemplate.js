@@ -496,7 +496,7 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   if (config.modelId) {
     try {
       const modelData = catalog?.models?.[config.modelId];
-      const photoSrc = modelData?.photoUrl ?? `/img/models/${config.modelId}.png`;
+      const photoSrc = modelData?.photoUrl || `/img/models/${config.modelId}.png`;
       const isJpeg = /\.(jpe?g)$/i.test(photoSrc);
       const imgResp = await fetch(photoSrc);
       if (imgResp.ok) {
