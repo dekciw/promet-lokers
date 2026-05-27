@@ -8,6 +8,7 @@
 
 /* ── Header ── */
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -16,6 +17,19 @@
   flex-shrink: 0;
   background: linear-gradient(135deg, #0c1e4a 0%, #081228 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.decoIcons {
+  position: absolute;
+  top: 50%;
+  left: 34%;
+  transform: translateY(-50%);
+  width: 54%;
+  height: auto;
+  pointer-events: none;
+  mix-blend-mode: luminosity;
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
+  mask-image: linear-gradient(to left, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
 }
 
 .backLink {

@@ -232,6 +232,12 @@ export default function AdminPage({ onLogout, username }) {
           ← Конфигуратор
         </Link>
         <span className={styles.title}>Панель администратора</span>
+        <img
+          className={styles.decoIcons}
+          src='/img/header/header-icons.svg'
+          alt=''
+          aria-hidden='true'
+        />
         <nav className={styles.adminTabs} role="tablist" aria-label="Раздел администрирования">
           {ADMIN_TABS.map((t) => (
             <button
