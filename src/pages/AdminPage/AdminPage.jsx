@@ -178,8 +178,7 @@ export default function AdminPage({ onLogout, username }) {
     if (oldIndex === -1 || newIndex === -1) return;
     const reordered = arrayMove(visibleModels, oldIndex, newIndex);
     try {
-      await reorderModels(reordered); // Pitfall #4 guarded inside hook: full-array merge
-      showOk('Порядок обновлён');
+      await reorderModels(reordered);
     } catch (err) {
       showError(`Ошибка сохранения порядка: ${err.message}`);
     }
