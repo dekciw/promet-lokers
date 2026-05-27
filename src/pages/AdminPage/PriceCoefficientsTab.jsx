@@ -132,7 +132,10 @@ export default function PriceCoefficientsTab({ onNotify }) {
               </tr>
             </thead>
             <tbody>
-              {[['roof', 'Только крыша'], ['roofBottom', 'Крыша + Низ']].map(([type, label]) => (
+              {[
+                ['roof',       'Вент. отверстия + патрубок в центре крыши'],
+                ['roofBottom', 'Вент. отверстия + патрубки в каждой секции'],
+              ].map(([type, label]) => (
                 <tr key={type}>
                   <td className={styles.rowLabel}>{label}</td>
                   {QTY_BRACKETS.map((q) => (
@@ -181,31 +184,36 @@ export default function PriceCoefficientsTab({ onNotify }) {
             </div>
           </label>
         </div>
-        <div className={styles.tableWrap}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Серия</th>
-                {THICKNESS_KEYS.map((k) => <th key={k}>{k} мм</th>)}
-              </tr>
-            </thead>
-            <tbody>
-              {SERIES.map((s) => (
-                <tr key={s}>
-                  <td className={styles.rowLabel}>{s.toUpperCase()}</td>
-                  {THICKNESS_KEYS.map((k) => (
-                    <td key={k}>
-                      <PctInput
-                        value={thickness[s]?.[k] ?? ''}
-                        onChange={(v) => update(['thickness', s, k], v)}
-                        ariaLabel={`Толщина ${s.toUpperCase()} ${k}мм`}
-                      />
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={styles.splitTables}>
+          {SERIES.map((s) => (
+            <div key={s} className={styles.splitBlock}>
+              <div className={styles.splitLabel}>{s.toUpperCase()}</div>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Толщина</th>
+                      <th>Надбавка</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {THICKNESS_KEYS.map((k) => (
+                      <tr key={k}>
+                        <td className={styles.rowLabel}>{k} мм</td>
+                        <td>
+                          <PctInput
+                            value={thickness[s]?.[k] ?? ''}
+                            onChange={(v) => update(['thickness', s, k], v)}
+                            ariaLabel={`Толщина ${s.toUpperCase()} ${k}мм`}
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
