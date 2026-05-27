@@ -9,10 +9,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
-import { validateInviteCode } from '../../hooks/useInviteCode';
 import styles from './AuthModal.module.css';
-
-const INVITE_CODE_KEY = 'promet_invite_code';
 
 function CloseSvg() {
   return (
@@ -109,19 +106,6 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
   const password = watch('password');
 
   async function onSubmit({ displayName, company, email, password: pw }) {
-    const code = sessionStorage.getItem(INVITE_CODE_KEY) ?? '';
-    let codeOk = false;
-    try {
-      codeOk = await validateInviteCode(code);
-    } catch {
-      codeOk = false;
-    }
-    if (!codeOk) {
-      setError('root', { message: 'Нужна ссылка-приглашение. Обратитесь к администратору.' });
-      setShake(true);
-      setTimeout(() => setShake(false), 400);
-      return;
-    }
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pw);
       await setDoc(doc(db, 'users', cred.user.uid), {
