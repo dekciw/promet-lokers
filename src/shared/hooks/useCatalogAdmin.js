@@ -2,14 +2,78 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-// localStorage key используется loadCatalog.js (regular user catalog cache).
-// Каждая admin-мутация должна сбрасывать его, чтобы конфигуратор увидел свежие данные.
 const CACHE_KEY = 'promet_catalog_v1';
 
-// Firestore хранит models как объект {articleKey: modelData}, а не массив.
-// Конвертируем в массив для удобной фильтрации/сортировки в UI.
-// Дедупликация: если в Firestore остались цифровые ключи (0, 1, 2...) от старого
-// формата РЯДОМ с новыми строковыми ключами — предпочитаем article-keyed записи.
+// Flatten Firestore nested model format → flat format for the admin form.
+// Firestore stores: { seriesId: 'ml', defaultSpecs: { height, width, depth, bodyThickness, doorThickness } }
+// Admin form needs: { series: 'ML', height, width, depth, bodyThickness, doorThickness }
+// We preserve ALL original fields plus add the flat ones — configurator keeps working.
+function normalizeModel(firestoreKey, m) {
+  const specs = m.defaultSpecs ?? {};
+  return {
+    // Preserve all original Firestore fields (defaultSpecs, seriesId, doorWeight, etc.)
+    ...m,
+    // firestoreKey = original numeric key, needed to write back under same key + for photo fallback
+    firestoreKey: m.firestoreKey ?? firestoreKey,
+    // article: explicit field takes priority, then use the key
+    article: m.article ?? firestoreKey,
+    // Flat dimensions (from defaultSpecs or top-level)
+    height:        specs.height        ?? m.height        ?? 0,
+    width:         specs.width         ?? m.width         ?? 0,
+    depth:         specs.depth         ?? m.depth         ?? 0,
+    bodyThickness: specs.bodyThickness ?? m.bodyThickness ?? 0.5,
+    doorThickness: specs.doorThickness ?? m.doorThickness ?? 0.5,
+    // series: uppercase for display ('ML'/'LS'), derived from seriesId if not present
+    series: m.series ?? (m.seriesId ? m.seriesId.toUpperCase() : 'ML'),
+    // weight: use explicit total or sum of parts
+    weight: m.weight ?? ((m.doorWeight ?? 0) + (m.bodyWeight ?? 0)),
+    lockCount: m.lockCount ?? 1,
+    doorCount:  m.doorCount  ?? 1,
+    photoUrl:   m.photoUrl   ?? '',
+  };
+}
+
+// Convert flat admin form data back to Firestore-compatible format.
+// We must preserve: defaultSpecs (configurator reads it), seriesId (configurator filters by it),
+// doorWeight/bodyWeight and any other original fields not managed by the admin form.
+function toFirestoreModel(formData, original) {
+  const series = formData.series ?? 'ML';
+  const height        = Number(formData.height)        || 0;
+  const width         = Number(formData.width)         || 0;
+  const depth         = Number(formData.depth)         || 0;
+  const bodyThickness = Number(formData.bodyThickness) || 0.5;
+  const doorThickness = Number(formData.doorThickness) || 0.5;
+
+  return {
+    // Start from original to preserve all Firestore-only fields
+    ...(original ?? {}),
+    // Admin-managed top-level fields
+    sortOrder:  Number(formData.sortOrder)  || 0,
+    name:       formData.name,
+    article:    formData.article,
+    basePrice:  Number(formData.basePrice)  || 0,
+    cpBezNDS:   Number(formData.cpBezNDS)   || 0,
+    lockCount:  Number(formData.lockCount)  || 1,
+    doorCount:  Number(formData.doorCount)  || 1,
+    weight:     Number(formData.weight)     || 0,
+    photoUrl:   formData.photoUrl           ?? '',
+    // series in both formats for compatibility
+    series:   series,
+    seriesId: series.toLowerCase(),
+    // Reconstruct defaultSpecs so configurator keeps working
+    defaultSpecs: {
+      ...(original?.defaultSpecs ?? {}),
+      height, width, depth, bodyThickness, doorThickness,
+    },
+    // Flat copies for admin display on next load
+    height, width, depth, bodyThickness, doorThickness,
+    // Preserve firestoreKey (internal — stripped before writing to Firestore)
+    firestoreKey: original?.firestoreKey ?? formData.article,
+  };
+}
+
+// Firestore stores models as object {key: modelData}.
+// rawToArray deduplicates (numeric key vs article key) and normalizes to admin flat format.
 function rawToArray(raw) {
   if (!raw || typeof raw !== 'object') return [];
   if (Array.isArray(raw)) return raw;
@@ -18,37 +82,48 @@ function rawToArray(raw) {
     if (!m || typeof m !== 'object') continue;
     const article = m.article ?? key;
     const existing = byArticle.get(article);
-    // Canonical entry: key === article (article-keyed) takes priority over numeric key
-    if (!existing || key === article) {
-      byArticle.set(article, { article, ...m });
+    if (!existing) {
+      // First occurrence — store with this key as firestoreKey
+      byArticle.set(article, normalizeModel(key, { article, ...m }));
+    } else if (key === article) {
+      // Article-keyed entry is canonical — overwrite but preserve numeric firestoreKey
+      byArticle.set(article, normalizeModel(key, {
+        article,
+        ...m,
+        firestoreKey: existing.firestoreKey ?? key,
+      }));
     }
+    // else: keep the existing entry (numeric key already stored)
   }
   return Array.from(byArticle.values());
 }
 
-// Конвертируем массив обратно в объект перед записью в Firestore.
+// Write models back as keyed object.
+// Use firestoreKey to preserve original numeric keys (so configurator modelId stays valid).
+// Strip firestoreKey itself — it's an internal admin-only field.
 function arrayToRaw(arr) {
   const obj = {};
   arr.forEach((m) => {
-    if (m.article) obj[m.article] = m;
+    const key = m.firestoreKey ?? m.article;
+    if (!key) return;
+    // eslint-disable-next-line no-unused-vars
+    const { firestoreKey, ...rest } = m;
+    obj[key] = rest;
   });
   return obj;
 }
 
-// Helper: получить актуальный массив моделей из Firestore.
 async function readModels(ref) {
   const snap = await getDoc(ref);
   if (!snap.exists()) return [];
   return rawToArray(snap.data().models);
 }
 
-// Helper: записать массив моделей с merge:true (сохраняет другие поля документа: locks, series).
 async function writeModels(ref, modelsArr) {
   await setDoc(ref, { models: arrayToRaw(modelsArr) }, { merge: true });
   try {
     localStorage.removeItem(CACHE_KEY);
   } catch (err) {
-    // localStorage может быть недоступен (private mode) — не критично
     console.warn('[useCatalogAdmin] localStorage.removeItem failed:', err.message);
   }
 }
@@ -58,7 +133,6 @@ export function useCatalogAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Стабилизируем ref через useMemo — без этого doc() создаётся при каждом рендере
   const ref = useMemo(() => doc(db, 'catalog', 'main'), []);
 
   const loadModels = useCallback(async () => {
@@ -75,30 +149,30 @@ export function useCatalogAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    loadModels();
-  }, [loadModels]);
+  useEffect(() => { loadModels(); }, [loadModels]);
 
-  // CATALOG-06: edit existing model (read-splice-write)
-  const saveModel = useCallback(async (updated) => {
+  // CATALOG-06: edit existing model
+  const saveModel = useCallback(async (formData) => {
     const current = await readModels(ref);
-    const idx = current.findIndex((m) => m.article === updated.article);
-    if (idx === -1) {
-      throw new Error(`Модель с артикулом ${updated.article} не найдена`);
-    }
+    const idx = current.findIndex((m) => m.article === formData.article);
+    if (idx === -1) throw new Error(`Модель с артикулом ${formData.article} не найдена`);
+    const firestoreModel = toFirestoreModel(formData, current[idx]);
     const next = [...current];
-    next[idx] = updated;
+    next[idx] = firestoreModel;
     await writeModels(ref, next);
     setModels(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // CATALOG-07: add new model with auto sortOrder (max+1, или 1 если массив пуст)
-  const addModel = useCallback(async (newModel) => {
+  // CATALOG-07: add new model
+  const addModel = useCallback(async (formData) => {
     const current = await readModels(ref);
     const maxSort = current.reduce((m, x) => Math.max(m, x.sortOrder ?? 0), 0);
-    const withSort = { ...newModel, sortOrder: maxSort + 1 };
-    const next = [...current, withSort];
+    const firestoreModel = toFirestoreModel(
+      { ...formData, sortOrder: maxSort + 1 },
+      null,
+    );
+    const next = [...current, firestoreModel];
     await writeModels(ref, next);
     setModels(next);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -113,14 +187,9 @@ export function useCatalogAdmin() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ORDER-02: reorder with full-array merge to protect models outside filtered view.
-  // PITFALL #4: if admin reorders while a series/search filter is active, only the
-  // visible subset is passed here. We must read the FULL array from Firestore first
-  // and merge the updated sortOrders back — otherwise hidden models are deleted.
+  // ORDER-02: reorder — must read full array to protect non-visible models
   const reorderModels = useCallback(async (reorderedArr) => {
-    // Reassign sortOrder sequentially per new array position (1-indexed)
     const withNewOrder = reorderedArr.map((m, i) => ({ ...m, sortOrder: i + 1 }));
-    // Read CURRENT full models from Firestore — critical to not lose non-visible models
     const current = await readModels(ref);
     const next = current.map((m) => {
       const updated = withNewOrder.find((u) => u.article === m.article);

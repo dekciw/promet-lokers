@@ -48,6 +48,8 @@ function SortableCard({ model, onEdit, onDelete, disabled }) {
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const photoSrc = model.photoUrl || (model.firestoreKey ? `/img/models/${model.firestoreKey}.png` : null);
+
   return (
     <article
       ref={setNodeRef}
@@ -73,6 +75,11 @@ function SortableCard({ model, onEdit, onDelete, disabled }) {
           <circle cx="11" cy="12" r="1.5" fill="currentColor" />
         </svg>
       </div>
+      {photoSrc && (
+        <div className={styles.cardPhoto}>
+          <img src={photoSrc} alt={model.name} className={styles.cardPhotoImg} />
+        </div>
+      )}
       <h3 className={styles.cardName}>{model.name}</h3>
       <span className={styles.cardArticle}>Артикул: {model.article}</span>
       <div className={styles.cardMeta}>
