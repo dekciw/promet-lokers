@@ -52,7 +52,7 @@ const QTY_LABELS = {
 
 const QTY_BRACKETS   = ['qty1', 'qty10', 'qty50', 'qty100'];
 const DEPTH_BRACKETS = ['qty10', 'qty50', 'qty100'];
-const THICKNESS_KEYS = ['0.45', '0.5', '0.6', '0.7'];
+const THICKNESS_KEYS = ['0.5', '0.6', '0.7'];
 const SERIES = ['ml', 'ls'];
 
 export default function PriceCoefficientsTab({ onNotify }) {
