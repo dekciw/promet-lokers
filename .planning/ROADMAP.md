@@ -227,7 +227,12 @@ Plans:
   3. Администратор удаляет (деактивирует) аккаунт через Cloud Function — пользователь больше не может войти
   4. При скачивании КП конфигурация автоматически сохраняется в /users/{uid}/history (дата, модель, цена)
   5. Пользователь видит список своих КП и может восстановить конфигурацию или повторно скачать КП одним кликом
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [x] 11-01-PLAN.md — useUsersAdmin hook + secondary Firebase App pattern + tests (USERS-01..04)
+- [ ] 11-02-PLAN.md — useHistory hook + Firestore subcollection + tests (HIST-01..04)
+- [ ] 11-03-PLAN.md — UsersTab UI + AdminPage tab + LoginScreen status gate (USERS-01..03)
+- [ ] 11-04-PLAN.md — HistoryPage + saveToHistory in Configurator + uid flow + Header link (HIST-01..04)
 **UI hint**: yes
 
 ---
@@ -246,8 +251,8 @@ Plans:
 | 8. Catalog CRUD | v1.1 | 2/2 | Complete   | 2026-05-26 |
 | 9. Media & Ordering | v1.1 | 0/? | Not started | — |
 | 10. Price Coefficients | v1.1 | 2/2 | Complete    | 2026-05-27 |
-| 11. Users & History | v1.1 | 0/? | Not started | — |
+| 11. Users & History | v1.1 | 1/4 | In Progress|  |
 
 ---
 
-*Last updated: 2026-05-27 — Phase 10 complete. Next: Phase 11 (Users & History)*
+*Last updated: 2026-05-27 — Phase 11 planned (4 plans, 2 waves). Next: execute Phase 11.*

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Админ-панель
 status: executing
-stopped_at: Phase 10 complete — ready for Phase 11
-last_updated: "2026-05-27T05:00:00.000Z"
+stopped_at: Completed 11-01-PLAN.md
+last_updated: "2026-05-27T04:45:15.602Z"
 last_activity: 2026-05-27
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  total_plans: 12
+  completed_plans: 9
   percent: 80
 ---
 
@@ -73,6 +73,9 @@ Recent decisions affecting v1.1 work (full log in PROJECT.md):
 - [Phase 09-media-ordering]: JS numeric string keys всегда итерируются в числовом порядке — нельзя полагаться на insertion order объекта для сортировки; sort() обязателен в consumer
 - [Phase 09-media-ordering]: trigger() после reset() в RHF mode:onChange — иначе isValid=false после программного reset
 - [Phase 09-media-ordering]: onPhotoUpload prop pattern — CatalogEditModal остался decoupled от Firestore; AdminPage передаёт mode-aware handler
+- [Phase 11-users-history]: firebaseConfig exported via simple const keyword change — no duplication of env vars, enables secondary Firebase App pattern
+- [Phase 11-users-history]: Secondary app name uses Date.now() suffix for uniqueness — avoids Firebase App name collision pitfall on rapid repeated calls
+- [Phase 11-users-history]: Firestore doc mapping: { ...d.data(), uid: d.id } — doc ID always wins over any uid field in document data
 
 ### Pending Todos
 
@@ -86,6 +89,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-27T00:14:00.000Z
-Stopped at: Phase 09 complete — all MEDIA-01..04 + ORDER-01..03 verified in browser
+Last session: 2026-05-27T04:45:15.599Z
+Stopped at: Completed 11-01-PLAN.md
 Resume file: None
