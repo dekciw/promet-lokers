@@ -274,6 +274,7 @@ export default function AdminPage({ onLogout, username = '' }) {
         </div>
       </header>
 
+      <div className={styles.content}>
       {activeTab === 'prices' && (
         <PriceCoefficientsTab onNotify={(status, title) => {
           if (status === 'ok') showOk(title);
@@ -387,6 +388,7 @@ export default function AdminPage({ onLogout, username = '' }) {
       </main>
         </>
       )}
+      </div>
 
       <CatalogEditModal
         isOpen={addOpen}
