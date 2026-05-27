@@ -1,6 +1,5 @@
 .tab {
   padding: 24px 40px;
-  max-width: 1200px;
 }
 
 .state {
@@ -28,23 +27,36 @@
   font-family: inherit;
 }
 
+/* ── Section ── */
 .section {
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   margin-bottom: 16px;
+}
+
+.sectionHead {
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
   font-size: 16px;
   font-weight: 700;
   color: #0c1e4a;
-  margin: 0 0 16px 0;
+  margin: 0 0 6px 0;
 }
 
+.sectionDesc {
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Min qty row ── */
 .minQtyRow {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .minQtyLabel {
@@ -52,10 +64,37 @@
   align-items: center;
   gap: 12px;
   font-size: 13px;
-  color: #4a5568;
   font-weight: 600;
+  color: #2d3748;
 }
 
+.minQtyInputWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.minQtyInput {
+  min-height: 40px;
+  width: 80px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1a202c;
+  background: #fff;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.minQtyInput:focus {
+  outline: none;
+  border-color: #0c53b3;
+  box-shadow: 0 0 0 3px rgba(12, 83, 179, 0.15);
+}
+
+/* ── Table ── */
 .tableWrap {
   overflow-x: auto;
 }
@@ -68,30 +107,42 @@
 
 .table th {
   text-align: left;
-  padding: 8px 10px;
+  padding: 10px 12px;
   background: #f7fafc;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 2px solid #e2e8f0;
   font-weight: 600;
   color: #4a5568;
   white-space: nowrap;
 }
 
 .table td {
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .rowLabel {
   font-weight: 600;
   color: #0c1e4a;
   white-space: nowrap;
+  min-width: 120px;
+}
+
+/* ── Percent input ── */
+.pctWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .rateInput {
-  min-height: 44px;
-  min-width: 96px;
-  padding: 0 12px;
+  min-height: 40px;
+  width: 80px;
+  padding: 0 10px;
   border: 1px solid #cbd5e0;
   border-radius: 6px;
   font-size: 14px;
@@ -99,6 +150,7 @@
   color: #1a202c;
   background: #fff;
   box-sizing: border-box;
+  text-align: right;
 }
 
 .rateInput:focus {
@@ -107,6 +159,15 @@
   box-shadow: 0 0 0 3px rgba(12, 83, 179, 0.15);
 }
 
+.pctSign {
+  font-size: 13px;
+  font-weight: 600;
+  color: #718096;
+  user-select: none;
+  min-width: 16px;
+}
+
+/* ── Save bar ── */
 .saveBar {
   position: sticky;
   bottom: 0;
@@ -156,6 +217,6 @@
   }
 
   .rateInput {
-    min-width: 80px;
+    width: 70px;
   }
 }
