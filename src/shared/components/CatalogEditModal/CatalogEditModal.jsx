@@ -328,6 +328,7 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     className={cx(styles.select, errors.bodyThickness && styles.inputError)}
                     {...register('bodyThickness', { valueAsNumber: true, required: 'Обязательно' })}
                   >
+                    <option value={0.45}>0.45</option>
                     <option value={0.5}>0.5</option>
                     <option value={0.6}>0.6</option>
                     <option value={0.7}>0.7</option>
@@ -345,6 +346,7 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     className={cx(styles.select, errors.doorThickness && styles.inputError)}
                     {...register('doorThickness', { valueAsNumber: true, required: 'Обязательно' })}
                   >
+                    <option value={0.45}>0.45</option>
                     <option value={0.5}>0.5</option>
                     <option value={0.6}>0.6</option>
                     <option value={0.7}>0.7</option>

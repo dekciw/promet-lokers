@@ -139,8 +139,8 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
 
   const nonStandardCount = [
     config.ventilationType,
-    modelDefaults && Number(config.bodyThickness) !== Number(modelDefaults.bodyThickness),
-    modelDefaults && Number(config.doorThickness) !== Number(modelDefaults.doorThickness),
+    modelDefaults && modelDefaults.bodyThickness != null && Number(config.bodyThickness) !== (Number(modelDefaults.bodyThickness) || 0.5),
+    modelDefaults && modelDefaults.doorThickness != null && Number(config.doorThickness) !== (Number(modelDefaults.doorThickness) || 0.5),
   ].filter(Boolean).length;
 
   const isLS = config.seriesId?.toLowerCase() === 'ls';
@@ -451,9 +451,9 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     const ventValX = X_VENTILATION_VAL_1 + VENT_VAL_OFFSET_X;
 
     const rows = [];
-    if (modelDefaults && Number(config.bodyThickness) !== Number(modelDefaults.bodyThickness))
+    if (modelDefaults && modelDefaults.bodyThickness != null && Number(config.bodyThickness) !== (Number(modelDefaults.bodyThickness) || 0.5))
       rows.push({ label: 'Толщина металла корпуса (мм)', value: String(config.bodyThickness) });
-    if (modelDefaults && Number(config.doorThickness) !== Number(modelDefaults.doorThickness))
+    if (modelDefaults && modelDefaults.doorThickness != null && Number(config.doorThickness) !== (Number(modelDefaults.doorThickness) || 0.5))
       rows.push({ label: 'Толщина металла двери (мм)', value: String(config.doorThickness) });
     if (config.ventilationType)
       rows.push({ label: 'Вентиляция', value: catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType, isVent: true });

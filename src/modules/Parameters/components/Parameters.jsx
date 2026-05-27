@@ -22,7 +22,7 @@ const HEIGHT_MAX = 2000;
 const HEIGHT_SNAPS = [1800, 1850, 1860, 1900, 2000];
 const DEPTH_MIN = 300;
 const WIDTH_RANGE = 50;
-const EXTRA_THICKNESS = ['0.5', '0.6', '0.7'];
+const EXTRA_THICKNESS = ['0.45', '0.5', '0.6', '0.7'];
 
 const STEP_LABELS = ['Серия', 'Модель', 'Параметры'];
 
@@ -62,9 +62,7 @@ const resetItem = {
 };
 
 function buildThicknessOptions(baseVal) {
-	// Clamp to minimum 0.5 — production minimum; 0.45 and below treated as 0.5
-	const num = baseVal != null ? Math.max(0.5, Number(baseVal)) : 0.5;
-	const base = String(num);
+	const base = String(Number(baseVal) || 0.5);
 	if (EXTRA_THICKNESS.includes(base)) return EXTRA_THICKNESS;
 	return [base, ...EXTRA_THICKNESS];
 }

@@ -149,8 +149,8 @@ export default function Configurator() {
 
 	const defaultsForDiff = defaults ? {
 		...defaults,
-		bodyThickness: String(Math.max(0.5, Number(defaults.bodyThickness ?? 0.5))),
-		doorThickness: String(Math.max(0.5, Number(defaults.doorThickness ?? 0.5))),
+		bodyThickness: String(Number(defaults.bodyThickness) || 0.5),
+		doorThickness: String(Number(defaults.doorThickness) || 0.5),
 		lockName: catalog.locks[defaults.lockId]?.name,
 		bodyColorName: defaults.bodyColorName ?? DEFAULT_COLOR_NAME,
 		doorColorName: defaults.doorColorName ?? DEFAULT_COLOR_NAME,

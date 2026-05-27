@@ -59,12 +59,12 @@ export function buildNonStandardOrderParams(config, catalog) {
     {
       label: 'Толщина корпуса',
       value: `${config.bodyThickness} мм`,
-      isNonStandard: defaults.bodyThickness != null && config.bodyThickness !== defaults.bodyThickness,
+      isNonStandard: defaults.bodyThickness != null && Number(config.bodyThickness) !== (Number(defaults.bodyThickness) || 0.5),
     },
     {
       label: 'Толщина двери',
       value: `${config.doorThickness} мм`,
-      isNonStandard: defaults.doorThickness != null && config.doorThickness !== defaults.doorThickness,
+      isNonStandard: defaults.doorThickness != null && Number(config.doorThickness) !== (Number(defaults.doorThickness) || 0.5),
     },
     {
       label: 'Замок',

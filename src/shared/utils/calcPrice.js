@@ -51,8 +51,8 @@ export function calcPrice(config, catalog) {
   const totalW = doorW + bodyW;
 
   // ── 1. Определяем каждое изменение ──────────────────────────────
-  const bodyThickChanged = !!config.bodyThickness && config.bodyThickness !== defaults.bodyThickness;
-  const doorThickChanged = !!config.doorThickness && config.doorThickness !== defaults.doorThickness;
+  const bodyThickChanged = defaults.bodyThickness != null && Number(config.bodyThickness) !== (Number(defaults.bodyThickness) || 0.5);
+  const doorThickChanged = defaults.doorThickness != null && Number(config.doorThickness) !== (Number(defaults.doorThickness) || 0.5);
   const thicknessChanged = bodyThickChanged || doorThickChanged;
 
   const heightVal = config.height !== '' ? Number(config.height) : null;
