@@ -11,10 +11,11 @@ const STATUS_TABS = [
 ];
 
 export default function UsersTab({ onNotify }) {
-  const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser } = useUsersAdmin();
+  const { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser, deleteUser } = useUsersAdmin();
   const [addOpen, setAddOpen] = useState(false);
   const [disableTarget, setDisableTarget] = useState(null);
   const [enableTarget, setEnableTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [statusFilter, setStatusFilter] = useState('active');
   const [search, setSearch] = useState('');
 
@@ -53,6 +54,17 @@ export default function UsersTab({ onNotify }) {
       await enableUser(enableTarget.uid);
       onNotify?.('ok', `Пользователь ${enableTarget.email} реактивирован`);
       setEnableTarget(null);
+    } catch (err) {
+      onNotify?.('error', `Ошибка: ${err.message}`);
+    }
+  }
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    try {
+      await deleteUser(deleteTarget.uid);
+      onNotify?.('ok', `Пользователь ${deleteTarget.email} удалён`);
+      setDeleteTarget(null);
     } catch (err) {
       onNotify?.('error', `Ошибка: ${err.message}`);
     }
@@ -166,14 +178,24 @@ export default function UsersTab({ onNotify }) {
                         Деактивировать
                       </button>
                     ) : (
-                      <button
-                        type="button"
-                        className={cx(styles.actionBtn, styles.actionBtnSuccess)}
-                        onClick={() => setEnableTarget(u)}
-                        aria-label={`Реактивировать ${u.email}`}
-                      >
-                        Реактивировать
-                      </button>
+                      <div className={styles.actionGroup}>
+                        <button
+                          type="button"
+                          className={cx(styles.actionBtn, styles.actionBtnSuccess)}
+                          onClick={() => setEnableTarget(u)}
+                          aria-label={`Реактивировать ${u.email}`}
+                        >
+                          Реактивировать
+                        </button>
+                        <button
+                          type="button"
+                          className={cx(styles.actionBtn, styles.actionBtnDanger)}
+                          onClick={() => setDeleteTarget(u)}
+                          aria-label={`Удалить ${u.email}`}
+                        >
+                          Удалить
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -294,6 +316,33 @@ export default function UsersTab({ onNotify }) {
                 onClick={handleEnable}
               >
                 Реактивировать
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className={styles.overlay} onClick={() => setDeleteTarget(null)}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Подтвердить удаление">
+            <h3 className={styles.modalTitle}>Удалить пользователя?</h3>
+            <p className={styles.modalText}>
+              Аккаунт <strong>{deleteTarget.email}</strong> будет удалён безвозвратно.
+            </p>
+            <div className={styles.actions}>
+              <button
+                type="button"
+                className={cx(styles.actionBtn, styles.actionBtnSecondary)}
+                onClick={() => setDeleteTarget(null)}
+              >
+                Отмена
+              </button>
+              <button
+                type="button"
+                className={cx(styles.actionBtn, styles.actionBtnDanger)}
+                onClick={handleDelete}
+              >
+                Удалить
               </button>
             </div>
           </div>

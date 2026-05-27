@@ -185,6 +185,12 @@
   color: #276749;
 }
 
+.actionGroup {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .actionBtn {
   min-height: 36px;
   min-width: 44px;

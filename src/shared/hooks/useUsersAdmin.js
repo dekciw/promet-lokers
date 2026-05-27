@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
-import { collection, doc, getDocs, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDocs, setDoc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth, firebaseConfig } from '../lib/firebase';
 
 // USERS-02/USERS-04: создание пользователя через secondary Firebase App.
@@ -81,5 +81,11 @@ export function useUsersAdmin() {
     setUsers((prev) => prev.map((u) => (u.uid === uid ? { ...u, status: 'active' } : u)));
   }, []);
 
-  return { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser };
+  // Удаление деактивированного пользователя из Firestore
+  const deleteUser = useCallback(async (uid) => {
+    await deleteDoc(doc(db, 'users', uid));
+    setUsers((prev) => prev.filter((u) => u.uid !== uid));
+  }, []);
+
+  return { users, isLoading, error, isCreating, loadUsers, createUser, disableUser, enableUser, deleteUser };
 }
