@@ -22,7 +22,7 @@ const HEIGHT_MAX = 2000;
 const HEIGHT_SNAPS = [1800, 1850, 1860, 1900, 2000];
 const DEPTH_MIN = 300;
 const WIDTH_RANGE = 50;
-const THICKNESS_UPGRADES = ['0.6', '0.7'];
+const THICKNESS_UPGRADES = ['0.5', '0.6', '0.7'];
 
 const STEP_LABELS = ['Серия', 'Модель', 'Параметры'];
 
