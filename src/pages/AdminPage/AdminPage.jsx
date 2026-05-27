@@ -36,7 +36,7 @@ const ADMIN_TABS = [
 // SortableCard: individual card wrapped in useSortable.
 // IMPORTANT: drag listeners are attached ONLY to .dragHandle, NOT the whole article —
 // this keeps "Редактировать" / "Удалить" button clicks from initiating a drag.
-function SortableCard({ model, onEdit, onDelete, disabled }) {
+function SortableCard({ model, onEdit, onDelete, disabled, position, total }) {
   const {
     attributes, listeners, setNodeRef,
     transform, transition, isDragging,
@@ -75,6 +75,11 @@ function SortableCard({ model, onEdit, onDelete, disabled }) {
           <circle cx="11" cy="12" r="1.5" fill="currentColor" />
         </svg>
       </div>
+      {position != null && (
+        <div className={styles.positionBadge} aria-label={`Позиция ${position} из ${total}`}>
+          {position} <span className={styles.positionTotal}>/ {total}</span>
+        </div>
+      )}
       {photoSrc && (
         <div className={styles.cardPhoto}>
           <img src={photoSrc} alt={model.name} className={styles.cardPhotoImg} />
@@ -151,9 +156,9 @@ export default function AdminPage({ onLogout, username }) {
     return await uploadToCloudinary(blob);
   }
 
-  // ORDER-01: drag is blocked when filter or search is active
-  // Reason: reordering a filtered subset would corrupt the global order of hidden models
-  const isDragDisabled = activeSeries !== 'all' || searchQuery.trim() !== '';
+  // ORDER-01: drag allowed only when a specific series is selected (not "all") and no search
+  // Reason: reordering mixed ML+LS is confusing; series tabs give isolated, predictable order
+  const isDragDisabled = activeSeries === 'all' || searchQuery.trim() !== '';
 
   // DnD sensors — PointerSensor with distance:5 avoids accidental drag on button clicks
   const sensors = useSensors(
@@ -339,19 +344,26 @@ export default function AdminPage({ onLogout, username }) {
               items={visibleModels.map((m) => m.article)}
               strategy={rectSortingStrategy}
             >
-              {isDragDisabled && (
+              {activeSeries === 'all' && (
                 <div className={styles.dragHint} role="status">
-                  Очистите фильтр и поиск, чтобы изменять порядок
+                  Выберите серию ML или LS, чтобы менять порядок карточек
+                </div>
+              )}
+              {searchQuery.trim() !== '' && activeSeries !== 'all' && (
+                <div className={styles.dragHint} role="status">
+                  Очистите поиск, чтобы изменять порядок
                 </div>
               )}
               <div className={styles.grid}>
-                {visibleModels.map((m) => (
+                {visibleModels.map((m, idx) => (
                   <SortableCard
                     key={m.article}
                     model={m}
                     onEdit={setEditTarget}
                     onDelete={setDeleteTarget}
                     disabled={isDragDisabled}
+                    position={activeSeries !== 'all' ? idx + 1 : null}
+                    total={activeSeries !== 'all' ? visibleModels.length : null}
                   />
                 ))}
               </div>

@@ -226,6 +226,33 @@
   opacity: 0.3;
 }
 
+/* Position badge — top-left, shows slot number within current series */
+.positionBadge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  min-width: 32px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 6px;
+  background: #0c53b3;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  user-select: none;
+}
+
+.positionTotal {
+  font-weight: 400;
+  opacity: 0.7;
+  font-size: 11px;
+}
+
 /* Drag handle — six-dot grip icon, top-right of each card */
 .dragHandle {
   position: absolute;
