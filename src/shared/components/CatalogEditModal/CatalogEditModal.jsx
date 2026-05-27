@@ -56,6 +56,8 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
 
   // Watch photoUrl to drive preview rendering
   const photoUrl = watch('photoUrl');
+  const fallbackPhotoUrl = model?.firestoreKey ? `/img/models/${model.firestoreKey}.png` : null;
+  const displayPhotoUrl = photoUrl || fallbackPhotoUrl;
 
   // Populate / reset form on open (RESEARCH.md Pitfall #3 — guard on isOpen is mandatory)
   // trigger() after reset: mode:'onChange' doesn't auto-validate on reset, so isValid stays
@@ -156,8 +158,8 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <label className={styles.label}>Фото модели</label>
                   <div className={styles.photoRow}>
                     <div className={styles.photoPreview}>
-                      {photoUrl ? (
-                        <img src={photoUrl} alt="Превью фото модели" className={styles.photoPreviewImg} />
+                      {displayPhotoUrl ? (
+                        <img src={displayPhotoUrl} alt="Превью фото модели" className={styles.photoPreviewImg} />
                       ) : (
                         <span className={styles.photoPlaceholder} aria-hidden="true">нет фото</span>
                       )}
