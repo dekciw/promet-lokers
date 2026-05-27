@@ -208,11 +208,13 @@
   cursor: pointer;
   font-family: inherit;
   font-size: inherit;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .footerLink:hover {
   text-decoration: underline;
+  opacity: 0.75;
 }
 
 /* ── Closed state ── */
