@@ -419,28 +419,30 @@
 /* ── Admin top-level tabs (Catalog / Prices) ── */
 .adminTabs {
   display: inline-flex;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 9999px;
-  padding: 4px;
+  gap: 6px;
   margin: 0 16px;
 }
 
 .adminTab {
-  min-height: 44px;
-  padding: 0 20px;
-  border: none;
-  background: transparent;
-  border-radius: 9999px;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--r-full, 9999px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.7);
-  transition: background 0.15s, color 0.15s;
+  font-weight: 500;
+  cursor: pointer;
   font-family: inherit;
   white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .adminTab:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
   color: #fff;
 }
 
@@ -450,8 +452,10 @@
 }
 
 .adminTabActive {
-  background: #fff;
-  color: #0c1e4a;
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #fff;
+  font-weight: 600;
 }
 
 /* ── Responsive ── */
@@ -494,11 +498,13 @@
     order: 3;
     width: 100%;
     margin: 8px 0 0;
+    justify-content: stretch;
   }
 
   .adminTab {
     flex: 1;
     min-height: 44px;
+    justify-content: center;
   }
 }
 
