@@ -79,6 +79,98 @@ describe('buildNonStandardOrderParams', () => {
     expect(result.find(p => p.label === 'Толщина двери').isNonStandard).toBe(true);
   });
 
+  it('не помечает doorThickness нестандартным когда строковое значение совпадает с числовым дефолтом из Firestore', () => {
+    // Firestore возвращает bodyThickness/doorThickness как числа (doubleValue),
+    // но config хранит их как строки через String(). Сравнение должно работать через Number().
+    const catalogNumericDefaults = {
+      ...CATALOG,
+      models: {
+        'ml-186': {
+          ...CATALOG.models['ml-186'],
+          defaultSpecs: {
+            ...CATALOG.models['ml-186'].defaultSpecs,
+            bodyThickness: 0.5,  // число, как из Firestore
+            doorThickness: 0.5,  // число, как из Firestore
+          },
+        },
+      },
+    };
+    const result = buildNonStandardOrderParams(
+      { ...STANDARD_CONFIG, bodyThickness: '0.5', doorThickness: '0.5' },
+      catalogNumericDefaults,
+    );
+    expect(result.find(p => p.label === 'Толщина корпуса').isNonStandard).toBe(false);
+    expect(result.find(p => p.label === 'Толщина двери').isNonStandard).toBe(false);
+  });
+
+  it('помечает doorThickness нестандартным при числовом дефолте из Firestore и строковом изменённом значении', () => {
+    const catalogNumericDefaults = {
+      ...CATALOG,
+      models: {
+        'ml-186': {
+          ...CATALOG.models['ml-186'],
+          defaultSpecs: {
+            ...CATALOG.models['ml-186'].defaultSpecs,
+            bodyThickness: 0.5,
+            doorThickness: 0.5,
+          },
+        },
+      },
+    };
+    const result = buildNonStandardOrderParams(
+      { ...STANDARD_CONFIG, doorThickness: '0.6' },
+      catalogNumericDefaults,
+    );
+    expect(result.find(p => p.label === 'Толщина двери').isNonStandard).toBe(true);
+  });
+
+  it('не помечает doorThickness нестандартным когда дефолт в Firestore 0 (legacy) а config=0.5 (после clamping applySpecs)', () => {
+    // Ситуация: в Firestore хранится doorThickness=0 (легаси-данные до добавления clamping).
+    // applySpecs делает Math.max(0.5, 0) = 0.5, поэтому config.doorThickness='0.5'.
+    // Сравнение должно клампировать defaults так же, как applySpecs: Math.max(0.5, 0)=0.5 === 0.5 → стандартный.
+    const catalogZeroDefaults = {
+      ...CATALOG,
+      models: {
+        'ml-186': {
+          ...CATALOG.models['ml-186'],
+          defaultSpecs: {
+            ...CATALOG.models['ml-186'].defaultSpecs,
+            bodyThickness: 0,
+            doorThickness: 0,
+          },
+        },
+      },
+    };
+    const result = buildNonStandardOrderParams(
+      { ...STANDARD_CONFIG, bodyThickness: '0.5', doorThickness: '0.5' },
+      catalogZeroDefaults,
+    );
+    expect(result.find(p => p.label === 'Толщина корпуса').isNonStandard).toBe(false);
+    expect(result.find(p => p.label === 'Толщина двери').isNonStandard).toBe(false);
+  });
+
+  it('помечает doorThickness нестандартным когда дефолт в Firestore 0 (legacy) а пользователь выбрал 0.6', () => {
+    // Пользователь явно выбрал 0.6, что отличается от эффективного дефолта 0.5.
+    const catalogZeroDefaults = {
+      ...CATALOG,
+      models: {
+        'ml-186': {
+          ...CATALOG.models['ml-186'],
+          defaultSpecs: {
+            ...CATALOG.models['ml-186'].defaultSpecs,
+            bodyThickness: 0,
+            doorThickness: 0,
+          },
+        },
+      },
+    };
+    const result = buildNonStandardOrderParams(
+      { ...STANDARD_CONFIG, doorThickness: '0.6' },
+      catalogZeroDefaults,
+    );
+    expect(result.find(p => p.label === 'Толщина двери').isNonStandard).toBe(true);
+  });
+
   it('форматирует ventilationType=roof как Крыша и помечает нестандартным', () => {
     const result = buildNonStandardOrderParams({ ...STANDARD_CONFIG, ventilationType: 'roof' }, CATALOG);
     const vent = result.find(p => p.label === 'Вентиляция');
