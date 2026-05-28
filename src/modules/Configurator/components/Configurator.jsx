@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { calcDiff } from '@/shared/utils/calcDiff';
 import Notification from '@/shared/components/Notification/Notification.jsx';
@@ -138,7 +138,7 @@ function IconFinal() {
 }
 
 export default function Configurator() {
-	const { config, price, catalog, isResetting, resetKey, parametersUnlocked, uid } = useAppContext();
+	const { config, price, catalog, isResetting, resetKey, parametersUnlocked, uid, pendingNzRestore, clearPendingNzRestore } = useAppContext();
 	const { saveToHistory } = useHistory(uid);
 	const model = config.modelId ? catalog.models[config.modelId] : null;
 	const modelName = model?.name ?? config.modelId ?? 'Неизвестная модель';
@@ -166,6 +166,14 @@ export default function Configurator() {
 	const [isOrderOpen, setIsOrderOpen] = useState(false);
 	const [isProposalOpen, setIsProposalOpen] = useState(false);
 	const [notify, setNotify] = useState({ visible: false, status: 'ok', title: '', message: '' });
+
+	// Auto-open НЗ modal when restoring from history
+	useEffect(() => {
+		if (pendingNzRestore) {
+			setIsOrderOpen(true);
+			clearPendingNzRestore?.();
+		}
+	}, [pendingNzRestore]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	function openOrderModal() { setIsOrderOpen(true); }
 	function closeOrderModal() { setIsOrderOpen(false); }
@@ -208,6 +216,10 @@ export default function Configurator() {
 		try {
 			const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
 			await generateNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+			saveToHistory(uid, config, modelName, article, price?.clientPrice ?? 0, {
+				type: 'nz',
+				nzFormData: { managerName, clientName, nzNumber, calcNumber },
+			}).catch((err) => { console.warn('[history] nz save failed:', err?.message ?? err); });
 			setIsOrderOpen(false);
 			setNotify({ visible: true, status: 'ok', title: 'Бланк скачан', message: 'Бланк нестандартного заказа успешно сохранён' });
 		} catch (err) {
@@ -566,7 +578,7 @@ export default function Configurator() {
 			</div>
 
 
-			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} onPrint={handleOrderPrint} summary={orderSummary} />
+			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} onPrint={handleOrderPrint} summary={orderSummary} initialValues={pendingNzRestore} />
 			<CommercialProposalModal
 				isOpen={isProposalOpen}
 				onClose={() => setIsProposalOpen(false)}

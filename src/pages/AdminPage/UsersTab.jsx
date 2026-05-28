@@ -281,7 +281,7 @@ export default function UsersTab({ onNotify }) {
       )}
 
       {addOpen && (
-        <div className={styles.overlay} onClick={() => !isCreating && setAddOpen(false)}>
+        <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget && !isCreating) setAddOpen(false); }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Добавить пользователя">
             <h3 className={styles.modalTitle}>Новый пользователь</h3>
             <form onSubmit={handleSubmit(handleCreate)} noValidate>
@@ -371,7 +371,7 @@ export default function UsersTab({ onNotify }) {
       )}
 
       {enableTarget && (
-        <div className={styles.overlay} onClick={() => setEnableTarget(null)}>
+        <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setEnableTarget(null); }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Подтвердить реактивацию">
             <h3 className={styles.modalTitle}>Реактивировать пользователя?</h3>
             <p className={styles.modalText}>
@@ -398,7 +398,7 @@ export default function UsersTab({ onNotify }) {
       )}
 
       {deleteTarget && (
-        <div className={styles.overlay} onClick={() => setDeleteTarget(null)}>
+        <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Подтвердить удаление">
             <h3 className={styles.modalTitle}>Удалить пользователя?</h3>
             <p className={styles.modalText}>
@@ -425,7 +425,7 @@ export default function UsersTab({ onNotify }) {
       )}
 
       {editTarget && (
-        <div className={styles.overlay} onClick={() => !isUpdating && setEditTarget(null)}>
+        <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget && !isUpdating) setEditTarget(null); }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Редактировать пользователя">
             <h3 className={styles.modalTitle}>Редактировать пользователя</h3>
             <form onSubmit={handleSubmitEdit(handleUpdate)} noValidate>
@@ -543,7 +543,7 @@ export default function UsersTab({ onNotify }) {
       </div>
 
       {disableTarget && (
-        <div className={styles.overlay} onClick={() => setDisableTarget(null)}>
+        <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setDisableTarget(null); }}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Подтвердить деактивацию">
             <h3 className={styles.modalTitle}>Деактивировать пользователя?</h3>
             <p className={styles.modalText}>

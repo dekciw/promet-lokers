@@ -4,18 +4,21 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-// HIST-01: write КП config snapshot to users/{uid}/history.
-// Fire-and-forget от вызывающей стороны — НЕ блокирует UX скачивания PDF.
-// Caller должен .catch(console.warn) чтобы Firestore-ошибка не сломала генерацию КП.
-async function saveToHistory(uid, config, modelName, article, price) {
-  if (!uid) return; // guard для anonymous (защитный, не должно происходить в проде)
-  await addDoc(collection(db, 'users', uid, 'history'), {
+// HIST-01: write config snapshot to users/{uid}/history.
+// options.type = 'kp' | 'nz'  (default 'kp')
+// options.nzFormData = { managerName, clientName, nzNumber, calcNumber } for НЗ entries
+async function saveToHistory(uid, config, modelName, article, price, { type = 'kp', nzFormData = null } = {}) {
+  if (!uid) return;
+  const entry = {
+    type,
     configSnapshot: config,
     modelName,
     article,
     price,
     downloadedAt: serverTimestamp(),
-  });
+  };
+  if (type === 'nz' && nzFormData) entry.nzFormData = nzFormData;
+  await addDoc(collection(db, 'users', uid, 'history'), entry);
 }
 
 // HIST-02: load history sorted newest first
@@ -30,14 +33,10 @@ async function loadHistoryFor(uid) {
 }
 
 // HIST-03: apply stored config back to useConfig state via setters.
-// Setters shape — см. src/shared/hooks/useConfig.js (setters object).
 function restoreConfig(snapshot, setters) {
   if (!snapshot || !setters) return;
-  // setSeriesId — это handleSeriesChange(newSeriesId, onAdvance?) — onAdvance вызывает stepper-переход;
-  // для programmatic restore передаём пустой колбэк, чтобы избежать побочного эффекта.
   setters.setSeriesId(snapshot.seriesId, () => {});
   setters.onModelChange(snapshot.modelId);
-  // Габариты могут быть нестандартными (отличаться от defaults модели) — перезаписываем явно.
   if (snapshot.width)  setters.setWidth(snapshot.width);
   if (snapshot.height) setters.setHeight(snapshot.height);
   if (snapshot.depth)  setters.setDepth(snapshot.depth);
@@ -57,6 +56,22 @@ async function redownloadKP(entry, catalog) {
     config: entry.configSnapshot,
     catalog,
     price: entry.price,
+  });
+}
+
+// HIST-05: regenerate НЗ from stored snapshot + nzFormData
+async function redownloadNZ(entry, catalog) {
+  const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
+  const form = entry.nzFormData ?? {};
+  const priceObj = entry.price ? { clientPrice: Number(entry.price), manual: false } : null;
+  await generateNonStandardOrder({
+    config: entry.configSnapshot,
+    catalog,
+    managerName: form.managerName ?? '',
+    clientName: form.clientName ?? '',
+    price: priceObj,
+    nzNumber: form.nzNumber ?? '',
+    calcNumber: form.calcNumber ?? '',
   });
 }
 
@@ -94,6 +109,7 @@ export function useHistory(uid) {
     saveToHistory,
     restoreConfig,
     redownloadKP,
+    redownloadNZ,
     removeEntry,
   };
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import Header from '../../shared/components/Header/Header';
+import NonStandardOrderModal from '../../shared/components/NonStandardOrderModal/NonStandardOrderModal.jsx';
 import { useHistory } from '../../shared/hooks/useHistory';
 import { useCatalog } from '../../shared/hooks/useCatalog';
+import { getColorHex } from '../../shared/utils/colors';
 import { cx } from '../../shared/utils/cx.js';
 import styles from './HistoryPage.module.css';
 
@@ -17,27 +19,58 @@ function formatDate(ts) {
   });
 }
 
+function buildNzSummary(snapshot, catalog, storedPrice) {
+  if (!snapshot || !catalog) return null;
+  const model = catalog.models?.[snapshot.modelId];
+  const defaults = model?.defaultSpecs ?? null;
+  if (!model || !defaults) return null;
+  const series = (catalog.series ?? []).find(s => s.id === snapshot.seriesId);
+  const lock = catalog.locks?.[snapshot.lockId];
+  const qty = snapshot.quantity ?? 10;
+  const bodyColorName = snapshot.bodyColor?.name ?? defaults.bodyColorName ?? 'RAL 7038';
+  const doorColorName = snapshot.doorColor?.name ?? defaults.doorColorName ?? 'RAL 7038';
+  const priceDisplay = storedPrice ? `${Number(storedPrice).toLocaleString('ru-RU')} ₽` : '—';
+  return {
+    model: series && model ? `${series.name} — ${model.name}` : model.name,
+    dims: `${snapshot.width || defaults.width} × ${snapshot.height || defaults.height} × ${snapshot.depth || defaults.depth} мм`,
+    thickness: `${snapshot.bodyThickness} / ${snapshot.doorThickness} мм`,
+    lock: lock?.name ?? '—',
+    qty: `${qty} шт.`,
+    price: priceDisplay,
+    bodyColor: bodyColorName,
+    bodyColorHex: snapshot.bodyColor?.color ?? getColorHex(bodyColorName),
+    doorColor: doorColorName,
+    doorColorHex: snapshot.doorColor?.color ?? getColorHex(doorColorName),
+  };
+}
+
 export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
-  const { history, isLoading, error, loadHistory, redownloadKP, removeEntry } = useHistory(uid);
+  const { history, isLoading, error, loadHistory, redownloadKP, redownloadNZ, removeEntry } = useHistory(uid);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [nzRedownloadEntry, setNzRedownloadEntry] = useState(null);
+  const [nzError, setNzError] = useState(null);
   const { catalog } = useCatalog();
   const navigate = useNavigate();
 
   useEffect(() => { loadHistory(); }, [loadHistory]);
 
   function handleRestore(entry) {
-    sessionStorage.setItem(RESTORE_KEY, JSON.stringify(entry.configSnapshot));
+    sessionStorage.setItem(RESTORE_KEY, JSON.stringify({ configSnapshot: entry.configSnapshot }));
     navigate('/configurator');
   }
 
-  async function handleDelete() {
-    if (!deleteTarget) return;
-    try {
-      await removeEntry(deleteTarget.id);
-      setDeleteTarget(null);
-    } catch (err) {
-      alert(`Ошибка удаления: ${err?.message ?? err}`);
-    }
+  function handleRestoreNz(entry) {
+    sessionStorage.setItem(RESTORE_KEY, JSON.stringify({
+      configSnapshot: entry.configSnapshot,
+      openModal: 'nz',
+      nzFormData: entry.nzFormData ?? {},
+    }));
+    navigate('/configurator');
+  }
+
+  function handleRedownloadNz(entry) {
+    setNzError(null);
+    setNzRedownloadEntry(entry);
   }
 
   async function handleRedownload(entry) {
@@ -52,12 +85,69 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
     }
   }
 
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    try {
+      await removeEntry(deleteTarget.id);
+      setDeleteTarget(null);
+    } catch (err) {
+      alert(`Ошибка удаления: ${err?.message ?? err}`);
+    }
+  }
+
+  async function handleNzRedownloadSubmit({ managerName, clientName, nzNumber, calcNumber }) {
+    if (!catalog || !nzRedownloadEntry) return;
+    try {
+      const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
+      const priceObj = nzRedownloadEntry.price
+        ? { clientPrice: Number(nzRedownloadEntry.price), manual: false }
+        : null;
+      await generateNonStandardOrder({
+        config: nzRedownloadEntry.configSnapshot,
+        catalog,
+        managerName,
+        clientName,
+        price: priceObj,
+        nzNumber,
+        calcNumber,
+      });
+      setNzRedownloadEntry(null);
+    } catch (err) {
+      setNzError(err?.message ?? String(err));
+    }
+  }
+
+  async function handleNzRedownloadPrint({ managerName, clientName, nzNumber, calcNumber }) {
+    if (!catalog || !nzRedownloadEntry) return;
+    try {
+      const { printNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
+      const priceObj = nzRedownloadEntry.price
+        ? { clientPrice: Number(nzRedownloadEntry.price), manual: false }
+        : null;
+      await printNonStandardOrder({
+        config: nzRedownloadEntry.configSnapshot,
+        catalog,
+        managerName,
+        clientName,
+        price: priceObj,
+        nzNumber,
+        calcNumber,
+      });
+    } catch (err) {
+      setNzError(err?.message ?? String(err));
+    }
+  }
+
+  const nzSummary = nzRedownloadEntry
+    ? buildNzSummary(nzRedownloadEntry.configSnapshot, catalog, nzRedownloadEntry.price)
+    : null;
+
   return (
     <div className={styles.page}>
       <Header onLogout={onLogout} username={username} isAdmin={isAdmin} />
       <main className={styles.main}>
         <div className={styles.toolbar}>
-          <h1 className={styles.title}>История КП</h1>
+          <h1 className={styles.title}>История</h1>
           <Link to="/configurator" className={styles.backLink}>← Конфигуратор</Link>
         </div>
 
@@ -76,7 +166,7 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
 
         {!isLoading && !error && history.length === 0 && (
           <div className={styles.state}>
-            История пуста — скачайте первое КП на странице конфигуратора.
+            История пуста — скачайте КП или бланк НЗ на странице конфигуратора.
           </div>
         )}
 
@@ -85,6 +175,7 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
             <table className={styles.table}>
               <thead>
                 <tr>
+                  <th>Тип</th>
                   <th>Дата</th>
                   <th>Модель</th>
                   <th>Артикул</th>
@@ -93,49 +184,57 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
                 </tr>
               </thead>
               <tbody>
-                {history.map((e) => (
-                  <tr key={e.id}>
-                    <td>{formatDate(e.downloadedAt)}</td>
-                    <td>{e.modelName}</td>
-                    <td>{e.article}</td>
-                    <td>{Number(e.price ?? 0).toLocaleString('ru-RU')} ₽</td>
-                    <td className={styles.actions}>
-                      <button
-                        type="button"
-                        className={cx(styles.actionBtn, styles.actionBtnSecondary)}
-                        onClick={() => handleRestore(e)}
-                        aria-label={`Восстановить конфигурацию ${e.modelName}`}
-                      >
-                        Восстановить
-                      </button>
-                      <button
-                        type="button"
-                        className={cx(styles.actionBtn, styles.actionBtnPrimary)}
-                        onClick={() => handleRedownload(e)}
-                        aria-label={`Скачать КП заново ${e.modelName}`}
-                      >
-                        Скачать заново
-                      </button>
-                      <button
-                        type="button"
-                        className={cx(styles.actionBtn, styles.actionBtnDanger)}
-                        onClick={() => setDeleteTarget(e)}
-                        aria-label={`Удалить запись ${e.modelName}`}
-                      >
-                        Удалить
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {history.map((e) => {
+                  const isNz = e.type === 'nz';
+                  return (
+                    <tr key={e.id}>
+                      <td>
+                        <span className={cx(styles.typeBadge, isNz ? styles.typeBadgeNz : styles.typeBadgeKp)}>
+                          {isNz ? 'НЗ' : 'КП'}
+                        </span>
+                      </td>
+                      <td>{formatDate(e.downloadedAt)}</td>
+                      <td>{e.modelName}</td>
+                      <td>{e.article}</td>
+                      <td>{Number(e.price ?? 0).toLocaleString('ru-RU')} ₽</td>
+                      <td className={styles.actions}>
+                        <button
+                          type="button"
+                          className={cx(styles.actionBtn, styles.actionBtnSecondary)}
+                          onClick={() => isNz ? handleRestoreNz(e) : handleRestore(e)}
+                          aria-label={`Восстановить конфигурацию ${e.modelName}`}
+                        >
+                          Восстановить
+                        </button>
+                        <button
+                          type="button"
+                          className={cx(styles.actionBtn, styles.actionBtnPrimary)}
+                          onClick={() => isNz ? handleRedownloadNz(e) : handleRedownload(e)}
+                          aria-label={`Скачать заново ${e.modelName}`}
+                        >
+                          Скачать заново
+                        </button>
+                        <button
+                          type="button"
+                          className={cx(styles.actionBtn, styles.actionBtnDanger)}
+                          onClick={() => setDeleteTarget(e)}
+                          aria-label={`Удалить запись ${e.modelName}`}
+                        >
+                          Удалить
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         )}
-        </main>
+      </main>
 
       {deleteTarget && (
-        <div className={styles.overlay} onClick={() => setDeleteTarget(null)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}>
+          <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <h3 className={styles.modalTitle}>Удалить запись из истории?</h3>
             <p className={styles.modalText}>
               Запись <strong>{deleteTarget.modelName}</strong> от {formatDate(deleteTarget.downloadedAt)} будет удалена без возможности восстановления.
@@ -157,6 +256,21 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      <NonStandardOrderModal
+        isOpen={!!nzRedownloadEntry}
+        onClose={() => { setNzRedownloadEntry(null); setNzError(null); }}
+        onSubmit={handleNzRedownloadSubmit}
+        onPrint={handleNzRedownloadPrint}
+        summary={nzSummary}
+        initialValues={nzRedownloadEntry?.nzFormData ?? null}
+      />
+
+      {nzError && (
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fc8181', color: '#fff', padding: '12px 20px', borderRadius: 8, fontSize: 14, zIndex: 9999 }}>
+          Ошибка: {nzError}
         </div>
       )}
     </div>

@@ -116,13 +116,14 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
         <motion.div
           className={styles.overlay}
           role="presentation"
-          onClick={() => { if (!isSubmitting) onClose(); }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget && !isSubmitting) onClose(); }}
           variants={overlayVariants}
           initial="hidden" animate="visible" exit="hidden"
           transition={{ duration: 0.18 }}
         >
           <motion.div
             className={styles.modal}
+            onMouseDown={(e) => e.stopPropagation()}
             onClick={(e) => e.stopPropagation()}
             role="dialog" aria-modal="true" aria-labelledby={titleId}
             variants={modalVariants}
@@ -364,9 +365,8 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     type="number"
                     step="1"
                     min="1"
-                    max="3"
                     className={cx(styles.input, errors.lockCount && styles.inputError)}
-                    {...register('lockCount', { valueAsNumber: true, required: 'Обязательно', min: { value: 1, message: '1-3' }, max: { value: 3, message: '1-3' } })}
+                    {...register('lockCount', { valueAsNumber: true, required: 'Обязательно', min: { value: 1, message: 'Минимум 1' } })}
                   />
                   <span className={styles.errorMsg} aria-live="polite">{errors.lockCount?.message ?? ''}</span>
                 </div>
@@ -381,9 +381,8 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                     type="number"
                     step="1"
                     min="1"
-                    max="2"
                     className={cx(styles.input, errors.doorCount && styles.inputError)}
-                    {...register('doorCount', { valueAsNumber: true, required: 'Обязательно', min: { value: 1, message: '1-2' }, max: { value: 2, message: '1-2' } })}
+                    {...register('doorCount', { valueAsNumber: true, required: 'Обязательно', min: { value: 1, message: 'Минимум 1' } })}
                   />
                   <span className={styles.errorMsg} aria-live="polite">{errors.doorCount?.message ?? ''}</span>
                 </div>

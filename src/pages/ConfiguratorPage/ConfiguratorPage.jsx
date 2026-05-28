@@ -16,6 +16,7 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, use
   const { catalog, catalogError, isLoading, retry } = useCatalog();
   const { config, setters, isResetting, resetKey } = useConfig(catalog);
   const [parametersUnlocked, setParametersUnlocked] = useState(false);
+  const [pendingNzRestore, setPendingNzRestore] = useState(null);
   const { restoreConfig } = useHistory(uid);
 
   // HIST-03: apply restore snapshot from sessionStorage (set by HistoryPage on "Восстановить")
@@ -25,7 +26,14 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, use
     if (!raw) return;
     sessionStorage.removeItem(RESTORE_KEY);
     try {
-      restoreConfig(JSON.parse(raw), setters);
+      const data = JSON.parse(raw);
+      // Support both old format (plain snapshot) and new format ({ configSnapshot, openModal, nzFormData })
+      const snapshot = data.configSnapshot ?? data;
+      restoreConfig(snapshot, setters);
+      setParametersUnlocked(true);
+      if (data.openModal === 'nz' && data.nzFormData) {
+        setPendingNzRestore(data.nzFormData);
+      }
     } catch (err) {
       console.warn('[restore] failed to parse snapshot:', err.message);
     }
@@ -45,7 +53,7 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, use
 
   const price = catalog ? calcPrice(config, catalog) : null;
   const ctx = catalog
-    ? { config, setters, catalog, price, isResetting, resetKey, parametersUnlocked, setParametersUnlocked, uid, user, openAuthModal }
+    ? { config, setters, catalog, price, isResetting, resetKey, parametersUnlocked, setParametersUnlocked, uid, user, openAuthModal, pendingNzRestore, clearPendingNzRestore: () => setPendingNzRestore(null) }
     : null;
 
   return (

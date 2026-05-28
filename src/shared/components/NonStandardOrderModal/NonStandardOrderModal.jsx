@@ -59,7 +59,7 @@ function SummaryRow({ label, value, colorHex }) {
 	);
 }
 
-export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPrint, summary }) {
+export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPrint, summary, initialValues }) {
 	const titleId = useId();
 	const [summaryOpen, setSummaryOpen] = useState(false);
 	const [isPrinting, setIsPrinting] = useState(false);
@@ -76,8 +76,20 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 	});
 
 	useEffect(() => {
-		if (!isOpen) { reset(); setSummaryOpen(false); setIsPrinting(false); }
-	}, [isOpen, reset]);
+		if (!isOpen) {
+			reset();
+			setSummaryOpen(false);
+			setIsPrinting(false);
+		} else if (initialValues) {
+			reset({
+				managerName: initialValues.managerName ?? '',
+				clientName: initialValues.clientName ?? '',
+				nzNumber: initialValues.nzNumber ?? '',
+				calcNumber: initialValues.calcNumber ?? '',
+			});
+			trigger();
+		}
+	}, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -127,7 +139,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 			{isOpen && (
 				<motion.div
 					className={styles.overlay}
-					onClick={() => { if (!busy) onClose(); }}
+					onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}
 					role='presentation'
 					variants={overlayVariants}
 					initial='hidden'
@@ -137,6 +149,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 				>
 					<motion.div
 						className={styles.modal}
+						onMouseDown={e => e.stopPropagation()}
 						onClick={e => e.stopPropagation()}
 						role='dialog'
 						aria-modal='true'

@@ -194,6 +194,27 @@
   margin-top: 20px;
 }
 
+.typeBadge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.typeBadgeKp {
+  background: #ebf4ff;
+  color: #0c53b3;
+}
+
+.typeBadgeNz {
+  background: #fff7e6;
+  color: #b76e00;
+}
+
 @media (max-width: 767px) {
   .main {
     padding: 20px 16px;
