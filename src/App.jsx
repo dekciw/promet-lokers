@@ -116,9 +116,11 @@ export default function App() {
           element={
             <HistoryPage
               uid={user?.uid}
+              user={user}
               onLogout={handleLogout}
               username={username}
               isAdmin={adminAllowed}
+              onLogin={() => openAuthModal(null, 'login')}
             />
           }
         />

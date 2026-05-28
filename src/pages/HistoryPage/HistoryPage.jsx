@@ -44,7 +44,7 @@ function buildNzSummary(snapshot, catalog, storedPrice) {
   };
 }
 
-export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
+export default function HistoryPage({ uid, user, onLogout, username, isAdmin, onLogin }) {
   const { history, isLoading, error, loadHistory, redownloadKP, redownloadNZ, removeEntry } = useHistory(uid);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [nzRedownloadEntry, setNzRedownloadEntry] = useState(null);
@@ -144,7 +144,7 @@ export default function HistoryPage({ uid, onLogout, username, isAdmin }) {
 
   return (
     <div className={styles.page}>
-      <Header onLogout={onLogout} username={username} isAdmin={isAdmin} />
+      <Header onLogout={onLogout} username={username} isAdmin={isAdmin} user={user} onLogin={onLogin} />
       <main className={styles.main}>
         <div className={styles.toolbar}>
           <h1 className={styles.title}>История</h1>
