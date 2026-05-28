@@ -79,7 +79,23 @@
 .userArea {
   display: flex;
   align-items: center;
+  gap: 8px;
   flex-shrink: 0;
+}
+
+.adminLink {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.adminLink:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
 }
 
 .userChip {

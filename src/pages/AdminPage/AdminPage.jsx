@@ -254,6 +254,7 @@ export default function AdminPage({ onLogout, username = '' }) {
           ))}
         </nav>
         <div className={styles.userArea}>
+          <Link to="/history" className={styles.adminLink}>История</Link>
           <div className={styles.userChip}>
             <span className={styles.userAvatar}>{initial}</span>
             <span className={styles.userName}>{username}</span>
