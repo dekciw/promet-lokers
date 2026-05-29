@@ -25,7 +25,6 @@
   overflow: hidden;
 }
 
-/* ── Заголовок ── */
 .header {
   background: var(--c-white);
   padding: 22px 24px 18px;
@@ -87,7 +86,6 @@
   outline-offset: 2px;
 }
 
-/* ── Итого ── */
 .totalStrip {
   display: flex;
   align-items: center;
@@ -137,7 +135,6 @@
   flex-shrink: 0;
 }
 
-/* ── Конфигурация (сворачиваемая) ── */
 .summary {
   padding: 14px 24px 0;
   flex-shrink: 0;
@@ -227,9 +224,18 @@
   height: 12px;
   border-radius: 3px;
   flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--swatch-bg);
 }
 
-/* ── Форма ── */
+.colorSwatchLight {
+  border-color: #e2e8f0;
+}
+
+.accordionContent {
+  overflow: hidden;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -252,7 +258,6 @@
   gap: 12px;
 }
 
-/* ── Разделитель секций ── */
 .sectionDivider {
   display: flex;
   align-items: center;
@@ -277,7 +282,6 @@
   background: var(--c-border-subtle);
 }
 
-/* ── Инпуты ── */
 .fieldLabel {
   font-size: 11px;
   font-weight: 600;
@@ -348,7 +352,6 @@
   border-color: var(--c-border-light);
 }
 
-/* ── Кнопки ── */
 .actions {
   display: flex;
   gap: 10px;
@@ -445,8 +448,6 @@
   animation: spin 0.75s linear infinite;
   flex-shrink: 0;
 }
-
-/* ── АДАПТИВ ── */
 
 @media (max-width: 600px) {
   .overlay {

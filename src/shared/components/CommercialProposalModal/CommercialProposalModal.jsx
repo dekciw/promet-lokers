@@ -173,7 +173,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 											animate={{ height: 'auto', opacity: 1 }}
 											exit={{ height: 0, opacity: 0 }}
 											transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-											style={{ overflow: 'hidden' }}
+											className={styles.accordionContent}
 										>
 											<div className={styles.summaryGrid}>
 												{summaryItems.map(({ label, value, colorHex }) => (
@@ -182,8 +182,8 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 														<span className={styles.summaryValue}>
 																{colorHex && (
 																	<span
-																		className={styles.colorSwatch}
-																		style={{ background: colorHex, border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.1)' }}
+																		className={cx(styles.colorSwatch, colorHex === '#ffffff' && styles.colorSwatchLight)}
+																		style={{ '--swatch-bg': colorHex }}
 																	/>
 																)}
 																{value}

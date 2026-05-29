@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useClickOutside } from '../../../shared/hooks/useClickOutside';
-import styles from './Parameters.module.css';
+import { useClickOutside } from '../../../../shared/hooks/useClickOutside';
+import styles from './CustomSelect.module.css';
 
 const dropdownVariants = {
 	hidden: { clipPath: 'inset(0 0 100% 0)', opacity: 0 },
@@ -53,7 +53,7 @@ export default function CustomSelect({ id, value, onChange, options, placeholder
 			>
 				{leftIcon && <span className={styles.cselectLeftIcon}>{leftIcon}</span>}
 				{selected?.swatch && (
-					<span className={styles.cselectSwatch} style={{ background: selected.swatch }} />
+					<span className={styles.cselectSwatch} style={{ '--swatch-bg': selected.swatch }} />
 				)}
 				<span className={`${styles.cselectText}${!selected ? ` ${styles.cselectTextPlaceholder}` : ''}`}>
 					{selected ? selected.label : placeholder}
@@ -85,7 +85,7 @@ export default function CustomSelect({ id, value, onChange, options, placeholder
 								onClick={() => handleSelect(o.value)}
 							>
 								{o.swatch && (
-									<span className={styles.cselectSwatch} style={{ background: o.swatch }} />
+									<span className={styles.cselectSwatch} style={{ '--swatch-bg': o.swatch }} />
 								)}
 								<span className={styles.cselectItemLabel}>{o.label}</span>
 								<AnimatePresence>

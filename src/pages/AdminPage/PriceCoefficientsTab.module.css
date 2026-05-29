@@ -27,7 +27,6 @@
   font-family: inherit;
 }
 
-/* ── Section ── */
 .section {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -54,7 +53,6 @@
   line-height: 1.5;
 }
 
-/* ── Min qty row ── */
 .minQtyRow {
   margin-bottom: 16px;
 }
@@ -94,7 +92,6 @@
   box-shadow: 0 0 0 3px rgba(12, 83, 179, 0.15);
 }
 
-/* ── Table ── */
 .tableWrap {
   overflow-x: auto;
 }
@@ -132,7 +129,6 @@
   min-width: 120px;
 }
 
-/* ── Percent input ── */
 .pctWrap {
   display: inline-flex;
   align-items: center;
@@ -167,7 +163,6 @@
   min-width: 16px;
 }
 
-/* ── Split tables (ML | LS side by side) ── */
 .splitTables {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -197,7 +192,6 @@
   }
 }
 
-/* ── Save bar ── */
 .saveBar {
   position: sticky;
   bottom: 0;

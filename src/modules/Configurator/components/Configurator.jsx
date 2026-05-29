@@ -167,13 +167,12 @@ export default function Configurator() {
 	const [isProposalOpen, setIsProposalOpen] = useState(false);
 	const [notify, setNotify] = useState({ visible: false, status: 'ok', title: '', message: '' });
 
-	// Auto-open НЗ modal when restoring from history
 	useEffect(() => {
 		if (pendingNzRestore) {
 			setIsOrderOpen(true);
 			clearPendingNzRestore?.();
 		}
-	}, [pendingNzRestore]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [pendingNzRestore]);
 
 	function openOrderModal() { setIsOrderOpen(true); }
 	function closeOrderModal() { setIsOrderOpen(false); }
@@ -368,7 +367,7 @@ export default function Configurator() {
 							initial='hidden'
 							animate='visible'
 						>
-							{/* ── Стандартное исполнение ── */}
+
 							<motion.div className={styles.configColWrapper} variants={colVariants}>
 								<div className={`${styles.configCol} ${styles.configColDefault}`}>
 									<div className={styles.colHeader}>
@@ -392,11 +391,8 @@ export default function Configurator() {
 												<span className={styles.specValue}>
 													{colorHex && (
 														<span
-															className={styles.colorSwatch}
-															style={{
-																background: colorHex,
-																border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
-															}}
+															className={cx(styles.colorSwatch, colorHex === '#ffffff' && styles.colorSwatchLight)}
+															style={{ '--swatch-bg': colorHex }}
 														/>
 													)}
 													{value}
@@ -413,7 +409,6 @@ export default function Configurator() {
 								</div>
 							</motion.div>
 
-							{/* ── Нестандартное исполнение ── */}
 							<motion.div className={styles.configColWrapper} variants={colVariants}>
 								<div className={`${styles.configCol} ${styles.configColChanged}`}>
 									<div className={styles.colHeader}>
@@ -462,11 +457,8 @@ export default function Configurator() {
 													<span className={styles.diffValue}>
 														{colorHex && (
 															<span
-																className={styles.colorSwatch}
-																style={{
-																	background: colorHex,
-																	border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)',
-																}}
+																className={cx(styles.colorSwatch, colorHex === '#ffffff' && styles.colorSwatchLight)}
+																style={{ '--swatch-bg': colorHex }}
 															/>
 														)}
 														{value}
@@ -487,7 +479,6 @@ export default function Configurator() {
 								</div>
 							</motion.div>
 
-							{/* ── Итоговая конфигурация ── */}
 							<motion.div className={styles.configColWrapper} variants={colVariants}>
 								<div className={`${styles.configCol} ${styles.configColFinal}`}>
 									<div className={styles.colHeader}>
@@ -511,11 +502,8 @@ export default function Configurator() {
 												<span className={styles.finalValue}>
 													{colorHex && (
 														<span
-															className={styles.colorSwatch}
-															style={{
-																background: colorHex,
-																border: colorHex === '#ffffff' ? '1px solid rgba(255,255,255,0.3)' : '1px solid rgba(255,255,255,0.2)',
-															}}
+															className={cx(styles.colorSwatch, colorHex === '#ffffff' ? styles.colorSwatchFinalLight : styles.colorSwatchFinal)}
+															style={{ '--swatch-bg': colorHex }}
 														/>
 													)}
 													{value}
@@ -525,7 +513,6 @@ export default function Configurator() {
 									</motion.ul>
 								</div>
 
-								{/* ── Блок цены ── */}
 								<div className={styles.priceBlock}>
 									<div className={styles.priceBlockTop}>
 										<span className={styles.priceBlockLabel}>за 1 шт.</span>
@@ -585,7 +572,6 @@ export default function Configurator() {
 					)}
 				</AnimatePresence>
 			</div>
-
 
 			<NonStandardOrderModal isOpen={isOrderOpen} onClose={closeOrderModal} onSubmit={handleOrderSubmit} onPrint={handleOrderPrint} summary={orderSummary} initialValues={pendingNzRestore} />
 			<CommercialProposalModal

@@ -4,9 +4,6 @@ import {
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-// HIST-01: write config snapshot to users/{uid}/history.
-// options.type = 'kp' | 'nz'  (default 'kp')
-// options.nzFormData = { managerName, clientName, nzNumber, calcNumber } for НЗ entries
 async function saveToHistory(uid, config, modelName, article, price, { type = 'kp', nzFormData = null } = {}) {
   if (!uid) return;
   const entry = {
@@ -21,7 +18,6 @@ async function saveToHistory(uid, config, modelName, article, price, { type = 'k
   await addDoc(collection(db, 'users', uid, 'history'), entry);
 }
 
-// HIST-02: load history sorted newest first
 async function loadHistoryFor(uid) {
   if (!uid) return [];
   const q = query(
@@ -32,7 +28,6 @@ async function loadHistoryFor(uid) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-// HIST-03: apply stored config back to useConfig state via setters.
 function restoreConfig(snapshot, setters) {
   if (!snapshot || !setters) return;
   setters.setSeriesId(snapshot.seriesId, () => {});
@@ -49,7 +44,6 @@ function restoreConfig(snapshot, setters) {
   setters.setQuantity(snapshot.quantity);
 }
 
-// HIST-04: regenerate КП from stored snapshot + price
 async function redownloadKP(entry, catalog) {
   const { generateCommercialProposal } = await import('@/pdf/kp/generateCommercialProposal.js');
   await generateCommercialProposal({
@@ -59,7 +53,6 @@ async function redownloadKP(entry, catalog) {
   });
 }
 
-// HIST-05: regenerate НЗ from stored snapshot + nzFormData
 async function redownloadNZ(entry, catalog) {
   const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
   const form = entry.nzFormData ?? {};

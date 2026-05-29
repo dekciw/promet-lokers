@@ -19,7 +19,6 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, use
   const [pendingNzRestore, setPendingNzRestore] = useState(null);
   const { restoreConfig } = useHistory(uid);
 
-  // HIST-03: apply restore snapshot from sessionStorage (set by HistoryPage on "Восстановить")
   useEffect(() => {
     if (!catalog) return;
     const raw = sessionStorage.getItem(RESTORE_KEY);
@@ -27,7 +26,7 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, use
     sessionStorage.removeItem(RESTORE_KEY);
     try {
       const data = JSON.parse(raw);
-      // Support both old format (plain snapshot) and new format ({ configSnapshot, openModal, nzFormData })
+
       const snapshot = data.configSnapshot ?? data;
       restoreConfig(snapshot, setters);
       setParametersUnlocked(true);
@@ -37,13 +36,13 @@ export default function ConfiguratorPage({ onLogout, username, isAdmin, uid, use
     } catch (err) {
       console.warn('[restore] failed to parse snapshot:', err.message);
     }
-  }, [catalog]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [catalog]);
 
   if (catalogError) {
     return (
       <div className='app-status'>
         <p>Не удалось загрузить каталог. Проверьте подключение к интернету.</p>
-        <p style={{ fontSize: 13, color: 'var(--c-text-muted)' }}>{catalogError}</p>
+        <p className='app-status__detail'>{catalogError}</p>
         <button className='app-status__retry' onClick={retry} disabled={isLoading}>
           {isLoading ? 'Загрузка…' : 'Повторить'}
         </button>

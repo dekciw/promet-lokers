@@ -49,8 +49,8 @@ function SummaryRow({ label, value, colorHex }) {
 			<span className={styles.summaryValue}>
 				{colorHex && (
 					<span
-						className={styles.colorSwatch}
-						style={{ background: colorHex, border: colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.1)' }}
+						className={cx(styles.colorSwatch, colorHex === '#ffffff' && styles.colorSwatchLight)}
+						style={{ '--swatch-bg': colorHex }}
 					/>
 				)}
 				{value}
@@ -89,7 +89,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 			});
 			trigger();
 		}
-	}, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [isOpen]);
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -160,7 +160,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 						exit='exit'
 						transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
 					>
-						{/* ── Заголовок ── */}
+
 						<div className={styles.header}>
 							<div className={styles.headerLeft}>
 								<p className={styles.headerEyebrow}>Документ</p>
@@ -177,7 +177,6 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 							</button>
 						</div>
 
-						{/* ── Итого ── */}
 						{summary && (
 							<div className={styles.totalStrip}>
 								<div className={styles.totalItem}>
@@ -192,7 +191,6 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 							</div>
 						)}
 
-						{/* ── Конфигурация (сворачиваемая) ── */}
 						{summary && (
 							<div className={styles.summary}>
 								<button
@@ -213,7 +211,7 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 											animate={{ height: 'auto', opacity: 1 }}
 											exit={{ height: 0, opacity: 0 }}
 											transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
-											style={{ overflow: 'hidden' }}
+											className={styles.accordionContent}
 										>
 											<div className={styles.summaryGrid}>
 												<SummaryRow label='Модель' value={summary.model} />
@@ -229,7 +227,6 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 							</div>
 						)}
 
-						{/* ── Форма ── */}
 						<form id='nz-form' className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
 							<div className={styles.field}>
 								<label className={styles.fieldLabel} htmlFor='nz-manager'>

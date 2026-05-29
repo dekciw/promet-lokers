@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-// localStorage key используется loadCatalog.js (regular user catalog cache).
-// Любая admin-мутация должна сбрасывать его, чтобы конфигуратор увидел свежие данные.
 const CACHE_KEY = 'promet_catalog_v1';
 
 export function usePriceRulesAdmin() {
@@ -33,7 +31,7 @@ export function usePriceRulesAdmin() {
     } finally {
       setIsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   useEffect(() => {
@@ -60,7 +58,7 @@ export function usePriceRulesAdmin() {
     } finally {
       setIsSaving(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, []);
 
   return { priceRules, locks, isLoading, error, isSaving, loadPriceRules, savePriceRules };

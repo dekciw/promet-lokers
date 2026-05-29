@@ -1,8 +1,7 @@
-// Коэффициенты прибавки к весу относительно базового веса из таблицы
 const WEIGHT_MULT = {
-  '0.5': 1.125,        // +12.5%
-  '0.6': 1 + 1 / 3,   // +33.33%
-  '0.7': 1 + 5 / 9,   // +55.56%
+  '0.5': 1.125,
+  '0.6': 1 + 1 / 3,
+  '0.7': 1 + 5 / 9,
 };
 
 function getVentRate(ventilationType, qty, priceRules) {
@@ -21,11 +20,11 @@ function getDepthRate(series, depth, qty, priceRules) {
   if (qty >= 100) return rule.qty100;
   if (qty >= 50) return rule.qty50;
   if (qty >= 10) return rule.qty10;
-  return null; // < 10 шт — ПСС по запросу
+  return null;
 }
 
 function getHeightRate(series, height, qty, priceRules) {
-  if (qty < 100) return null; // ПСС по запросу
+  if (qty < 100) return null;
   const table = series === 'ls' ? priceRules.height?.ls : priceRules.height?.ml;
   return table?.[String(height)] ?? null;
 }
@@ -43,14 +42,13 @@ export function calcPrice(config, catalog) {
 
   const priceRules = catalog.priceRules ?? {};
   const defaults = model.defaultSpecs ?? {};
-  const series = model.seriesId; // 'ml' | 'ls'
+  const series = model.seriesId;
   const qty = Number(config.quantity) || 1;
 
   const doorW = model.doorWeight ?? 0;
   const bodyW = model.bodyWeight ?? 0;
   const totalW = doorW + bodyW;
 
-  // ── 1. Определяем каждое изменение ──────────────────────────────
   const bodyThickChanged = defaults.bodyThickness != null && Number(config.bodyThickness) !== (Number(defaults.bodyThickness) || 0.5);
   const doorThickChanged = defaults.doorThickness != null && Number(config.doorThickness) !== (Number(defaults.doorThickness) || 0.5);
   const thicknessChanged = bodyThickChanged || doorThickChanged;
@@ -69,8 +67,6 @@ export function calcPrice(config, catalog) {
   const doorColorChanged = !!config.doorColor;
   const bodyColorChanged = !!config.bodyColor;
 
-  // Толщина = 1 исполнение даже если изменены оба компонента
-  // ВАЖНО: каждый новый параметр должен добавляться сюда, иначе changeCount будет занижен
   const changeCount = [
     thicknessChanged,
     heightChanged,
@@ -82,27 +78,22 @@ export function calcPrice(config, catalog) {
     bodyColorChanged,
   ].filter(Boolean).length;
 
-  // ── 2. Нестандартная ширина — всегда ПСС по запросу ─────────────
   if (widthChanged) {
     return { manual: true, changeCount };
   }
 
-  // ── 3. Лимит исполнений ─────────────────────────────────────────
   if (changeCount > 2) {
     return { manual: true, changeCount };
   }
 
-  // ── 4. Суммарный процент наценки ────────────────────────────────
   let totalRate = 0;
   let anyManual = false;
 
-  // ВАЖНО: каждый параметр должен вызывать addRate() — null означает ПСС по запросу
   function addRate(rate) {
     if (rate === null || rate === undefined) anyManual = true;
     else totalRate += rate;
   }
 
-  // Толщина (пропорциональный расчёт)
   if (thicknessChanged) {
     if (qty < (priceRules.thickness?.minQty ?? 100)) {
       anyManual = true;
@@ -111,10 +102,10 @@ export function calcPrice(config, catalog) {
         ? priceRules.thickness?.ls ?? {}
         : priceRules.thickness?.ml ?? {};
       if (bodyThickChanged && doorThickChanged && config.bodyThickness === config.doorThickness) {
-        // Весь шкаф одинаково — полный процент
+
         addRate(rates[config.bodyThickness] ?? null);
       } else {
-        // Пропорционально по весу
+
         if (doorThickChanged && totalW > 0) {
           const r = rates[config.doorThickness] ?? null;
           addRate(r !== null ? r * (doorW / totalW) : null);
@@ -127,27 +118,22 @@ export function calcPrice(config, catalog) {
     }
   }
 
-  // Глубина
   if (depthChanged) {
     addRate(getDepthRate(series, depthVal, qty, priceRules));
   }
 
-  // Высота
   if (heightChanged) {
     addRate(getHeightRate(series, heightVal, qty, priceRules));
   }
 
-  // Вентиляция
   if (ventChanged) {
     addRate(getVentRate(config.ventilationType, qty, priceRules));
   }
 
-  // Цвет двери
   if (doorColorChanged) {
     addRate(getColorRate(config.doorColor.cat, 'door', qty, priceRules));
   }
 
-  // Цвет корпуса
   if (bodyColorChanged) {
     addRate(getColorRate(config.bodyColor.cat, 'full', qty, priceRules));
   }
@@ -156,7 +142,6 @@ export function calcPrice(config, catalog) {
     return { manual: true, changeCount };
   }
 
-  // ── 5. Наценка за нестандартный замок ───────────────────────────
   let lockSurcharge = 0;
   if (lockChanged) {
     const lock = catalog.locks?.[config.lockId];
@@ -166,12 +151,10 @@ export function calcPrice(config, catalog) {
     }
   }
 
-  // ── 6. Цены ─────────────────────────────────────────────────────
   const priceMin = model.basePrice ?? 0;
 
   const clientPrice = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
 
-  // ── 7. Вес ──────────────────────────────────────────────────────
   const effDoor = config.doorThickness || defaults.doorThickness || '0.5';
   const effBody = config.bodyThickness || defaults.bodyThickness || '0.5';
   const defaultDoor = String(Number(defaults.doorThickness) || 0.5);
@@ -180,7 +163,6 @@ export function calcPrice(config, catalog) {
   const bodyMult = effBody !== defaultBody ? (WEIGHT_MULT[effBody] ?? 1) : 1;
   const weight = Math.round(((doorW * doorMult) + (bodyW * bodyMult)) * 100) / 100;
 
-  // ── 8. Срок изготовления ────────────────────────────────────────
   let leadTime = null;
   if (changeCount === 1) leadTime = '7–14 дней';
   else if (changeCount >= 2 && changeCount <= 4) leadTime = '14–21–30 дней';

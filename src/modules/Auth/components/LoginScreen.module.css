@@ -17,7 +17,6 @@
 	overflow: hidden;
 }
 
-/* Глубинное свечение — не дешёвое, а объёмное */
 .loginPage::before {
 	content: '';
 	position: absolute;
@@ -212,4 +211,8 @@
 	font-size: 11px;
 	color: var(--c-text-faint);
 	margin-top: 2px;
+}
+
+.loginErrorCenter {
+  text-align: center;
 }

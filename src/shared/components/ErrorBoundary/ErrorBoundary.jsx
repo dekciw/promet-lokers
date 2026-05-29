@@ -20,7 +20,7 @@ export default class ErrorBoundary extends Component {
       return (
         <div className='app-status'>
           <p>Что-то пошло не так. Попробуйте перезагрузить страницу.</p>
-          <p style={{ fontSize: 13, color: 'var(--c-text-muted)', maxWidth: 480 }}>
+          <p className='app-status__detail'>
             {this.state.error.message}
           </p>
           <button className='app-status__retry' onClick={this.handleReset}>

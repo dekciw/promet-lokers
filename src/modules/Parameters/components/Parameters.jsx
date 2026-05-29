@@ -1,21 +1,11 @@
 import { useState, useRef, useCallback, startTransition, useEffect } from 'react';
 import { motion, AnimatePresence, useAnimationControls } from 'motion/react';
-import CustomSelect from './CustomSelect';
+import CustomSelect from './CustomSelect/CustomSelect';
 import ColorPicker from './ColorPicker/ColorPicker';
-import StepperInput from './StepperInput';
+import StepperInput from './StepperInput/StepperInput';
 import { cx } from '../../../shared/utils/cx';
 import { useAppContext } from '../../../shared/context/AppContext';
-import { COLORS } from '../../../shared/utils/colors';
 import styles from './Parameters.module.css';
-
-const COLOR_OPTIONS = [
-	{ value: null, label: 'Стандарт (без изменений)' },
-	...COLORS.flatMap(g => g.items.map(item => ({ value: item.name, label: item.name, swatch: item.color }))),
-];
-
-const COLOR_MAP = new Map(COLORS.flatMap(g => g.items.map(i => [i.name, i])));
-
-
 
 const HEIGHT_MIN = 1400;
 const HEIGHT_MAX = 2000;
@@ -106,14 +96,12 @@ export default function Parameters() {
 	const backAnimTimersRef = useRef([]);
 
 	const step3Controls = useAnimationControls();
-	const resetAnimRef = useRef(false); // блокирует повторное нажатие пока идёт анимация высоты
-
+	const resetAnimRef = useRef(false);
 
 	useEffect(() => {
 		if (!modelId) setModelConfirmed(false);
 	}, [modelId]);
 
-	// Сбрасываем степпер и конфиг при выходе из аккаунта
 	useEffect(() => {
 		if (user) return;
 		setSeriesId('', () => {});
@@ -124,9 +112,9 @@ export default function Parameters() {
 		setModelConfirmed(false);
 		setParametersUnlocked(false);
 		setOpenSelectId(null);
-	}, [user]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [user]);
 
-const [openSelectId, setOpenSelectId] = useState(null);
+	const [openSelectId, setOpenSelectId] = useState(null);
 	const handleSeriesOpen = useCallback(v => setOpenSelectId(v ? 'series' : null), []);
 	const handleModelOpen = useCallback(v => setOpenSelectId(v ? 'model' : null), []);
 	const handleLockOpen = useCallback(v => setOpenSelectId(v ? 'lock' : null), []);
@@ -134,16 +122,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 	const handleDoorColorOpen = useCallback(v => setOpenSelectId(v ? 'doorColor' : null), []);
 	const handleBodyColorOpen = useCallback(v => setOpenSelectId(v ? 'bodyColor' : null), []);
 
-	function handleDoorColorChange(name) {
-		setDoorColor(name ? (COLOR_MAP.get(name) ?? null) : null);
-	}
-
-	function handleBodyColorChange(name) {
-		setBodyColor(name ? (COLOR_MAP.get(name) ?? null) : null);
-	}
-
 	const stepperStepRef = useRef(stepperStep);
-	// eslint-disable-next-line react-hooks/refs -- ref для актуального значения в таймерах goToStep, избегает stale closure
 	stepperStepRef.current = stepperStep;
 
 	function goToStep(newStep) {
@@ -222,12 +201,6 @@ const [openSelectId, setOpenSelectId] = useState(null);
 		return 'inactive';
 	}
 
-	function getCircleStyle(status) {
-		if (status === 'active') return { background: 'var(--c-primary)', boxShadow: 'none', transform: 'scale(1.1)' };
-		if (status === 'complete') return { background: 'var(--c-primary)', boxShadow: 'none', transform: 'scale(1)' };
-		return { background: 'transparent', boxShadow: 'none', transform: 'scale(1)' };
-	}
-
 	async function handleAnimatedReset() {
 		if (resetAnimRef.current) return;
 		if (!specs) { onReset(); return; }
@@ -239,8 +212,6 @@ const [openSelectId, setOpenSelectId] = useState(null);
 		if (heightPath.length === 0) { onReset(); return; }
 
 		resetAnimRef.current = true;
-		// onReset ставит height в дефолт, сразу восстанавливаем для анимации —
-		// React 18 батчит всё в один кадр, флика нет
 		onReset();
 		setHeight(String(curHeight));
 
@@ -295,7 +266,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 				})}
 			</div>
 
-			<div className={styles.stepContent} style={{ overflow: isSliding ? 'hidden' : 'visible' }}>
+			<div className={cx(styles.stepContent, isSliding && styles.stepContentSliding)}>
 				<AnimatePresence initial={false} custom={direction} mode='popLayout'>
 					<motion.div
 						key={stepperStep}
@@ -305,7 +276,7 @@ const [openSelectId, setOpenSelectId] = useState(null);
 						animate='animate'
 						exit='exit'
 						transition={{ type: 'spring', stiffness: 380, damping: 36, mass: 0.85 }}
-						style={{ width: '100%' }}
+						className={styles.stepMotionWrapper}
 					>
 						{stepperStep === 1 && (
 							<div className={styles.stepPane}>

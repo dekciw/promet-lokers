@@ -7,7 +7,6 @@ import { auth, db } from '../../../shared/lib/firebase';
 import { validateInviteCode } from '../../../shared/hooks/useInviteCode';
 import styles from './LoginScreen.module.css';
 
-// 'loading' | 'valid' | 'invalid'
 function useCodeValidation(code) {
   const [status, setStatus] = useState('loading');
 
@@ -84,7 +83,7 @@ export default function RegisterScreen() {
               <h1 className={styles.loginTitle}>Регистрация закрыта</h1>
               <p className={styles.loginSubtitle}>Для регистрации нужна ссылка-приглашение</p>
             </div>
-            <p className={styles.loginError} style={{ textAlign: 'center' }}>
+            <p className={`${styles.loginError} ${styles.loginErrorCenter}`}>
               Обратитесь к администратору за ссылкой для регистрации.
             </p>
             <p className={styles.loginFooter}>

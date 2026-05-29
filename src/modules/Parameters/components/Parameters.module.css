@@ -1,4 +1,3 @@
-/* Правая панель параметров */
 .parameters {
   width: 480px;
   flex-shrink: 0;
@@ -40,7 +39,6 @@
   color: var(--c-brand);
 }
 
-/* ── Кнопка сброса ── */
 .resetBtn {
   background: none;
   border: none;
@@ -75,7 +73,6 @@
   border-radius: 3px;
 }
 
-/* ── Tabs ── */
 .breadcrumbs {
   display: flex;
   align-items: stretch;
@@ -130,18 +127,17 @@
   cursor: pointer;
 }
 
-.breadcrumbArrow {
-  display: none;
-}
-
-.breadcrumbActiveBg {
-  display: none;
-}
-
-/* ── Анимируемый контент ── */
 .stepContent {
   position: relative;
   margin-top: 4px;
+}
+
+.stepContentSliding {
+  overflow: hidden;
+}
+
+.stepMotionWrapper {
+  width: 100%;
 }
 
 .stepPane {
@@ -158,7 +154,6 @@
   opacity: 0.8;
 }
 
-/* Группа параметра */
 .paramGroup {
   display: flex;
   flex-direction: column;
@@ -175,165 +170,12 @@
   text-transform: uppercase;
 }
 
-/* Custom Select */
-.cselect {
-  position: relative;
-}
-
-.cselectLeftIcon {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--c-text-faint);
-  width: 16px;
-  height: 16px;
-}
-
 .paramsGrid {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.cselectDisabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.cselectDisabled .cselectTrigger {
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-.cselectTrigger {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 44px;
-  padding: 0 14px;
-  background: var(--c-white);
-  border: 1.5px solid var(--c-border-subtle);
-  border-radius: var(--r-sm);
-  cursor: pointer;
-  font-family: var(--f-main);
-  font-size: 13.5px;
-  font-weight: 400;
-  color: var(--c-text-dark);
-  text-align: left;
-  box-shadow: var(--s-xs);
-  transition: border-color 0.18s;
-  outline: none;
-}
-
-.cselectTrigger:active {
-  background: var(--c-bg);
-}
-
-.cselectTrigger:focus-visible {
-  border-color: var(--c-primary);
-  box-shadow: 0 0 0 3px var(--c-primary-bg);
-}
-
-.cselectOpen .cselectTrigger {
-  border-color: var(--c-border);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  box-shadow: none;
-}
-
-.cselectText {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cselectTextPlaceholder {
-  color: var(--c-text-faint);
-}
-
-.cselectArrow {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  pointer-events: none;
-  color: var(--c-text-faint);
-}
-
-.cselectSwatch {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  display: inline-block;
-}
-
-.cselectDropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: var(--c-white);
-  border: 1.5px solid var(--c-border);
-  border-top: none;
-  border-bottom-left-radius: var(--r-sm);
-  border-bottom-right-radius: var(--r-sm);
-  list-style: none;
-  z-index: 300;
-  box-shadow: var(--s-md);
-  overflow: hidden;
-  max-height: 240px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--c-border) transparent;
-}
-
-.cselectDropdown::-webkit-scrollbar {
-  width: 6px;
-}
-.cselectDropdown::-webkit-scrollbar-track {
-  background: transparent;
-}
-.cselectDropdown::-webkit-scrollbar-thumb {
-  background: var(--c-border);
-  border-radius: 3px;
-}
-
-.cselectItem {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  font-size: 13.5px;
-  color: var(--c-text-mid);
-  cursor: pointer;
-  transition:
-    background 0.12s,
-    color 0.12s;
-  border-radius: 0;
-}
-
-.cselectItemLabel {
-  flex: 1;
-  line-height: 1.4;
-}
-
-.cselectItemCheck {
-  flex-shrink: 0;
-  color: var(--c-primary);
-  margin-left: 8px;
-}
-
-.cselectItemActive {
-  background: var(--c-primary-bg);
-  color: var(--c-primary);
-  font-weight: 500;
-}
-
-/* Толщина металла */
 .toggleGroup {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
@@ -382,7 +224,6 @@
   box-shadow: var(--s-primary-btn);
 }
 
-/* Поля габаритов */
 .dimFields {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -414,7 +255,6 @@
   gap: 5px;
 }
 
-/* ── Количество / Следующий шаг ── */
 .modelExtra {
   display: flex;
   flex-direction: column;
@@ -470,146 +310,7 @@
   box-shadow: none;
 }
 
-/* ── Stepper ── */
-@keyframes stepper-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-5px);
-  }
-  40% {
-    transform: translateX(5px);
-  }
-  60% {
-    transform: translateX(-4px);
-  }
-  80% {
-    transform: translateX(4px);
-  }
-}
-
-.stepper {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.stepperRow {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 44px;
-  background: var(--c-white);
-  border: 1.5px solid var(--c-border-subtle);
-  border-radius: var(--r-sm);
-  overflow: hidden;
-  box-shadow: var(--s-xs);
-  transition: border-color 0.18s;
-}
-
-.stepperLimit .stepperRow {
-  border-color: #dc2626;
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
-  animation: stepper-shake 0.35s ease;
-}
-
-.stepperBtn {
-  flex-shrink: 0;
-  width: 36px;
-  min-height: 44px;
-  background: transparent;
-  border: none;
-  color: var(--c-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    background 0.15s,
-    color 0.15s;
-  user-select: none;
-}
-
-.stepperBtn:active {
-  background: var(--c-primary-bg);
-  opacity: 0.7;
-}
-
-.stepperBtn:focus-visible {
-  outline: none;
-  box-shadow:
-    0 0 0 2px #fff,
-    0 0 0 4px var(--c-primary);
-  border-radius: var(--r-sm);
-}
-
-.stepperEditInput {
-  flex: 1;
-  height: 44px;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-family: var(--f-main);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--c-text-dark);
-  text-align: center;
-  width: 0;
-}
-
-.stepperDisplay {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  height: 44px;
-  font-family: var(--f-main);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: -0.1px;
-  color: var(--c-text-dark);
-}
-
-.stepperHint {
-  position: absolute;
-  top: calc(100% + 2px);
-  left: 0;
-  right: 0;
-  font-size: 10px;
-  color: #dc2626;
-  letter-spacing: 0.3px;
-  line-height: 1.35;
-  white-space: nowrap;
-  text-align: center;
-  pointer-events: none;
-  z-index: 10;
-  font-weight: 500;
-}
-
-/* ── HOVER ── */
 @media (hover: hover) and (pointer: fine) {
-  .cselectTrigger:hover:not(:focus-visible) {
-    border-color: var(--c-text-muted);
-  }
-
-  .stepperRow:hover {
-    border-color: var(--c-text-muted);
-  }
-
-  .cselectItem:hover {
-    background: var(--c-primary-bg);
-    color: var(--c-primary);
-  }
-
-  .cselectItemActive:hover {
-    background: var(--c-primary-bg);
-  }
-
   .toggleBtn:hover:not(.toggleBtnActive) {
     border-color: var(--c-primary);
     color: var(--c-primary);
@@ -621,10 +322,6 @@
     border-color: var(--c-primary-hover);
   }
 
-  .stepperBtn:hover {
-    background: var(--c-primary-bg);
-  }
-
   .nextBtn:hover:not(:disabled) {
     background: var(--c-primary-hover);
   }
@@ -633,8 +330,6 @@
     color: var(--c-text-dark);
   }
 }
-
-/* ── АДАПТИВ ── */
 
 @media (max-width: 1279px) {
   .parameters {
@@ -681,9 +376,6 @@
   .title {
     font-size: 17px;
   }
-  .stepperBtn {
-    width: 44px;
-  }
   .toggleBtn {
     height: 44px;
   }
@@ -723,8 +415,5 @@
   }
   .stepPane {
     gap: 14px;
-  }
-  .stepperBtn {
-    width: 40px;
   }
 }

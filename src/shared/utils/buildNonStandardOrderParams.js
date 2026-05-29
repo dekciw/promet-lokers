@@ -9,15 +9,6 @@ function fmtVentilation(type) {
   return VENT_LABELS[type] ?? 'Нет';
 }
 
-/**
- * Возвращает плоский массив параметров конфигуратора для строки 6 НЗ.
- * Покрывает все 11 параметров (стандартные и нестандартные).
- * isNonStandard=true когда значение отличается от model.defaultSpecs.
- *
- * @param {object} config — текущая конфигурация
- * @param {object} catalog — каталог из Firebase
- * @returns {Array<{label: string, value: string, isNonStandard: boolean}>}
- */
 export function buildNonStandardOrderParams(config, catalog) {
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   if (!model) return [];

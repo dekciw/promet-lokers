@@ -1,4 +1,3 @@
-/* Внешний контейнер конфигуратора */
 .configurator {
   padding: 32px;
   display: flex;
@@ -7,7 +6,6 @@
   width: 100%;
 }
 
-/* Верхняя строка: заголовок слева, текущая модель справа */
 .topRow {
   display: flex;
   align-items: center;
@@ -43,7 +41,7 @@
   gap: 4px;
   flex-shrink: 0;
   text-align: right;
-  /* margin-top: 14px; */
+
 }
 
 .currentModelLabel {
@@ -64,7 +62,6 @@
   letter-spacing: -0.1px;
 }
 
-/* Slim-bar: серия + модель */
 .modelBar {
   display: flex;
   align-items: center;
@@ -118,7 +115,6 @@
   margin-left: auto;
 }
 
-/* Пустое состояние — модель не выбрана */
 .emptyState {
   flex: 1;
   display: flex;
@@ -150,14 +146,12 @@
   max-width: 260px;
 }
 
-/* Сетка трёх колонок */
 .configGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-/* Анимация сворачивания при сбросе */
 @keyframes itemCollapse {
   from {
     opacity: 1;
@@ -176,7 +170,6 @@
   overflow: hidden;
 }
 
-/* ── Колонки ── */
 .configCol {
   border-radius: 16px;
   overflow: hidden;
@@ -200,7 +193,6 @@
     0 10px 36px rgba(12, 21, 41, 0.11);
 }
 
-/* Цветной кружок в правой части заголовка */
 .configCol .colHeader::after {
   content: '';
   width: 8px;
@@ -218,7 +210,6 @@
   background: #16a34a;
 }
 
-/* ── Info-bar внизу карточек 1 и 2 ── */
 .cardInfoBar {
   display: flex;
   align-items: center;
@@ -267,14 +258,12 @@
   margin: 0 16px;
 }
 
-/* Обёртка колонки */
 .configColWrapper {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* Заголовок карточки — внутри карточки */
 .colHeader {
   display: flex;
   align-items: center;
@@ -300,7 +289,6 @@
   flex: 1;
 }
 
-/* Бейдж количества изменений */
 .changeBadge {
   display: inline-flex;
   align-items: center;
@@ -330,7 +318,6 @@
   padding: 14px 20px 22px;
 }
 
-/* Анимации строк */
 @keyframes itemIn {
   from {
     opacity: 0;
@@ -342,7 +329,6 @@
   }
 }
 
-/* ── Списки ── */
 .specList,
 .diffList,
 .finalSpec {
@@ -353,7 +339,6 @@
   flex: 1;
 }
 
-/* Строки */
 .specItem,
 .diffItem,
 .finalItem {
@@ -371,7 +356,6 @@
   border-bottom: none;
 }
 
-/* Метки */
 .specLabel,
 .diffLabel,
 .finalLabel {
@@ -382,7 +366,6 @@
   flex: 1;
 }
 
-/* Значения */
 .specValue,
 .diffValue {
   font-size: 12.5px;
@@ -395,17 +378,28 @@
   gap: 6px;
 }
 
-/* Цветовой кружок */
 .colorSwatch {
   display: inline-block;
   width: 12px;
   height: 12px;
   border-radius: 3px;
   flex-shrink: 0;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: var(--swatch-bg);
 }
 
-/* Итоговая колонка */
+.colorSwatchLight {
+  border-color: #e2e8f0;
+}
+
+.colorSwatchFinal {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.colorSwatchFinalLight {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 .finalValue {
   font-size: 12.5px;
   font-weight: 600;
@@ -442,7 +436,6 @@
   display: inline-block;
 }
 
-/* ── Блок цены ── */
 .priceBlock {
   border-radius: 16px;
   background: linear-gradient(150deg, #111f47 0%, #07101e 100%);
@@ -501,7 +494,6 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* ── Кнопки действий ── */
 .btn {
   display: block;
   width: 100%;
@@ -537,7 +529,6 @@
   pointer-events: none;
 }
 
-/* Primary — корпоративный синий */
 .btnPrimary {
   background: var(--c-primary);
   color: #fff;
@@ -560,7 +551,6 @@
   opacity: 1;
 }
 
-/* Secondary — обводка */
 .btnSecondary {
   background: transparent;
   color: var(--c-primary);
@@ -576,7 +566,6 @@
   background: rgba(0, 53, 158, 0.1);
 }
 
-/* KP — оранжевый CTA */
 .btnKP {
   background: var(--c-orange);
   color: #fff;
@@ -599,7 +588,6 @@
   opacity: 1;
 }
 
-/* Ghost — для тёмного блока цены */
 .btnGhost {
   background: rgba(255, 255, 255, 0.07);
   color: rgba(255, 255, 255, 0.65);
@@ -626,7 +614,6 @@
   opacity: 1;
 }
 
-/* Алиас для отключения анимаций (обратная совместимость) */
 .btnNoAnim {
 }
 
@@ -638,8 +625,6 @@
   text-align: center;
   font-style: italic;
 }
-
-/* ──────────── АДАПТИВ ──────────── */
 
 @media (max-width: 1279px) {
   .configurator {
@@ -700,7 +685,6 @@
   }
 }
 
-/* Широкие мониторы 21:9 */
 @media (min-width: 1440px) {
   .configGrid {
     grid-template-columns: repeat(3, 1fr);

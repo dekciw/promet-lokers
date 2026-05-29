@@ -44,7 +44,6 @@ export default function Notification({
 			{visible && (
 				<motion.div
 					className={styles.toast}
-					style={{ top: 20, right: 20 }}
 					initial={{ opacity: 0, y: -10, scale: 0.96 }}
 					animate={{ opacity: 1, y: 0, scale: 1 }}
 					exit={{ opacity: 0, y: -8, scale: 0.97 }}

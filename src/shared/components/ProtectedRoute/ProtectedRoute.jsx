@@ -6,7 +6,7 @@ export default function ProtectedRoute({ isAllowed, redirectPath = '/configurato
     if (!isAllowed && openAuthModal) {
       openAuthModal(null, 'login');
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!isAllowed) {
     return <Navigate to={redirectPath} replace />;

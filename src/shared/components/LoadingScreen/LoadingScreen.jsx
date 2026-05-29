@@ -66,7 +66,7 @@ export default function LoadingScreen() {
 			exit={{ opacity: 0, scale: 1.02, transition: { duration: 0.4, ease: [0.23, 1, 0.32, 1] } }}
 		>
 			<div className={styles.content}>
-				{/* Лого — въезжает сверху */}
+
 				<motion.img
 					src='/img/brand/logo.svg'
 					alt='Промет'
@@ -76,7 +76,6 @@ export default function LoadingScreen() {
 					transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
 				/>
 
-				{/* Иконки — въезжают снизу с задержкой */}
 				<div className={styles.iconsRow}>
 					{ICONS.map((Icon, i) => (
 						<motion.div
@@ -94,7 +93,7 @@ export default function LoadingScreen() {
 								scale: { duration: SPIN, ease: [0.4, 0, 0.6, 1] },
 							}}
 						>
-							{/* Вращение */}
+
 							<motion.div
 								animate={{ rotate: [0, 360] }}
 								transition={{

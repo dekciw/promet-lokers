@@ -37,11 +37,6 @@ function IconClose() {
   );
 }
 
-// Architecture note: CatalogEditModal is a pure form component — it does NOT import
-// useImageUpload or call Firestore directly. Photo upload is delegated to onPhotoUpload
-// prop provided by the parent (AdminPage), keeping the modal decoupled and testable.
-// onPhotoUpload(file, currentFormValues, mode) → Promise<photoUrl>
-
 export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, onClose, onSave, onPhotoUpload }) {
   const titleId = useId();
   const {
@@ -49,18 +44,13 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
     formState: { errors, isSubmitting, isValid },
   } = useForm({ mode: 'onChange', defaultValues: EMPTY_MODEL });
 
-  // Local state for upload progress + error — mirrors state from the hook in AdminPage
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoError, setPhotoError] = useState(null);
 
-  // Watch photoUrl to drive preview rendering
   const photoUrl = watch('photoUrl');
   const fallbackPhotoUrl = model?.firestoreKey ? `/img/models/${model.firestoreKey}.png` : null;
   const displayPhotoUrl = photoUrl || fallbackPhotoUrl;
 
-  // Populate / reset form on open (RESEARCH.md Pitfall #3 — guard on isOpen is mandatory)
-  // trigger() after reset: mode:'onChange' doesn't auto-validate on reset, so isValid stays
-  // false until first user interaction — call trigger() to unblock the Save button immediately.
   useEffect(() => {
     if (isOpen) {
       reset(model ?? EMPTY_MODEL);
@@ -69,14 +59,12 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
     }
   }, [isOpen, model, reset, trigger]);
 
-  // Scroll lock
   useEffect(() => {
     if (!isOpen) return;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // ESC handler
   useEffect(() => {
     if (!isOpen) return;
     function onKey(e) { if (e.key === 'Escape' && !isSubmitting) onClose(); }
@@ -94,8 +82,7 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
     setPhotoError(null);
     setIsUploadingPhoto(true);
     try {
-      // ADD mode: model not yet in Firestore — onPhotoUpload only uploads to Cloudinary
-      // EDIT mode: model exists — onPhotoUpload uploads and persists to Firestore via saveModel
+
       const currentValues = getValues();
       const newUrl = await onPhotoUpload(file, currentValues, mode);
       setValue('photoUrl', newUrl, { shouldDirty: true, shouldValidate: false });
@@ -103,7 +90,7 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
       setPhotoError(err.message ?? 'Ошибка загрузки');
     } finally {
       setIsUploadingPhoto(false);
-      e.target.value = ''; // allow reselecting same file
+      e.target.value = '';
     }
   }
 
@@ -149,12 +136,12 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
             </div>
 
             <form id="catalog-form" className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-              {/* Hidden fields — registers photoUrl and sortOrder so they submit with the form */}
+
               <input type="hidden" {...register('photoUrl')} />
               <input type="hidden" {...register('sortOrder', { valueAsNumber: true })} />
 
               <div className={styles.grid}>
-                {/* Фото модели — full-width row at the top */}
+
                 <div className={cx(styles.field, styles.gridFull, styles.photoField)}>
                   <label className={styles.label}>Фото модели</label>
                   <div className={styles.photoRow}>
@@ -195,7 +182,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   </div>
                 </div>
 
-                {/* series */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-series">
                     Серия <span className={styles.required}>*</span>
@@ -211,7 +197,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.series?.message ?? ''}</span>
                 </div>
 
-                {/* name */}
                 <div className={cx(styles.field, styles.gridFull)}>
                   <label className={styles.label} htmlFor="f-name">
                     Название <span className={styles.required}>*</span>
@@ -225,11 +210,10 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.name?.message ?? ''}</span>
                 </div>
 
-                {/* article — read-only in edit mode */}
                 <div className={cx(styles.field, styles.gridFull)}>
                   <label className={styles.label} htmlFor="f-article">
                     Артикул <span className={styles.required}>*</span>
-                    {isEdit && <span style={{ color: '#718096', fontWeight: 400 }}> (нельзя изменить)</span>}
+                    {isEdit && <span className={styles.readonlyNote}> (нельзя изменить)</span>}
                   </label>
                   <input
                     id="f-article"
@@ -244,7 +228,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.article?.message ?? ''}</span>
                 </div>
 
-                {/* basePrice */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-basePrice">
                     Цена (basePrice) <span className={styles.required}>*</span>
@@ -259,7 +242,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.basePrice?.message ?? ''}</span>
                 </div>
 
-                {/* height */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-height">
                     Высота, мм <span className={styles.required}>*</span>
@@ -274,7 +256,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.height?.message ?? ''}</span>
                 </div>
 
-                {/* width */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-width">
                     Ширина, мм <span className={styles.required}>*</span>
@@ -289,7 +270,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.width?.message ?? ''}</span>
                 </div>
 
-                {/* depth */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-depth">
                     Глубина, мм <span className={styles.required}>*</span>
@@ -304,7 +284,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.depth?.message ?? ''}</span>
                 </div>
 
-                {/* weight */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-weight">
                     Вес, кг <span className={styles.required}>*</span>
@@ -319,7 +298,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.weight?.message ?? ''}</span>
                 </div>
 
-                {/* bodyThickness */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-bodyT">
                     Толщина корпуса, мм <span className={styles.required}>*</span>
@@ -337,7 +315,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.bodyThickness?.message ?? ''}</span>
                 </div>
 
-                {/* doorThickness */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-doorT">
                     Толщина двери, мм <span className={styles.required}>*</span>
@@ -355,7 +332,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.doorThickness?.message ?? ''}</span>
                 </div>
 
-                {/* lockCount */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-lockCount">
                     Замков <span className={styles.required}>*</span>
@@ -371,7 +347,6 @@ export default function CatalogEditModal({ isOpen, mode = 'edit', model = null, 
                   <span className={styles.errorMsg} aria-live="polite">{errors.lockCount?.message ?? ''}</span>
                 </div>
 
-                {/* doorCount */}
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="f-doorCount">
                     Дверей <span className={styles.required}>*</span>

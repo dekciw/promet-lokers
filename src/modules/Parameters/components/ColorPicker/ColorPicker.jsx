@@ -47,18 +47,16 @@ export default function ColorPicker({
 		onOpenChange(false);
 	}
 
-	function getSwatchStyle(colorHex) {
-		const border = colorHex === '#ffffff' ? '1px solid #e2e8f0' : '1px solid rgba(0,0,0,0.12)';
-		return { background: colorHex, border };
-	}
-
-	const swatchStyle = selected ? getSwatchStyle(selected.color) : {};
-
 	return (
 		<div className={cx(styles.colorPicker, isOpen && styles.colorPickerOpen)} ref={ref}>
 			<button type='button' className={cx(styles.trigger, modified && styles.triggerModified)} aria-expanded={isOpen} onClick={handleTriggerClick}>
 				<img src='/img/icons/icon-color.svg' alt='' width='16' height='16' className={styles.triggerIcon} />
-				{selected && <span className={styles.triggerSwatch} style={swatchStyle} />}
+				{selected && (
+					<span
+						className={cx(styles.triggerSwatch, selected.color === '#ffffff' && styles.triggerSwatchLight)}
+						style={{ '--swatch-bg': selected.color }}
+					/>
+				)}
 				<span className={`${styles.triggerText}${selected ? ` ${styles.triggerTextSelected}` : ''}`}>
 					{selected ? selected.name : placeholder}
 				</span>
@@ -97,7 +95,7 @@ export default function ColorPicker({
 										className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
 										onClick={() => handleSelect(item)}
 									>
-										<span className={styles.itemSwatch} style={{ background: item.color }} />
+										<span className={styles.itemSwatch} style={{ '--swatch-bg': item.color }} />
 										<span className={styles.itemName}>{item.name}</span>
 										<AnimatePresence>
 											{selected?.name === item.name && (

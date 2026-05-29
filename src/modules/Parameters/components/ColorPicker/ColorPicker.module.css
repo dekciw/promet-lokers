@@ -41,13 +41,17 @@
 	border-radius: var(--r-sm);
 }
 
-
 .triggerSwatch {
 	width: 20px;
 	height: 20px;
 	border-radius: 4px;
 	flex-shrink: 0;
 	border: 1px solid rgba(0, 0, 0, 0.12);
+	background: var(--swatch-bg);
+}
+
+.triggerSwatchLight {
+	border-color: #e2e8f0;
 }
 
 .triggerIcon {
@@ -146,6 +150,7 @@
 	border-radius: 3px;
 	flex-shrink: 0;
 	border: 1px solid rgba(0, 0, 0, 0.1);
+	background: var(--swatch-bg);
 }
 
 .itemSwatchStandard {

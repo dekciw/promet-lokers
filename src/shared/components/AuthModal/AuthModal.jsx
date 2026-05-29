@@ -30,7 +30,6 @@ function CardHeader({ title, subtitle }) {
   );
 }
 
-// F03: login gate treats missing Firestore doc as deleted/disabled (except master admin).
 function LoginForm({ onSwitch, onSuccess, onClose }) {
   const [shake, setShake] = useState(false);
   const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm();
@@ -135,7 +134,7 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
       });
       onSuccess?.();
     } catch {
-      try { await cred.user.delete(); } catch { /* ignore */ }
+      try { await cred.user.delete(); } catch {}
       setError('root', { message: 'Ошибка регистрации. Попробуйте ещё раз.' });
       setShake(true);
       setTimeout(() => setShake(false), 400);

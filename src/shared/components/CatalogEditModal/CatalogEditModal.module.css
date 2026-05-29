@@ -196,9 +196,8 @@
   background: #f7fafc;
 }
 
-/* ── Photo upload field ── */
 .photoField {
-  /* full-width row — gridFull handles column span */
+
 }
 
 .photoRow {
@@ -240,7 +239,7 @@
 
 .photoBtn {
   position: relative;
-  min-height: 44px;    /* touch target per CLAUDE.md UI/UX Pro Max */
+  min-height: 44px;    
   min-width: 44px;
   padding: 10px 16px;
   cursor: pointer;
@@ -254,7 +253,7 @@
 }
 
 .photoFileInput:focus-visible + * {
-  outline: 2px solid #0c53b3; /* matches project brand color */
+  outline: 2px solid #0c53b3; 
   outline-offset: 2px;
 }
 
@@ -266,4 +265,9 @@
   .modal {
     max-width: 100%;
   }
+}
+
+.readonlyNote {
+  color: #718096;
+  font-weight: 400;
 }

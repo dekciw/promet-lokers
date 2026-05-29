@@ -4,7 +4,6 @@ const curveTo = (x1, y1, x2, y2, x3, y3) =>
   PDFOperator.of('c', [x1, y1, x2, y2, x3, y3].map(PDFNumber.of));
 import fontkit from '@pdf-lib/fontkit';
 
-// ─── Цвета RAL ────────────────────────────────────────────────────────────
 const KP_COLOR_DATA = {
   'RAL 7038':     { hex: '#B4B8B0', ralCode: 'RAL 7038', name: 'Агатовый серый' },
   '5002 шагрень': { hex: '#2B2C7C', ralCode: 'RAL 5002', name: 'Ультрамариново-синий' },
@@ -21,7 +20,6 @@ const KP_COLOR_DATA = {
 };
 const DEFAULT_COLOR_KEY = 'RAL 7038';
 
-// ─── Координаты ───────────────────────────────────────────────────────────
 const X_CATEGORY = 40;
 const Y_CATEGORY = 722;
 
@@ -33,19 +31,15 @@ const Y_MODEL = 722;
 const MODEL_MAX_WIDTH = 205;
 const MODEL_LINE_HEIGHT = 12;
 
-// ЦВЕТ ДВЕРИ
 const X_DOOR_COLOR = 279;
 const Y_DOOR_COLOR = 530;
 
-// ЦВЕТ КОРПУСА
 const X_BODY_COLOR = 406;
 const Y_BODY_COLOR = 530;
 
-// ГАБАРИТЫ
 const X_DIMS = 481;
 const Y_DIMS = 480.6;
 
-// ЗАМОК
 const X_LOCK = 481;
 const Y_LOCK = 455.6;
 
@@ -65,37 +59,31 @@ const LOCK_Y = {
   euro_locks:        Y_LOCK + 1.6,
 };
 
-// КОЛИЧЕСТВО
 const X_QTY = 530;
 const Y_QTY = Y_LOCK - 23.4;
 
-// ЦЕНА ЗА 1 ШТ
 const X_PRICE = 281;
 const Y_PRICE = Y_QTY - 24;
 
-// ML-1 — НЕСТАНДАРТНЫЕ ПАРАМЕТРЫ
 const X_BODY_THICKNESS_1 = 481;
 const Y_BODY_THICKNESS_1 = Y_PRICE - 24;
 const X_BODY_THICKNESS_VAL_1 = X_BODY_THICKNESS_1 + 49;
 
-const X_DOOR_THICKNESS_1     = X_BODY_THICKNESS_1;     // подтверждено
-const Y_DOOR_THICKNESS_1     = Y_BODY_THICKNESS_1;     // подтверждено
-const X_DOOR_THICKNESS_VAL_1 = X_BODY_THICKNESS_VAL_1; // подтверждено
+const X_DOOR_THICKNESS_1     = X_BODY_THICKNESS_1;
+const Y_DOOR_THICKNESS_1     = Y_BODY_THICKNESS_1;
+const X_DOOR_THICKNESS_VAL_1 = X_BODY_THICKNESS_VAL_1;
 
 const X_VENTILATION_1        = X_BODY_THICKNESS_1;
 const Y_VENTILATION_1        = Y_BODY_THICKNESS_1;
 const X_VENTILATION_VAL_1    = X_BODY_THICKNESS_VAL_1;
 const VENT_VAL_OFFSET_X      = -135;
-const VENT_VAL_OFFSET_Y      = 20;   // подтверждено
-const VENT_LABEL_OFFSET_Y    = 15;   // подтверждено (val - 5)
+const VENT_VAL_OFFSET_Y      = 20;
+const VENT_LABEL_OFFSET_Y    = 15;
 
-// ФОТО МОДЕЛИ — бокс, фото вписывается по центру не выходя за края
 const PHOTO_BOX = { x: 0, y: 260, w: 260, h: 420 };
 
-// ФОТО ЗАМКА — бокс в нижней рамке КП
 const LOCK_PHOTO_BOX = { x: 326, y: 135, w: 185, h: 125 };
 
-// Маппинг lockId → имя файла в /img/locks/
 const LOCK_IMAGE_MAP = {
   praktik_el_code:   'Замок_Практик_EL_code.jpg',
   praktik_el_mifare: 'Замок_Практик_EL_Mifare.jpg',
@@ -104,18 +92,14 @@ const LOCK_IMAGE_MAP = {
   d111x:             'Замок_D111x-20-1.jpg',
 };
 
-// Индивидуальные боксы для конкретных моделей (переопределяют PHOTO_BOX)
 const PHOTO_BOX_OVERRIDE = {
 };
 
-// ПРАВАЯ СТЕНКА (текст не должен выходить правее)
 const FRAME_RIGHT_X = 546;
-const COLOR_CIRCLE_R = 19;     // радиус кружка
-const COLOR_TEXT_GAP = 6;      // отступ текста от правого края кружка
-const COLOR_LINE_GAP = 9;      // межстрочный интервал между строками названия
-const COLOR_RAL_GAP = 13;      // отступ от RAL-кода до первой строки названия
-
-// ─── Вспомогательные ──────────────────────────────────────────────────────
+const COLOR_CIRCLE_R = 19;
+const COLOR_TEXT_GAP = 6;
+const COLOR_LINE_GAP = 9;
+const COLOR_RAL_GAP = 13;
 
 async function fetchFont(url) {
   const resp = await fetch(url);
@@ -131,8 +115,6 @@ function hexToRgb(hex) {
     parseInt(h.slice(4, 6), 16) / 255,
   );
 }
-
-// ─── Основная функция ─────────────────────────────────────────────────────
 
 export async function fillCommercialProposalTemplate({ config, catalog, price }) {
   const modelDefaults = config.modelId ? catalog.models?.[config.modelId]?.defaultSpecs : null;
@@ -192,7 +174,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     return (c >= 0x0400 && c <= 0x04FF) || c === 0x20BD;
   }
 
-  // Montserrat Bold — смешанный текст (белый, для заголовков)
   function drawMixed(text, x, y, size = FONT_SIZE, color = WHITE) {
     if (!text) return;
     const str = String(text);
@@ -223,7 +204,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     return interLat;
   }
 
-  // Рисует ₽ вручную: «Р» из шрифта + одна горизонтальная черта внизу буквы
   function drawRubleSign(x, y, size, color) {
     page.drawText('Р', { x, y, size, font: interCyr, color });
     const capH = size * 0.68;
@@ -232,7 +212,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     page.drawLine({ start: { x: x - 0.4, y: y + capH * 0.19 }, end: { x: x + barW, y: y + capH * 0.19 }, color, thickness: barT });
   }
 
-  // Inter Medium — смешанный текст (для цветовых меток)
   function drawInterMixed(text, x, y, size = 8, color = BLACK) {
     if (!text) return;
     const str = String(text);
@@ -370,8 +349,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     return lines;
   }
 
-  // Кружок + RAL-код + название цвета
-  // x, y — левый центр блока (центр кружка по Y); nameMaxWidth — макс. ширина строки названия
   function drawColorBlock(colorKey, x, y, nameMaxWidth = 120, textYOffset = 0) {
     const data = KP_COLOR_DATA[colorKey] ?? KP_COLOR_DATA[DEFAULT_COLOR_KEY];
 
@@ -396,13 +373,11 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     });
   }
 
-  // ── Данные ──
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   const seriesLabel = config.seriesId?.toUpperCase() ?? '';
   const doorColorKey = config.doorColor?.name ?? DEFAULT_COLOR_KEY;
   const bodyColorKey = config.bodyColor?.name ?? DEFAULT_COLOR_KEY;
 
-  // ── Поля ──
   drawMixed('ШКАФЫ ДЛЯ РАЗДЕВАЛОК', X_CATEGORY, Y_CATEGORY);
   drawMixed(seriesLabel, X_SERIES, Y_SERIES);
 
@@ -414,13 +389,10 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const isNonStd = isMl1 || isMl2 || isMl3;
   const colorTextOffset = isNonStd ? 4 : 0;
 
-  // Цвет двери (узкий лимит — рядом второй блок)
   drawColorBlock(doorColorKey, X_DOOR_COLOR, Y_DOOR_COLOR, 75, colorTextOffset);
 
-  // Цвет корпуса
   drawColorBlock(bodyColorKey, X_BODY_COLOR, Y_BODY_COLOR, 120, colorTextOffset);
 
-  // Габариты: ШхВхГ мм
   const w = config.width  || model?.defaultSpecs?.width  || '';
   const h = config.height || model?.defaultSpecs?.height || '';
   const d = config.depth  || model?.defaultSpecs?.depth  || '';
@@ -429,7 +401,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const dimsX = X_DIMS - 7;
   drawInterMixed(dimsText, dimsX, dimsY, 10, BLACK);
 
-  // Замок — индивидуальная X для каждого замка
   const lockLabel = (catalog.locks?.[config.lockId]?.name ?? '')
     .replace(/\s*([-/])\s*/g, '$1');
   if (lockLabel) {
@@ -438,13 +409,11 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     drawInterMixed(lockLabel, lockX, lockY, 10, BLACK);
   }
 
-  // Количество — 3 цифры на X_QTY, 1-2 цифры +5 вправо
   const qtyLabel = String(config.quantity ?? 10);
   const qtyX = (qtyLabel.length >= 3 ? X_QTY : X_QTY + 7) - (!isNonStd && !isLS ? 3 : isMl1 ? 3 : (isMl2 || isMl3) ? 3 : (isLS && nonStandardCount === 0) ? 3 : 2);
   const qtyY = isNonStd ? Y_QTY - 6.3 : Y_QTY - (isLS && nonStandardCount === 0 ? 7 : 0);
   drawInterMixed(qtyLabel, qtyX, qtyY, 10, BLACK);
 
-  // ML-1/ML-2 — нестандартные параметры (стек: каждый следующий ниже на ROW_STEP)
   if (isNonStd) {
     const ROW_STEP = 20;
     const baseY = Y_BODY_THICKNESS_1 + 13;
@@ -458,7 +427,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     if (config.ventilationType)
       rows.push({ label: 'Вентиляция', value: catalog.priceRules?.ventilation?.[config.ventilationType]?.name ?? config.ventilationType, isVent: true });
 
-    // ML-2: определяем комбинацию
     const hasBody = rows.some(r => r.label.includes('корпуса'));
     const hasDoor = rows.some(r => r.label.includes('двери'));
     const hasVent = rows.some(r => r.isVent);
@@ -482,7 +450,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     });
   }
 
-  // Цена за 1 шт — метка + значение
   const priceY = isMl3 ? Y_PRICE - 90 : isMl2 ? Y_PRICE - 62 : isMl1 ? Y_PRICE - 37 : Y_PRICE - (isLS && nonStandardCount === 0 ? 7 : 0);
   drawInterMixed('Итоговая цена за 1 шт. (включая НДС)', X_PRICE, priceY, 10, GRAY_PRICE);
   if (price) {
@@ -490,9 +457,6 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
     drawInterMixed(priceStr, X_PRICE + 228 + (isLS && nonStandardCount >= 1 ? 2 : 0) + (!isNonStd && !isLS ? 1 : 0), priceY, 10, BLACK);
   }
 
-  // Фото модели — приоритет: photoUrl из Firestore, иначе локальный PNG-fallback
-  // pdf-lib: формат определяется по расширению URL (.jpg/.jpeg → embedJpg, иначе → embedPng).
-  // Cloudinary сохраняет в том формате что загружен — нельзя предполагать JPEG для всех remote.
   if (config.modelId) {
     try {
       const modelData = catalog?.models?.[config.modelId];
@@ -512,10 +476,9 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
         const py = box.y + (box.h - ph) / 2;
         page.drawImage(img, { x: px, y: py, width: pw, height: ph });
       }
-    } catch { /* фото не найдено — пропускаем */ }
+    } catch {}
   }
 
-  // Фото замка
   const lockImgFile = LOCK_IMAGE_MAP[config.lockId];
   if (lockImgFile) {
     try {
@@ -550,26 +513,22 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
         page.drawImage(img, { x: px, y: py, width: pw, height: ph });
         page.pushOperators(popGraphicsState());
       }
-    } catch { /* фото замка не найдено — пропускаем */ }
+    } catch {}
   }
 
-  // ─── DEBUG: координатная сетка ─────────────────────────────────────────
   const DEBUG = false;
   if (DEBUG) {
     const { width, height } = page.getSize();
     const GREEN = rgb(0, 0.78, 0.2);
 
-    // Фотобокс — оранжевая рамка (активный бокс для текущей модели)
     const ORANGE = rgb(1, 0.5, 0);
     const activeBox = PHOTO_BOX_OVERRIDE[config.modelId] ?? PHOTO_BOX;
     page.drawRectangle({ x: activeBox.x, y: activeBox.y, width: activeBox.w, height: activeBox.h, borderColor: ORANGE, borderWidth: 1, opacity: 0 });
 
-    // Бокс замка — синяя рамка
     const BLUE2 = rgb(0, 0.4, 1);
     page.drawRectangle({ x: LOCK_PHOTO_BOX.x, y: LOCK_PHOTO_BOX.y, width: LOCK_PHOTO_BOX.w, height: LOCK_PHOTO_BOX.h, borderColor: BLUE2, borderWidth: 1, opacity: 0 });
     page.drawText(`LOCK x=${LOCK_PHOTO_BOX.x} y=${LOCK_PHOTO_BOX.y} w=${LOCK_PHOTO_BOX.w} h=${LOCK_PHOTO_BOX.h}`, { x: LOCK_PHOTO_BOX.x + 2, y: LOCK_PHOTO_BOX.y + LOCK_PHOTO_BOX.h + 2, size: 6, font: latFont, color: BLUE2 });
 
-    // Правая стенка FRAME_RIGHT_X — зелёная вертикальная линия
     page.drawLine({
       start: { x: FRAME_RIGHT_X, y: 0 },
       end:   { x: FRAME_RIGHT_X, y: height },

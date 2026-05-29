@@ -11,7 +11,6 @@ function setByPath(obj, path, value) {
   return next;
 }
 
-// Decimal ↔ percent helpers (stored as 0.15, displayed as 15)
 function decimalToPct(v) {
   if (v === '' || v === null || v === undefined) return '';
   const pct = Math.round(Number(v) * 10000) / 100;
@@ -146,7 +145,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
   return (
     <div className={styles.tab}>
 
-      {/* ── Вентиляция ── */}
       <section className={styles.section} aria-labelledby="vent-heading">
         <div className={styles.sectionHead}>
           <h2 id="vent-heading" className={styles.sectionTitle}>Вентиляция</h2>
@@ -185,7 +183,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      {/* ── Толщина металла ── */}
       <section className={styles.section} aria-labelledby="thick-heading">
         <div className={styles.sectionHead}>
           <h2 id="thick-heading" className={styles.sectionTitle}>Толщина металла</h2>
@@ -248,7 +245,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      {/* ── Глубина ML + LS ── */}
       <section className={styles.section} aria-labelledby="depth-heading">
         <div className={styles.sectionHead}>
           <h2 id="depth-heading" className={styles.sectionTitle}>Глубина</h2>
@@ -295,7 +291,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      {/* ── Высота ML + LS ── */}
       <section className={styles.section} aria-labelledby="height-heading">
         <div className={styles.sectionHead}>
           <h2 id="height-heading" className={styles.sectionTitle}>Высота</h2>
@@ -340,7 +335,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      {/* ── Замки ── */}
       <section className={styles.section} aria-labelledby="locks-heading">
         <div className={styles.sectionHead}>
           <h2 id="locks-heading" className={styles.sectionTitle}>Замки</h2>
@@ -374,7 +368,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      {/* ── Сохранить ── */}
       <div className={styles.saveBar}>
         <button
           type="button"

@@ -33,9 +33,6 @@ const ADMIN_TABS = [
   { key: 'users',   label: 'Пользователи' },
 ];
 
-// SortableCard: individual card wrapped in useSortable.
-// IMPORTANT: drag listeners are attached ONLY to .dragHandle, NOT the whole article —
-// this keeps "Редактировать" / "Удалить" button clicks from initiating a drag.
 function SortableCard({ model, onEdit, onDelete, disabled, position, total }) {
   const {
     attributes, listeners, setNodeRef,
@@ -123,18 +120,15 @@ export default function AdminPage({ onLogout, username = '' }) {
   const [activeSeries, setActiveSeries] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // CRUD UI state
   const [addOpen, setAddOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Notification state
   const [notif, setNotif] = useState({ visible: false, status: 'ok', title: '' });
   function showOk(title)    { setNotif({ visible: true, status: 'ok',    title }); }
   function showError(title) { setNotif({ visible: true, status: 'error', title }); }
 
-  // CATALOG-02/03: filtered and sorted models
   const visibleModels = useMemo(() => models
     .filter((m) => activeSeries === 'all' || m.series === activeSeries)
     .filter((m) => !searchQuery || (m.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()))
@@ -142,26 +136,19 @@ export default function AdminPage({ onLogout, username = '' }) {
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
   [models, activeSeries, searchQuery]);
 
-  // MEDIA-01..03: wire useImageUpload (edit flow — saveModel persists photoUrl to Firestore)
   const { uploadPhoto } = useImageUpload({ saveModel });
 
-  // Photo upload handler — mode-aware:
-  // - EDIT mode: model exists in Firestore → full pipeline (resize + upload + saveModel)
-  // - ADD mode: model not yet in Firestore → only resize + Cloudinary (form Save will persist)
   async function handlePhotoUpload(file, currentValues, mode) {
     if (mode === 'edit' && currentValues.article) {
-      return await uploadPhoto(file, currentValues); // saves to Firestore + returns URL
+      return await uploadPhoto(file, currentValues);
     }
-    // ADD mode: resize + upload but don't persist to Firestore yet
+
     const blob = await resizeImageToHeight(file, 1520);
     return await uploadToCloudinary(blob);
   }
 
-  // ORDER-01: drag allowed only when a specific series is selected (not "all") and no search
-  // Reason: reordering mixed ML+LS is confusing; series tabs give isolated, predictable order
   const isDragDisabled = activeSeries === 'all' || searchQuery.trim() !== '';
 
-  // DnD sensors — PointerSensor with distance:5 avoids accidental drag on button clicks
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -169,11 +156,10 @@ export default function AdminPage({ onLogout, username = '' }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // ORDER-02: persist new sortOrder to Firestore after drag
   async function handleDragEnd(event) {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;  // Pitfall #5 guard — no-op on same position
-    if (isDragDisabled) return;                   // safety net if drag somehow fires while disabled
+    if (!over || active.id === over.id) return;
+    if (isDragDisabled) return;
     const oldIndex = visibleModels.findIndex((m) => m.article === active.id);
     const newIndex = visibleModels.findIndex((m) => m.article === over.id);
     if (oldIndex === -1 || newIndex === -1) return;
@@ -185,11 +171,10 @@ export default function AdminPage({ onLogout, username = '' }) {
     }
   }
 
-  // CATALOG-07: add with duplicate article guard (Pitfall #5)
   async function handleAdd(data) {
     if (models.some((m) => m.article === data.article)) {
       showError(`Артикул «${data.article}» уже существует`);
-      return; // Do not close modal — let user fix the article
+      return;
     }
     try {
       await addModel(data);
@@ -200,7 +185,6 @@ export default function AdminPage({ onLogout, username = '' }) {
     }
   }
 
-  // CATALOG-06: save existing model
   async function handleSave(data) {
     try {
       await saveModel(data);
@@ -211,7 +195,6 @@ export default function AdminPage({ onLogout, username = '' }) {
     }
   }
 
-  // CATALOG-08: delete confirmed
   async function handleDeleteConfirm() {
     if (!deleteTarget) return;
     setIsDeleting(true);

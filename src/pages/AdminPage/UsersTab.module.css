@@ -377,7 +377,6 @@ select.input {
   font-family: inherit;
 }
 
-/* ── Invite link block ── */
 .inviteSection {
   margin-top: 32px;
   padding: 20px 24px;
@@ -482,4 +481,9 @@ select.input {
     min-width: 0;
     width: 100%;
   }
+}
+
+.statusText {
+  font-size: 13px;
+  color: #718096;
 }

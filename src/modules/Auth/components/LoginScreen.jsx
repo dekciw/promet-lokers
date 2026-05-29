@@ -20,8 +20,6 @@ export default function LoginScreen() {
     formState: { errors, isSubmitting },
   } = useForm();
 
-  // Auth State Flash workaround: after signOut the component remounts.
-  // We stash the error in sessionStorage before signOut and read it here on mount.
   useEffect(() => {
     const msg = sessionStorage.getItem(DEACTIVATED_KEY);
     if (msg) {
@@ -36,8 +34,6 @@ export default function LoginScreen() {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
 
-      // F03: master admin has no Firestore doc and always passes through.
-      // Regular users: missing doc = deleted account → block same as disabled.
       const userSnap = await getDoc(doc(db, 'users', cred.user.uid));
       const isMasterAdmin = cred.user.email === ADMIN_EMAIL;
       if (!isMasterAdmin && (!userSnap.exists() || userSnap.data().status === 'disabled')) {

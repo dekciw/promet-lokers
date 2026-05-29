@@ -15,14 +15,13 @@ import './index.css';
 
 const REGISTER_TRIGGER_KEY = 'promet_open_register';
 
-// Redirects /register to /configurator and sets a trigger flag to open the register popup.
 function RegisterRedirect() {
   const navigate = useNavigate();
 
   useEffect(() => {
     sessionStorage.setItem(REGISTER_TRIGGER_KEY, '1');
     navigate('/configurator', { replace: true });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 }
@@ -63,9 +62,6 @@ export default function App() {
     setAuthModal((prev) => ({ ...prev, open: false, onSuccess: null }));
   }, []);
 
-  // Auto-open register popup when:
-  //   - arriving via /register redirect (REGISTER_TRIGGER_KEY set in sessionStorage), or
-  //   - URL contains ?action=register
   useEffect(() => {
     if (authState !== 'ready' || user) return;
     const trigger = sessionStorage.getItem(REGISTER_TRIGGER_KEY);
@@ -76,8 +72,6 @@ export default function App() {
     openAuthModal(null, 'register');
   }, [authState, location.pathname, location.search, openAuthModal]);
 
-  // F04: слушаем статус в реальном времени — выходим немедленно при блокировке.
-  // Не нужен для master admin (у него нет Firestore-документа).
   useEffect(() => {
     if (!user || user.email === ADMIN_EMAIL) return;
     const unsub = onSnapshot(doc(db, 'users', user.uid), (snap) => {

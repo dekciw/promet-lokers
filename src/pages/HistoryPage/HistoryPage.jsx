@@ -269,7 +269,7 @@ export default function HistoryPage({ uid, user, onLogout, username, isAdmin, on
       />
 
       {nzError && (
-        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#fc8181', color: '#fff', padding: '12px 20px', borderRadius: 8, fontSize: 14, zIndex: 9999 }}>
+        <div className={styles.nzError}>
           Ошибка: {nzError}
         </div>
       )}

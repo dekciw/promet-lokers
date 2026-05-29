@@ -26,7 +26,6 @@ function IconTrash() {
 export default function DeleteConfirmModal({ isOpen, modelName, isDeleting = false, onCancel, onConfirm }) {
   const titleId = useId();
 
-  // ESC handler
   useEffect(() => {
     if (!isOpen) return;
     function onKey(e) { if (e.key === 'Escape' && !isDeleting) onCancel(); }

@@ -10,7 +10,6 @@
 	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* ── Левая часть ── */
 .brand {
 	display: flex;
 	align-items: center;
@@ -53,7 +52,6 @@
 	white-space: nowrap;
 }
 
-/* ── Центральные иконки продуктов — градиент слева тёмный → справа ярче ── */
 .decoIcons {
 	position: absolute;
 	top: 50%;
@@ -67,7 +65,6 @@
 	mask-image: linear-gradient(to left, transparent 0%, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.28) 60%, rgba(255,255,255,0.45) 100%);
 }
 
-/* ── Правая часть ── */
 .userArea {
 	display: flex;
 	align-items: center;
@@ -147,7 +144,6 @@
 	box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
 }
 
-/* ── Login button (unauthenticated) ── */
 .loginBtn {
   height: 36px;
   padding: 0 20px;
@@ -186,7 +182,6 @@
   }
 }
 
-/* ── Admin link ── */
 .adminLink {
   display: inline-flex;
   align-items: center;
@@ -223,8 +218,6 @@
     min-height: 44px;
   }
 }
-
-/* ──────────── АДАПТИВ ──────────── */
 
 @media (max-width: 1279px) {
 	.header {

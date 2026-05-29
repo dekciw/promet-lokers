@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import styles from './Parameters.module.css';
+import { cx } from '../../../../shared/utils/cx';
+import styles from './StepperInput.module.css';
 
 const SLOT_SETS = 3;
 const SLOT_HIGH = 22;
 const SLOT_LOW = 8;
-const DIGIT_H = 20;
 const LIMIT_HINT_DURATION = 1500;
 
 function SlotDigit({ digit, direction }) {
@@ -36,7 +36,6 @@ function SlotDigit({ digit, direction }) {
 			const snap = cur + adj;
 			const fin = snap + delta;
 			posRef.current = snap;
-			// eslint-disable-next-line react-hooks/set-state-in-effect -- double-rAF trick: snap без анимации → потом re-enable
 			setInstant(true);
 			setPos(snap);
 			requestAnimationFrame(() =>
@@ -50,19 +49,16 @@ function SlotDigit({ digit, direction }) {
 			posRef.current = next;
 			setPos(next);
 		}
-	}, [digit]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [digit]);
 
 	return (
-		<span style={{ display: 'inline-block', overflow: 'hidden', height: DIGIT_H, width: '1ch', verticalAlign: 'top' }}>
+		<span className={styles.slotOuter}>
 			<span
-				style={{
-					display: 'block',
-					transform: `translateY(${-pos * DIGIT_H}px)`,
-					transition: instant ? 'none' : 'transform 0.8s cubic-bezier(0.34, 1.2, 0.64, 1)',
-				}}
+				className={cx(styles.slotTrack, instant && styles.slotTrackInstant)}
+				style={{ '--slot-pos': pos }}
 			>
 				{Array.from({ length: SLOT_SETS * 10 }, (_, i) => (
-					<span key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: DIGIT_H }}>
+					<span key={i} className={styles.slotCell}>
 						{i % 10}
 					</span>
 				))}
@@ -73,7 +69,7 @@ function SlotDigit({ digit, direction }) {
 
 function SlotCounter({ value, direction }) {
 	return (
-		<span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+		<span className={styles.slotCounter}>
 			{String(value)
 				.split('')
 				.map((ch, i) => (
@@ -92,7 +88,6 @@ export default function StepperInput({ id, value, min, max, step = 50, onChange,
 	const timerRef = useRef(null);
 
 	useEffect(() => {
-		// eslint-disable-next-line react-hooks/set-state-in-effect -- controlled input: синхронизация локального стейта с внешним value
 		if (!focused) setInputVal(value);
 	}, [value, focused]);
 
@@ -165,7 +160,7 @@ export default function StepperInput({ id, value, min, max, step = 50, onChange,
 		<div className={`${styles.stepper}${limitSide ? ` ${styles.stepperLimit}` : ''}`}>
 			<div className={`${styles.stepperRow}${modified ? ` ${styles.stepperRowModified}` : ''}`}>
 				<button className={styles.stepperBtn} type='button' onClick={() => handleStep(-1)} aria-label='Уменьшить'>
-					<img src='/img/icons/icon-chevron.svg' alt='' width='10' height='8' style={{ transform: 'rotate(180deg)' }} />
+					<img src='/img/icons/icon-chevron.svg' alt='' width='10' height='8' className={styles.chevronFlipped} />
 				</button>
 				{editable && focused ? (
 					<input
@@ -181,7 +176,7 @@ export default function StepperInput({ id, value, min, max, step = 50, onChange,
 					/>
 				) : (
 					<div
-						className={styles.stepperDisplay}
+						className={cx(styles.stepperDisplay, editable && styles.stepperDisplayEditable)}
 						id={id}
 						onClick={
 							editable
@@ -194,7 +189,6 @@ export default function StepperInput({ id, value, min, max, step = 50, onChange,
 									}
 								: undefined
 						}
-						style={editable ? { cursor: 'text' } : undefined}
 					>
 						{value && <SlotCounter value={value} direction={direction} />}
 					</div>

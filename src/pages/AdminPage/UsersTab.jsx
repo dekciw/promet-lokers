@@ -30,9 +30,7 @@ export default function UsersTab({ onNotify }) {
       await navigator.clipboard.writeText(inviteLink);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // fallback: select the input
-    }
+    } catch {}
   }
 
   async function handleRegenerate() {
@@ -498,7 +496,6 @@ export default function UsersTab({ onNotify }) {
         </div>
       )}
 
-      {/* ── Invite link section ── */}
       <div className={styles.inviteSection}>
         <h3 className={styles.inviteSectionTitle}>Ссылка-приглашение для регистрации</h3>
         <p className={styles.inviteSectionDesc}>
@@ -506,7 +503,7 @@ export default function UsersTab({ onNotify }) {
         </p>
         <div className={styles.inviteLinkRow}>
           {inviteLoading ? (
-            <span style={{ fontSize: 13, color: '#718096' }}>Загрузка…</span>
+            <span className={styles.statusText}>Загрузка…</span>
           ) : inviteLink ? (
             <>
               <input
@@ -528,7 +525,7 @@ export default function UsersTab({ onNotify }) {
               {copied && <span className={styles.inviteCopied} aria-live="polite" />}
             </>
           ) : (
-            <span style={{ fontSize: 13, color: '#718096' }}>Ссылка не создана</span>
+            <span className={styles.statusText}>Ссылка не создана</span>
           )}
           <button
             type="button"
