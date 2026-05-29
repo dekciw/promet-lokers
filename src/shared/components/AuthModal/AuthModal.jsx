@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
+import { ADMIN_EMAIL } from '../../constants/admin';
 import styles from './AuthModal.module.css';
 
 function CloseSvg() {
@@ -29,6 +30,7 @@ function CardHeader({ title, subtitle }) {
   );
 }
 
+// F03: login gate treats missing Firestore doc as deleted/disabled (except master admin).
 function LoginForm({ onSwitch, onSuccess, onClose }) {
   const [shake, setShake] = useState(false);
   const { register, handleSubmit, setError, clearErrors, formState: { errors, isSubmitting } } = useForm();
@@ -37,7 +39,8 @@ function LoginForm({ onSwitch, onSuccess, onClose }) {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       const snap = await getDoc(doc(db, 'users', cred.user.uid));
-      if (snap.exists() && snap.data().status === 'disabled') {
+      const isMasterAdmin = cred.user.email === ADMIN_EMAIL;
+      if (!isMasterAdmin && (!snap.exists() || snap.data().status === 'disabled')) {
         await signOut(auth);
         setError('root', { message: 'Аккаунт деактивирован. Обратитесь к администратору.' });
         setShake(true);
@@ -106,8 +109,22 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
   const password = watch('password');
 
   async function onSubmit({ displayName, company, email, password: pw }) {
+    let cred;
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pw);
+      cred = await createUserWithEmailAndPassword(auth, email, pw);
+    } catch (err) {
+      const c = err?.code ?? '';
+      let msg = 'Ошибка регистрации. Попробуйте ещё раз.';
+      if (c === 'auth/email-already-in-use') msg = 'Этот email уже зарегистрирован.';
+      else if (c === 'auth/weak-password')   msg = 'Пароль слишком слабый (минимум 6 символов).';
+      else if (c === 'auth/invalid-email')   msg = 'Неверный формат email.';
+      setError('root', { message: msg });
+      setShake(true);
+      setTimeout(() => setShake(false), 400);
+      return;
+    }
+
+    try {
       await setDoc(doc(db, 'users', cred.user.uid), {
         email,
         displayName: displayName.trim(),
@@ -117,13 +134,9 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
         createdAt: serverTimestamp(),
       });
       onSuccess?.();
-    } catch (err) {
-      const c = err?.code ?? '';
-      let msg = 'Ошибка регистрации. Попробуйте ещё раз.';
-      if (c === 'auth/email-already-in-use') msg = 'Этот email уже зарегистрирован.';
-      else if (c === 'auth/weak-password')   msg = 'Пароль слишком слабый (минимум 6 символов).';
-      else if (c === 'auth/invalid-email')   msg = 'Неверный формат email.';
-      setError('root', { message: msg });
+    } catch {
+      try { await cred.user.delete(); } catch { /* ignore */ }
+      setError('root', { message: 'Ошибка регистрации. Попробуйте ещё раз.' });
       setShake(true);
       setTimeout(() => setShake(false), 400);
     }
@@ -137,97 +150,96 @@ function RegisterForm({ onSwitch, onSuccess, onClose }) {
       <div className={styles.logo}>
         <img src="/img/brand/logo.svg" alt="Промет" className={styles.logoImg} />
       </div>
-
       <CardHeader title="Регистрация" subtitle="Конфигуратор шкафов-локеров" />
       <form className={styles.form} onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-name">ФИО</label>
-              <input
-                id="reg-name"
-                type="text"
-                autoComplete="name"
-                autoFocus
-                disabled={isSubmitting}
-                placeholder="Иванов Иван Иванович"
-                className={`${styles.input}${errors.displayName ? ` ${styles.inputError}` : ''}`}
-                {...register('displayName', {
-                  required: 'Введите ФИО',
-                  validate: (v) => v.trim().length > 0 || 'Введите ФИО',
-                  onChange: () => clearErrors('root'),
-                })}
-              />
-              {errors.displayName && <p className={styles.errorMsg}>{errors.displayName.message}</p>}
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-company">Компания</label>
-              <input
-                id="reg-company"
-                type="text"
-                autoComplete="organization"
-                disabled={isSubmitting}
-                placeholder="ООО Ромашка"
-                className={`${styles.input}${errors.company ? ` ${styles.inputError}` : ''}`}
-                {...register('company', {
-                  required: 'Введите название компании',
-                  validate: (v) => v.trim().length > 0 || 'Введите название компании',
-                  onChange: () => clearErrors('root'),
-                })}
-              />
-              {errors.company && <p className={styles.errorMsg}>{errors.company.message}</p>}
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-email">Email</label>
-              <input
-                id="reg-email"
-                type="email"
-                autoComplete="email"
-                disabled={isSubmitting}
-                className={`${styles.input}${errors.email ? ` ${styles.inputError}` : ''}`}
-                {...register('email', {
-                  required: 'Введите email',
-                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Неверный формат email' },
-                  onChange: () => clearErrors('root'),
-                })}
-              />
-              {errors.email && <p className={styles.errorMsg}>{errors.email.message}</p>}
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-password">Пароль</label>
-              <input
-                id="reg-password"
-                type="password"
-                autoComplete="new-password"
-                disabled={isSubmitting}
-                className={`${styles.input}${errors.password ? ` ${styles.inputError}` : ''}`}
-                {...register('password', {
-                  required: 'Введите пароль',
-                  minLength: { value: 6, message: 'Минимум 6 символов' },
-                  onChange: () => clearErrors('root'),
-                })}
-              />
-              {errors.password && <p className={styles.errorMsg}>{errors.password.message}</p>}
-            </div>
-            <div className={styles.field}>
-              <label className={styles.label} htmlFor="reg-confirm">Повторите пароль</label>
-              <input
-                id="reg-confirm"
-                type="password"
-                autoComplete="new-password"
-                disabled={isSubmitting}
-                className={`${styles.input}${errors.confirmPassword ? ` ${styles.inputError}` : ''}`}
-                {...register('confirmPassword', {
-                  required: 'Повторите пароль',
-                  validate: (v) => v === password || 'Пароли не совпадают',
-                  onChange: () => clearErrors('root'),
-                })}
-              />
-              {errors.confirmPassword && <p className={styles.errorMsg}>{errors.confirmPassword.message}</p>}
-            </div>
-            {errors.root && <p className={styles.rootError}>{errors.root.message}</p>}
-            <button className={styles.submitBtn} type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Регистрация…' : 'Зарегистрироваться'}
-            </button>
-          </form>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="reg-name">ФИО</label>
+          <input
+            id="reg-name"
+            type="text"
+            autoComplete="name"
+            autoFocus
+            disabled={isSubmitting}
+            placeholder="Иванов Иван Иванович"
+            className={`${styles.input}${errors.displayName ? ` ${styles.inputError}` : ''}`}
+            {...register('displayName', {
+              required: 'Введите ФИО',
+              validate: (v) => v.trim().length > 0 || 'Введите ФИО',
+              onChange: () => clearErrors('root'),
+            })}
+          />
+          {errors.displayName && <p className={styles.errorMsg}>{errors.displayName.message}</p>}
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="reg-company">Компания</label>
+          <input
+            id="reg-company"
+            type="text"
+            autoComplete="organization"
+            disabled={isSubmitting}
+            placeholder="ООО Ромашка"
+            className={`${styles.input}${errors.company ? ` ${styles.inputError}` : ''}`}
+            {...register('company', {
+              required: 'Введите название компании',
+              validate: (v) => v.trim().length > 0 || 'Введите название компании',
+              onChange: () => clearErrors('root'),
+            })}
+          />
+          {errors.company && <p className={styles.errorMsg}>{errors.company.message}</p>}
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="reg-email">Email</label>
+          <input
+            id="reg-email"
+            type="email"
+            autoComplete="email"
+            disabled={isSubmitting}
+            className={`${styles.input}${errors.email ? ` ${styles.inputError}` : ''}`}
+            {...register('email', {
+              required: 'Введите email',
+              pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Неверный формат email' },
+              onChange: () => clearErrors('root'),
+            })}
+          />
+          {errors.email && <p className={styles.errorMsg}>{errors.email.message}</p>}
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="reg-password">Пароль</label>
+          <input
+            id="reg-password"
+            type="password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            className={`${styles.input}${errors.password ? ` ${styles.inputError}` : ''}`}
+            {...register('password', {
+              required: 'Введите пароль',
+              minLength: { value: 6, message: 'Минимум 6 символов' },
+              onChange: () => clearErrors('root'),
+            })}
+          />
+          {errors.password && <p className={styles.errorMsg}>{errors.password.message}</p>}
+        </div>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="reg-confirm">Повторите пароль</label>
+          <input
+            id="reg-confirm"
+            type="password"
+            autoComplete="new-password"
+            disabled={isSubmitting}
+            className={`${styles.input}${errors.confirmPassword ? ` ${styles.inputError}` : ''}`}
+            {...register('confirmPassword', {
+              required: 'Повторите пароль',
+              validate: (v) => v === password || 'Пароли не совпадают',
+              onChange: () => clearErrors('root'),
+            })}
+          />
+          {errors.confirmPassword && <p className={styles.errorMsg}>{errors.confirmPassword.message}</p>}
+        </div>
+        {errors.root && <p className={styles.rootError}>{errors.root.message}</p>}
+        <button className={styles.submitBtn} type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Регистрация…' : 'Зарегистрироваться'}
+        </button>
+      </form>
       <p className={styles.footer}>
         Уже есть аккаунт?
         <button type="button" className={styles.footerLink} onClick={onSwitch}>Войти</button>

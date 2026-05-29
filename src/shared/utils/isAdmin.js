@@ -1,4 +1,4 @@
-const ADMIN_EMAIL = 'admin@promet.ru';
+import { ADMIN_EMAIL } from '../constants/admin';
 
 export function isAdmin(email) {
   return email === ADMIN_EMAIL;

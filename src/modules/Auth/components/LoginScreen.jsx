@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../../shared/lib/firebase';
+import { ADMIN_EMAIL } from '../../../shared/constants/admin';
 import styles from './LoginScreen.module.css';
 
 const DEACTIVATED_KEY = 'promet_login_deactivated';
@@ -35,11 +36,11 @@ export default function LoginScreen() {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
 
-      // USERS-03 login gate: check Firestore users/{uid}.status.
-      // Admin (admin@promet.ru) has no users/{uid} doc → snap.exists() === false → passes through.
+      // F03: master admin has no Firestore doc and always passes through.
+      // Regular users: missing doc = deleted account → block same as disabled.
       const userSnap = await getDoc(doc(db, 'users', cred.user.uid));
-      if (userSnap.exists() && userSnap.data().status === 'disabled') {
-        // Store error before signOut — component will remount after auth state change.
+      const isMasterAdmin = cred.user.email === ADMIN_EMAIL;
+      if (!isMasterAdmin && (!userSnap.exists() || userSnap.data().status === 'disabled')) {
         sessionStorage.setItem(DEACTIVATED_KEY, 'Аккаунт деактивирован. Обратитесь к администратору.');
         await signOut(auth);
         return;
