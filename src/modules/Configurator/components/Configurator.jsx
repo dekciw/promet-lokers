@@ -293,19 +293,28 @@ export default function Configurator() {
 					</div>
 				</div>
 
-				<div className={styles.modelHero}>
-					<img src='/img/brand/product.png' alt='' className={styles.heroPlaceholderImg} />
-					<div className={styles.heroOverlay}>
-						<div className={styles.heroTop}>
-							{series && <span className={styles.heroBadge}>{series.name}</span>}
-						</div>
-						{model && (
-							<div className={styles.heroBottom}>
-								<h2 className={styles.heroName}>{model.name}</h2>
-							</div>
-						)}
-					</div>
-				</div>
+				<AnimatePresence>
+					{series && (
+						<motion.div
+							className={styles.modelBar}
+							initial={{ opacity: 0, y: -8, scale: 0.98 }}
+							animate={{ opacity: 1, y: 0, scale: 1 }}
+							exit={{ opacity: 0, y: -6, scale: 0.98 }}
+							transition={{ duration: 0.28, ease: [0.23, 1, 0.32, 1] }}
+						>
+							<span className={styles.modelBarBadge}>{series.name}</span>
+							{model && (
+								<>
+									<span className={styles.modelBarDivider} />
+									<span className={styles.modelBarName}>{model.name}</span>
+									{model.article && (
+										<span className={styles.modelBarArticle}>{model.article}</span>
+									)}
+								</>
+							)}
+						</motion.div>
+					)}
+				</AnimatePresence>
 
 				<AnimatePresence mode='wait'>
 					{!model ? (
@@ -424,7 +433,7 @@ export default function Configurator() {
 											)}
 										</AnimatePresence>
 									</div>
-									<motion.ul className={styles.diffList} layout>
+									<motion.ul className={styles.diffList}>
 										<AnimatePresence initial={false} mode='popLayout' key={config.modelId}>
 											{changedSpecs.length === 0 && (
 												<motion.li

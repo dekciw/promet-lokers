@@ -59,7 +59,6 @@ function SlotDigit({ digit, direction }) {
 					display: 'block',
 					transform: `translateY(${-pos * DIGIT_H}px)`,
 					transition: instant ? 'none' : 'transform 0.8s cubic-bezier(0.34, 1.2, 0.64, 1)',
-					willChange: 'transform',
 				}}
 			>
 				{Array.from({ length: SLOT_SETS * 10 }, (_, i) => (

@@ -143,6 +143,7 @@ body {
 	overflow-y: auto;
 	overflow-x: hidden;
 	min-height: 0;
+	will-change: transform;
 }
 
 /* Основная раскладка страницы */
