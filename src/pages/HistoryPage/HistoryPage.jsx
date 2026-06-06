@@ -143,9 +143,11 @@ export default function HistoryPage({ uid, user, onLogout, username, isAdmin, on
     : null;
 
   return (
-    <div className={styles.page}>
+    <div className="app-wrapper">
       <Header onLogout={onLogout} username={username} isAdmin={isAdmin} user={user} onLogin={onLogin} />
-      <main className={styles.main}>
+      <div className="main-scroll">
+        <div className={styles.page}>
+          <main className={styles.main}>
         <div className={styles.toolbar}>
           <h1 className={styles.title}>История</h1>
           <Link to="/configurator" className={styles.backLink}>← Конфигуратор</Link>
@@ -230,9 +232,8 @@ export default function HistoryPage({ uid, user, onLogout, username, isAdmin, on
             </table>
           </div>
         )}
-      </main>
 
-      {deleteTarget && (
+        {deleteTarget && (
         <div className={styles.overlay} onMouseDown={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}>
           <div className={styles.modal} onMouseDown={(e) => e.stopPropagation()} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
             <h3 className={styles.modalTitle}>Удалить запись из истории?</h3>
@@ -257,22 +258,25 @@ export default function HistoryPage({ uid, user, onLogout, username, isAdmin, on
             </div>
           </div>
         </div>
-      )}
+        )}
 
-      <NonStandardOrderModal
+        <NonStandardOrderModal
         isOpen={!!nzRedownloadEntry}
         onClose={() => { setNzRedownloadEntry(null); setNzError(null); }}
         onSubmit={handleNzRedownloadSubmit}
         onPrint={handleNzRedownloadPrint}
         summary={nzSummary}
         initialValues={nzRedownloadEntry?.nzFormData ?? null}
-      />
+        />
 
-      {nzError && (
-        <div className={styles.nzError}>
-          Ошибка: {nzError}
+        {nzError && (
+          <div className={styles.nzError}>
+            Ошибка: {nzError}
+          </div>
+        )}
+          </main>
         </div>
-      )}
+      </div>
     </div>
   );
 }

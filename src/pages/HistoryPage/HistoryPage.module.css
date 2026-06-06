@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  min-height: calc(100dvh - 80px);
   background: #f0f4f8;
 }
 
@@ -11,6 +11,7 @@
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
+  padding-bottom: 60px;
 }
 
 .toolbar {
