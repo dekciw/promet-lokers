@@ -19,7 +19,6 @@ dist-ssr
 .claude/
 .agents/
 skills-lock.json
-docs/
 CLAUDE.md
 
 # Локальная документация
