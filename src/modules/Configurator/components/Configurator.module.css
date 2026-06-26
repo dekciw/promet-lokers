@@ -264,6 +264,19 @@
   gap: 12px;
 }
 
+/* Reorder cards: Standard -> Final -> Changed */
+.configColWrapper:has(.configColDefault) {
+  order: 1;
+}
+
+.configColWrapper:has(.configColFinal) {
+  order: 2;
+}
+
+.configColWrapper:has(.configColChanged) {
+  order: 3;
+}
+
 .colHeader {
   display: flex;
   align-items: center;
