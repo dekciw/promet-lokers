@@ -62,8 +62,8 @@ function buildCurrentForDiff(config, lock) {
 		doorThickness: config.doorThickness,
 		lockName: config.lockId !== 'key_basic' ? lock?.name : undefined,
 		ventilationType: config.ventilationType ?? undefined,
-		bodyColorName: config.bodyColor?.name ?? undefined,
-		doorColorName: config.doorColor?.name ?? undefined,
+		bodyColorName: config.bodyColor?.name !== DEFAULT_COLOR_NAME ? config.bodyColor?.name : undefined,
+		doorColorName: config.doorColor?.name !== DEFAULT_COLOR_NAME ? config.doorColor?.name : undefined,
 	};
 }
 
@@ -512,7 +512,9 @@ export default function Configurator() {
 										))}
 									</motion.ul>
 								</div>
+							</motion.div>
 
+							<motion.div className={styles.priceBlockWrapper} variants={colVariants}>
 								<div className={styles.priceBlock}>
 									<div className={styles.priceBlockTop}>
 										<span className={styles.priceBlockLabel}>за 1 шт.</span>
