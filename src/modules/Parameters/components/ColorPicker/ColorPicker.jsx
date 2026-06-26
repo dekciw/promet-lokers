@@ -85,36 +85,40 @@ export default function ColorPicker({
 								<span className={styles.itemName}>{standardLabel}</span>
 							</motion.li>
 						)}
-						{COLORS.map((group) => (
-							<Fragment key={group.group}>
-								<motion.li variants={itemVariants} className={styles.group}>{group.group}</motion.li>
-								{group.items.map(item => (
-									<motion.li
-										key={item.name}
-										variants={itemVariants}
-										className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
-										onClick={() => handleSelect(item)}
-									>
-										<span className={styles.itemSwatch} style={{ '--swatch-bg': item.color }} />
-										<span className={styles.itemName}>{item.name}</span>
-										<AnimatePresence>
-											{selected?.name === item.name && (
-												<motion.svg
-													width='14' height='14' viewBox='0 0 14 14' fill='none'
-													className={styles.itemCheck}
-													initial={{ scale: 0, opacity: 0 }}
-													animate={{ scale: 1, opacity: 1 }}
-													exit={{ scale: 0, opacity: 0 }}
-													transition={{ duration: 0.15, type: 'spring', bounce: 0.4 }}
-												>
-													<path d='M2.5 7l3 3 6-6' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' />
-												</motion.svg>
-											)}
-										</AnimatePresence>
-									</motion.li>
-								))}
-							</Fragment>
-						))}
+						{COLORS.map((group) => {
+							const filteredItems = group.items.filter(item => item.name !== 'RAL 7038');
+							if (filteredItems.length === 0) return null;
+							return (
+								<Fragment key={group.group}>
+									<motion.li variants={itemVariants} className={styles.group}>{group.group}</motion.li>
+									{filteredItems.map(item => (
+										<motion.li
+											key={item.name}
+											variants={itemVariants}
+											className={cx(styles.item, selected?.name === item.name && styles.itemActive)}
+											onClick={() => handleSelect(item)}
+										>
+											<span className={styles.itemSwatch} style={{ '--swatch-bg': item.color }} />
+											<span className={styles.itemName}>{item.name}</span>
+											<AnimatePresence>
+												{selected?.name === item.name && (
+													<motion.svg
+														width='14' height='14' viewBox='0 0 14 14' fill='none'
+														className={styles.itemCheck}
+														initial={{ scale: 0, opacity: 0 }}
+														animate={{ scale: 1, opacity: 1 }}
+														exit={{ scale: 0, opacity: 0 }}
+														transition={{ duration: 0.15, type: 'spring', bounce: 0.4 }}
+													>
+														<path d='M2.5 7l3 3 6-6' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' />
+													</motion.svg>
+												)}
+											</AnimatePresence>
+										</motion.li>
+									))}
+								</Fragment>
+							);
+						})}
 					</motion.ul>
 				)}
 			</AnimatePresence>
