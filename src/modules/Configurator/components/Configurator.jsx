@@ -74,6 +74,8 @@ function buildDefaultSpecsList(defaults, catalog) {
 	const bodyColor = defaults.bodyColorName ?? DEFAULT_COLOR_NAME;
 	const doorColor = defaults.doorColorName ?? DEFAULT_COLOR_NAME;
 	return [
+		{ label: 'Цвет двери', value: doorColor, colorHex: getColorHex(doorColor) },
+		{ label: 'Цвет корпуса', value: bodyColor, colorHex: getColorHex(bodyColor) },
 		{ label: 'Замок', value: catalog.locks[defaults.lockId]?.name ?? defaults.lockId },
 		{ label: 'Ширина', value: `${defaults.width} мм` },
 		{ label: 'Высота', value: `${defaults.height} мм` },
@@ -81,8 +83,6 @@ function buildDefaultSpecsList(defaults, catalog) {
 		{ label: 'Толщина корпуса', value: `${defaults.bodyThickness} мм` },
 		{ label: 'Толщина двери', value: `${defaults.doorThickness} мм` },
 		{ label: 'Вентиляция', value: 'Нет' },
-		{ label: 'Цвет корпуса', value: bodyColor, colorHex: getColorHex(bodyColor) },
-		{ label: 'Цвет двери', value: doorColor, colorHex: getColorHex(doorColor) },
 	];
 }
 
