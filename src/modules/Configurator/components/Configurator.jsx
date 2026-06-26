@@ -372,7 +372,14 @@ export default function Configurator() {
 								<div className={`${styles.configCol} ${styles.configColDefault}`}>
 									<div className={styles.colHeader}>
 										<span className={styles.colIcon}><IconDefault /></span>
-										<span className={styles.colTitle}>Стандартное исполнение</span>
+										<div className={styles.colHeaderContent}>
+											<span className={styles.colTitle}>Стандартное исполнение</span>
+											{model?.basePrice && (
+												<span className={styles.colSubtitle}>
+													Базовая стоимость: {model.basePrice.toLocaleString('ru-RU')} ₽
+												</span>
+											)}
+										</div>
 									</div>
 									<motion.ul
 										className={styles.specList}
@@ -413,20 +420,29 @@ export default function Configurator() {
 								<div className={`${styles.configCol} ${styles.configColChanged}`}>
 									<div className={styles.colHeader}>
 										<span className={styles.colIcon}><IconNonStandard /></span>
-										<span className={styles.colTitle}>Нестандартное исполнение</span>
-										<AnimatePresence>
-											{changedSpecs.length > 0 && (
-												<motion.span
-													className={styles.changeBadge}
-													initial={{ opacity: 0, scale: 0.7 }}
-													animate={{ opacity: 1, scale: 1 }}
-													exit={{ opacity: 0, scale: 0.7 }}
-													transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-												>
-													{changedSpecs.length}
-												</motion.span>
-											)}
-										</AnimatePresence>
+										<div className={styles.colHeaderContent}>
+											<div className={styles.colTitleRow}>
+												<span className={styles.colTitle}>Нестандартное исполнение</span>
+												<AnimatePresence>
+													{changedSpecs.length > 0 && (
+														<motion.span
+															className={styles.changeBadge}
+															initial={{ opacity: 0, scale: 0.7 }}
+															animate={{ opacity: 1, scale: 1 }}
+															exit={{ opacity: 0, scale: 0.7 }}
+															transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+														>
+															{changedSpecs.length}
+														</motion.span>
+													)}
+												</AnimatePresence>
+											</div>
+											<span className={styles.colSubtitle}>
+												{changedSpecs.length === 0
+													? 'Все параметры стандартные'
+													: `Изменено ${changedSpecs.length} из 9 параметров`}
+											</span>
+										</div>
 									</div>
 									<motion.ul className={styles.diffList}>
 										<AnimatePresence initial={false} mode='popLayout' key={config.modelId}>
@@ -463,6 +479,7 @@ export default function Configurator() {
 														)}
 														{value}
 													</span>
+													<span className={styles.diffSurcharge}>—</span>
 												</motion.li>
 											))}
 										</AnimatePresence>
@@ -517,30 +534,41 @@ export default function Configurator() {
 							<motion.div className={styles.priceBlockWrapper} variants={colVariants}>
 								<div className={styles.priceBlock}>
 									<div className={styles.priceBlockTop}>
-										<span className={styles.priceBlockLabel}>за 1 шт.</span>
-										<AnimatePresence mode='wait' initial={false}>
-											<motion.div
-												key={unitPriceDisplay}
-												className={styles.priceBlockValue}
-												initial={{ opacity: 0, y: -8 }}
-												animate={{ opacity: 1, y: 0 }}
-												exit={{ opacity: 0, y: 8 }}
-												transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
-											>
-												{unitPriceDisplay}
-											</motion.div>
-										</AnimatePresence>
-										{price && !price.manual && (
-											<span className={styles.priceBlockUnit}>
-												Общая сумма: {totalClientPrice.toLocaleString('ru-RU')} = {price.clientPrice.toLocaleString('ru-RU')} × {qty} шт.
-											</span>
+										<div className={styles.priceSummaryHeader}>
+											<span className={styles.priceSummaryTitle}>Промежуточный итог:</span>
+											<span className={styles.priceSummarySubtitle}>Общая стоимость + нестандартные заказы</span>
+										</div>
+
+										{price && !price.manual && model?.basePrice && (
+											<div className={styles.priceFormulaWrapper}>
+												<span className={styles.priceFormulaLabel}>Итого =</span>
+												<span className={styles.priceFormula}>
+													{model.basePrice.toLocaleString('ru-RU')}
+													{price.lockSurcharge > 0 && ` + ${price.lockSurcharge.toLocaleString('ru-RU')}`}
+													{(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)) > 0 &&
+														` + ${(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)).toLocaleString('ru-RU')}`
+													}
+												</span>
+											</div>
 										)}
-										<span className={styles.priceBlockLeadTime}>
-											Итого: {qty} шт.
-										</span>
-										{price && !price.manual && price.leadTime && (
-											<span className={styles.priceBlockLeadTime}>{price.leadTime}</span>
-										)}
+
+										<div className={styles.priceTotalsWrapper}>
+											<span className={styles.priceTotalsLabel}>Итог:</span>
+											{price && !price.manual ? (
+												<>
+													<div className={styles.priceTotalRow}>
+														<span className={styles.priceTotalLabel}>Без НДС</span>
+														<span className={styles.priceTotalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
+													</div>
+													<div className={styles.priceTotalRow}>
+														<span className={styles.priceTotalLabel}>С НДС (22%)</span>
+														<span className={styles.priceTotalValue}>{Math.round(price.clientPrice * 1.22).toLocaleString('ru-RU')} ₽</span>
+													</div>
+												</>
+											) : (
+												<span className={styles.priceManual}>По согласованию</span>
+											)}
+										</div>
 									</div>
 									<div className={styles.priceBlockActions}>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>

@@ -312,6 +312,27 @@
   flex: 1;
 }
 
+.colHeaderContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.colTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colSubtitle {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--c-text-dark);
+  line-height: 1.3;
+  letter-spacing: -0.1px;
+}
+
 .changeBadge {
   display: inline-flex;
   align-items: center;
@@ -363,7 +384,15 @@
 }
 
 .specItem,
-.diffItem,
+.diffItem {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr auto;
+  align-items: center;
+  padding: 9px 0;
+  gap: 12px;
+  border-bottom: 1px solid var(--c-border-subtle);
+}
+
 .finalItem {
   display: flex;
   justify-content: space-between;
@@ -395,10 +424,18 @@
   font-weight: 600;
   color: var(--c-text-dark);
   line-height: 1.4;
-  text-align: right;
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.diffSurcharge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--c-primary);
+  line-height: 1.4;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .colorSwatch {
@@ -507,6 +544,99 @@
   font-size: 11.5px;
   color: rgba(255, 255, 255, 0.32);
   margin-top: 2px;
+}
+
+.priceSummaryHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.priceSummaryTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.48);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.priceSummarySubtitle {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.64);
+  line-height: 1.4;
+}
+
+.priceFormulaWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+}
+
+.priceFormulaLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.priceFormula {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace;
+  letter-spacing: 0.2px;
+}
+
+.priceTotalsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.priceTotalsLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.48);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.priceTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.priceTotalLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.priceTotalValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+
+.priceManual {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  padding: 12px;
 }
 
 .priceBlockActions {
