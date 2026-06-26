@@ -64,8 +64,8 @@ export function calcPrice(config, catalog) {
 
   const lockChanged = !!config.lockId && config.lockId !== (defaults.lockId ?? 'key_basic');
   const ventChanged = !!config.ventilationType;
-  const doorColorChanged = !!config.doorColor;
-  const bodyColorChanged = !!config.bodyColor;
+  const doorColorChanged = !!config.doorColor && config.doorColor.name !== 'RAL 7038';
+  const bodyColorChanged = !!config.bodyColor && config.bodyColor.name !== 'RAL 7038';
 
   const changeCount = [
     thicknessChanged,
