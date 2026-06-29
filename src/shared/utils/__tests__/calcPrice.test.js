@@ -25,7 +25,33 @@ const CATALOG_BASE = {
     euro_locks:   { name: 'Евро замок',         perSection: 500 },
   },
   priceRules: {
-    thickness:   { minQty: 100, ml: { '0.5': 0.1, '0.6': 0.25, '0.7': 0.85 }, ls: { '0.5': 0.1, '0.6': 0.25, '0.7': 0.85 } },
+    thickness:   {
+      minQty: 1,
+      body: {
+        ml: {
+          '0.5': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+          '0.6': { qty1: 0.3, qty10: 0.25, qty50: 0.2, qty100: 0.15 },
+          '0.7': { qty1: 0.9, qty10: 0.85, qty50: 0.8, qty100: 0.7 }
+        },
+        ls: {
+          '0.5': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+          '0.6': { qty1: 0.32, qty10: 0.27, qty50: 0.22, qty100: 0.17 },
+          '0.7': { qty1: 0.95, qty10: 0.88, qty50: 0.82, qty100: 0.75 }
+        }
+      },
+      door: {
+        ml: {
+          '0.5': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+          '0.6': { qty1: 0.28, qty10: 0.22, qty50: 0.18, qty100: 0.12 },
+          '0.7': { qty1: 0.95, qty10: 0.85, qty50: 0.75, qty100: 0.65 }
+        },
+        ls: {
+          '0.5': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+          '0.6': { qty1: 0.30, qty10: 0.24, qty50: 0.19, qty100: 0.13 },
+          '0.7': { qty1: 1.0, qty10: 0.90, qty50: 0.78, qty100: 0.68 }
+        }
+      }
+    },
     depth:       {
       ml: {
         '450': { qty1: 0.08, qty10: 0.05, qty50: 0.03, qty100: 0.02 },
@@ -243,7 +269,14 @@ describe('calcPrice', () => {
   it('computes weight with upgraded door thickness', () => {
     const r = calcPrice({ ...BASE_CONFIG, doorThickness: '0.7' }, { ...CATALOG_BASE,
       models: { 'ml-01': { ...MODEL_ML, defaultSpecs: { ...MODEL_ML.defaultSpecs } } },
-      priceRules: { ...CATALOG_BASE.priceRules, thickness: { minQty: 100, ml: { '0.7': 0.85 }, ls: {} } },
+      priceRules: {
+        ...CATALOG_BASE.priceRules,
+        thickness: {
+          minQty: 1,
+          body: { ml: { '0.7': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 } }, ls: {} },
+          door: { ml: { '0.7': { qty1: 0.95, qty10: 0.85, qty50: 0.75, qty100: 0.65 } }, ls: {} }
+        }
+      },
     });
     // door upgraded 0.5→0.7: 20 × (1+5/9) ≈ 31.11, body stays at default: 30 × 1 = 30
     const expected = Math.round((20 * (1 + 5 / 9) + 30 * 1) * 100) / 100;
@@ -258,5 +291,101 @@ describe('calcPrice', () => {
   it('leadTime is 7–14 дней for 1 change', () => {
     const r = calcPrice({ ...BASE_CONFIG, ventilationType: 'roof' }, CATALOG_BASE);
     expect(r.leadTime).toBe('7–14 дней');
+  });
+
+  // Толщина корпуса (CALC-01) - qty-bracket tests
+  it('applies body thickness surcharge for qty 1-9 (qty1 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, bodyThickness: '0.6', quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // bodyThickness 0.6: qty1=0.3, bodyW=30, totalW=50, rate = 0.3 × (30/50) = 0.18
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.18));
+  });
+
+  it('applies body thickness surcharge for qty 10-49 (qty10 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, bodyThickness: '0.6', quantity: 10 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // bodyThickness 0.6: qty10=0.25, rate = 0.25 × (30/50) = 0.15
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.15));
+  });
+
+  it('applies body thickness surcharge for qty 50-99 (qty50 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, bodyThickness: '0.7', quantity: 60 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // bodyThickness 0.7: qty50=0.8, rate = 0.8 × (30/50) = 0.48
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.48));
+  });
+
+  // Толщина двери (CALC-02) - qty-bracket tests
+  it('applies door thickness surcharge for qty 1-9 (qty1 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorThickness: '0.6', quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorThickness 0.6: qty1=0.28, doorW=20, totalW=50, rate = 0.28 × (20/50) = 0.112
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.112));
+  });
+
+  it('applies door thickness surcharge for qty 10-49 (qty10 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorThickness: '0.6', quantity: 10 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorThickness 0.6: qty10=0.22, rate = 0.22 × (20/50) = 0.088
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.088));
+  });
+
+  it('applies door thickness surcharge for qty 50-99 (qty50 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorThickness: '0.7', quantity: 75 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorThickness 0.7: qty50=0.75, rate = 0.75 × (20/50) = 0.30
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.30));
+  });
+
+  // Обе толщины равны - проверка раздельных таблиц body/door
+  it('applies both body and door thickness when both changed to same value', () => {
+    const r = calcPrice({ ...BASE_CONFIG, bodyThickness: '0.7', doorThickness: '0.7', quantity: 50 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // body 0.7 qty50=0.8 × (30/50) = 0.48
+    // door 0.7 qty50=0.75 × (20/50) = 0.30
+    // totalRate = 0.48 + 0.30 = 0.78
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.78));
+    expect(r.changeCount).toBe(1); // обе толщины считаются как одно изменение
+  });
+
+  // ML vs LS series - разные таблицы
+  it('applies different body thickness rates for ML vs LS series', () => {
+    const catalogLS = {
+      ...CATALOG_BASE,
+      models: {
+        'ls-01': {
+          ...MODEL_ML,
+          seriesId: 'ls',
+        },
+      },
+    };
+    const rML = calcPrice({ ...BASE_CONFIG, bodyThickness: '0.6', quantity: 5 }, CATALOG_BASE);
+    const rLS = calcPrice({ modelId: 'ls-01', bodyThickness: '0.6', quantity: 5, doorThickness: '0.5', lockId: 'key_basic', ventilationType: null, bodyColor: null, doorColor: null, width: '', height: '', depth: '' }, catalogLS);
+    expect(rML.manual).toBe(false);
+    expect(rLS.manual).toBe(false);
+    // ML: qty1=0.3 × (30/50) = 0.18 → 10000 × 1.18 = 11800
+    expect(rML.clientPrice).toBe(11800);
+    // LS: qty1=0.32 × (30/50) = 0.192 → 10000 × 1.192 = 11920
+    expect(rLS.clientPrice).toBe(11920);
+  });
+
+  it('applies different door thickness rates for ML vs LS series', () => {
+    const catalogLS = {
+      ...CATALOG_BASE,
+      models: {
+        'ls-01': {
+          ...MODEL_ML,
+          seriesId: 'ls',
+        },
+      },
+    };
+    const rML = calcPrice({ ...BASE_CONFIG, doorThickness: '0.6', quantity: 10 }, CATALOG_BASE);
+    const rLS = calcPrice({ modelId: 'ls-01', doorThickness: '0.6', quantity: 10, bodyThickness: '0.5', lockId: 'key_basic', ventilationType: null, bodyColor: null, doorColor: null, width: '', height: '', depth: '' }, catalogLS);
+    expect(rML.manual).toBe(false);
+    expect(rLS.manual).toBe(false);
+    // ML: qty10=0.22 × (20/50) = 0.088 → 10000 × 1.088 = 10880
+    expect(rML.clientPrice).toBe(10880);
+    // LS: qty10=0.24 × (20/50) = 0.096 → 10000 × 1.096 = 10960
+    expect(rLS.clientPrice).toBe(10960);
   });
 });
