@@ -26,8 +26,28 @@ const CATALOG_BASE = {
   },
   priceRules: {
     thickness:   { minQty: 100, ml: { '0.5': 0.1, '0.6': 0.25, '0.7': 0.85 }, ls: { '0.5': 0.1, '0.6': 0.25, '0.7': 0.85 } },
-    depth:       { minQty: 10,  ml: { '450': { qty10: 0.05, qty50: 0.03, qty100: 0.02 } }, ls: {} },
-    height:      { minQty: 100, ml: { '1800': -0.02, '1830': 0, '1860': 0, '2000': 0.05 }, ls: {} },
+    depth:       {
+      ml: {
+        '450': { qty1: 0.08, qty10: 0.05, qty50: 0.03, qty100: 0.02 },
+        '500': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 }
+      },
+      ls: {
+        '450': { qty1: 0.09, qty10: 0.06, qty50: 0.04, qty100: 0.03 }
+      }
+    },
+    height: {
+      ml: {
+        '1800': { qty1: -0.02, qty10: -0.02, qty50: -0.02, qty100: -0.02 },
+        '1830': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+        '1860': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+        '2000': { qty1: 0.08, qty10: 0.07, qty50: 0.06, qty100: 0.05 }
+      },
+      ls: {
+        '1800': { qty1: -0.03, qty10: -0.03, qty50: -0.03, qty100: -0.03 },
+        '1830': { qty1: 0, qty10: 0, qty50: 0, qty100: 0 },
+        '2000': { qty1: 0.10, qty10: 0.09, qty50: 0.07, qty100: 0.06 }
+      }
+    },
     ventilation: {
       roof:       { qty1: 0.15, qty10: 0.1, qty50: 0.07, qty100: 0.05 },
       roofBottom: { qty1: 0.25, qty10: 0.2, qty50: 0.15, qty100: 0.1 },
@@ -127,15 +147,76 @@ describe('calcPrice', () => {
     expect(r.clientPrice).toBe(Math.round(10000 * 1.05));
   });
 
-  it('returns manual:true for height change at qty < 100', () => {
-    const r = calcPrice({ ...BASE_CONFIG, height: '2000', quantity: 50 }, CATALOG_BASE);
-    expect(r.manual).toBe(true);
+  it('applies height surcharge for qty 1-9 (qty1 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, height: '2000', quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.08));
+  });
+
+  it('applies height surcharge for qty 10-49 (qty10 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, height: '2000', quantity: 25 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.07));
+  });
+
+  it('applies height surcharge for qty 50-99 (qty50 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, height: '2000', quantity: 75 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.06));
+  });
+
+  it('applies different height rates for ML vs LS series', () => {
+    const catalogLS = {
+      ...CATALOG_BASE,
+      models: {
+        'ls-01': {
+          ...MODEL_ML,
+          seriesId: 'ls',
+        },
+      },
+    };
+    const rML = calcPrice({ ...BASE_CONFIG, height: '2000', quantity: 5 }, CATALOG_BASE);
+    const rLS = calcPrice({ modelId: 'ls-01', height: '2000', quantity: 5, bodyThickness: '0.5', doorThickness: '0.5', lockId: 'key_basic', ventilationType: null, bodyColor: null, doorColor: null, width: '', depth: '' }, catalogLS);
+    expect(rML.manual).toBe(false);
+    expect(rLS.manual).toBe(false);
+    expect(rML.clientPrice).toBe(Math.round(10000 * 1.08)); // ML qty1 = 0.08
+    expect(rLS.clientPrice).toBe(Math.round(10000 * 1.10)); // LS qty1 = 0.10
+  });
+
+  it('applies depth surcharge for qty 1-9 (qty1 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, depth: '450', quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.08));
   });
 
   it('applies depth surcharge at qty 10+', () => {
     const r = calcPrice({ ...BASE_CONFIG, depth: '450', quantity: 10 }, CATALOG_BASE);
     expect(r.manual).toBe(false);
     expect(r.clientPrice).toBe(Math.round(10000 * 1.05));
+  });
+
+  it('applies depth surcharge for qty 50-99 (qty50 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, depth: '450', quantity: 60 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.03));
+  });
+
+  it('applies different depth rates for ML vs LS series', () => {
+    const catalogLS = {
+      ...CATALOG_BASE,
+      models: {
+        'ls-01': {
+          ...MODEL_ML,
+          seriesId: 'ls',
+        },
+      },
+    };
+    const rML = calcPrice({ ...BASE_CONFIG, depth: '450', quantity: 5 }, CATALOG_BASE);
+    const rLS = calcPrice({ modelId: 'ls-01', depth: '450', quantity: 5, bodyThickness: '0.5', doorThickness: '0.5', lockId: 'key_basic', ventilationType: null, bodyColor: null, doorColor: null, width: '', height: '' }, catalogLS);
+    expect(rML.manual).toBe(false);
+    expect(rLS.manual).toBe(false);
+    expect(rML.clientPrice).toBe(Math.round(10000 * 1.08)); // ML qty1 = 0.08
+    expect(rLS.clientPrice).toBe(Math.round(10000 * 1.09)); // LS qty1 = 0.09
   });
 
   it('applies lock surcharge linearly by doorCount', () => {
