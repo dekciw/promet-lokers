@@ -33,6 +33,18 @@ function getHeightRate(series, height, qty, priceRules) {
   return rule.qty1 ?? null;
 }
 
+function getThicknessRate(part, series, thicknessStr, qty, priceRules) {
+  const table = part === 'body'
+    ? (series === 'ls' ? priceRules.thickness?.body?.ls : priceRules.thickness?.body?.ml)
+    : (series === 'ls' ? priceRules.thickness?.door?.ls : priceRules.thickness?.door?.ml);
+  const rule = table?.[thicknessStr];
+  if (!rule) return null;
+  if (qty >= 100) return rule.qty100 ?? null;
+  if (qty >= 50) return rule.qty50 ?? null;
+  if (qty >= 10) return rule.qty10 ?? null;
+  return rule.qty1 ?? null;
+}
+
 function getColorRate(colorCat, ruleKey, qty, priceRules) {
   const catRule = priceRules.color?.[ruleKey]?.[colorCat];
   if (!catRule || qty < catRule.minQty) return null;
@@ -106,29 +118,27 @@ export function calcPrice(config, catalog) {
   }
 
   if (thicknessChanged) {
-    if (qty < (priceRules.thickness?.minQty ?? 100)) {
+    if (totalW === 0) {
       anyManual = true;
     } else {
-      const rates = series === 'ls'
-        ? priceRules.thickness?.ls ?? {}
-        : priceRules.thickness?.ml ?? {};
+      const doorRate = doorThickChanged
+        ? getThicknessRate('door', series, config.doorThickness, qty, priceRules)
+        : null;
+      const bodyRate = bodyThickChanged
+        ? getThicknessRate('body', series, config.bodyThickness, qty, priceRules)
+        : null;
+
       if (bodyThickChanged && doorThickChanged && config.bodyThickness === config.doorThickness) {
         // Обе толщины одинаковы - распределяем наценку пропорционально весу
-        const rate = rates[config.bodyThickness] ?? null;
-        if (rate !== null && totalW > 0) {
-          addRate(rate * (doorW / totalW), 'doorThickness');
-          addRate(rate * (bodyW / totalW), 'bodyThickness');
-        } else {
-          anyManual = true;
-        }
+        // (но теперь body и door имеют раздельные таблицы, могут быть разные ставки)
+        addRate(doorRate !== null ? doorRate * (doorW / totalW) : null, 'doorThickness');
+        addRate(bodyRate !== null ? bodyRate * (bodyW / totalW) : null, 'bodyThickness');
       } else {
-        if (doorThickChanged && totalW > 0) {
-          const r = rates[config.doorThickness] ?? null;
-          addRate(r !== null ? r * (doorW / totalW) : null, 'doorThickness');
+        if (doorThickChanged) {
+          addRate(doorRate !== null ? doorRate * (doorW / totalW) : null, 'doorThickness');
         }
-        if (bodyThickChanged && totalW > 0) {
-          const r = rates[config.bodyThickness] ?? null;
-          addRate(r !== null ? r * (bodyW / totalW) : null, 'bodyThickness');
+        if (bodyThickChanged) {
+          addRate(bodyRate !== null ? bodyRate * (bodyW / totalW) : null, 'bodyThickness');
         }
       }
     }
