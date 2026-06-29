@@ -109,7 +109,7 @@ export function calcPrice(config, catalog) {
       anyManual = true;
     } else {
       totalRate += rate;
-      if (paramKey && rate !== 0) {
+      if (paramKey) {
         breakdown[paramKey] = { rate, amount: 0 };
       }
     }
