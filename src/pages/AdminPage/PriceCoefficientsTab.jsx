@@ -69,9 +69,88 @@ const QTY_LABELS = {
 };
 
 const QTY_BRACKETS   = ['qty1', 'qty10', 'qty50', 'qty100'];
-const DEPTH_BRACKETS = ['qty10', 'qty50', 'qty100'];
+const THICK_BRACKETS = ['qty1', 'qty10', 'qty50', 'qty100'];
 const THICKNESS_KEYS = ['0.5', '0.6', '0.7'];
 const SERIES = ['ml', 'ls'];
+
+function toQtyObj(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return {
+      qty1: value,
+      qty10: value,
+      qty50: value,
+      qty100: value,
+    };
+  }
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return {
+      qty1: value.qty1 ?? 0,
+      qty10: value.qty10 ?? 0,
+      qty50: value.qty50 ?? 0,
+      qty100: value.qty100 ?? 0,
+    };
+  }
+  return {
+    qty1: 0,
+    qty10: 0,
+    qty50: 0,
+    qty100: 0,
+  };
+}
+
+export function normalizeRules(priceRules) {
+  const result = structuredClone(priceRules);
+
+  if (result.thickness) {
+    result.thickness.minQty = 1;
+
+    // Migrate old flat structure (thickness.ml/ls) to new body/door structure
+    if (result.thickness.ml && !result.thickness.body) {
+      result.thickness.body = { ml: result.thickness.ml, ls: result.thickness.ls || {} };
+      result.thickness.door = { ml: {}, ls: {} };
+      delete result.thickness.ml;
+      delete result.thickness.ls;
+    }
+
+    // Normalize body and door to qty-tiered structure
+    for (const part of ['body', 'door']) {
+      if (result.thickness[part]) {
+        for (const series of ['ml', 'ls']) {
+          if (result.thickness[part][series]) {
+            const seriesData = result.thickness[part][series];
+            for (const key of Object.keys(seriesData)) {
+              seriesData[key] = toQtyObj(seriesData[key]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  if (result.depth) {
+    for (const series of ['ml', 'ls']) {
+      if (result.depth[series]) {
+        const seriesData = result.depth[series];
+        for (const key of Object.keys(seriesData)) {
+          seriesData[key] = toQtyObj(seriesData[key]);
+        }
+      }
+    }
+  }
+
+  if (result.height) {
+    for (const series of ['ml', 'ls']) {
+      if (result.height[series]) {
+        const seriesData = result.height[series];
+        for (const key of Object.keys(seriesData)) {
+          seriesData[key] = toQtyObj(seriesData[key]);
+        }
+      }
+    }
+  }
+
+  return result;
+}
 
 export default function PriceCoefficientsTab({ onNotify }) {
   const { priceRules, locks, isLoading, error, isSaving, loadPriceRules, savePriceRules } = usePriceRulesAdmin();
@@ -81,7 +160,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
 
   useEffect(() => {
     if (priceRules && locks && !hasInit) {
-      setLocal(structuredClone(priceRules));
+      setLocal(structuredClone(normalizeRules(priceRules)));
       setLocalLocks(structuredClone(locks));
       setHasInit(true);
     }
@@ -135,7 +214,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
   }
 
   const vent      = local.ventilation ?? { roof: {}, roofBottom: {} };
-  const thickness = local.thickness   ?? { minQty: 100, ml: {}, ls: {} };
+  const thickness = local.thickness   ?? { minQty: 1, body: { ml: {}, ls: {} }, door: { ml: {}, ls: {} } };
   const depth     = local.depth       ?? { ml: {}, ls: {} };
   const height    = local.height      ?? { ml: {}, ls: {} };
 
@@ -183,11 +262,11 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="thick-heading">
+      <section className={styles.section} aria-labelledby="thick-body-heading">
         <div className={styles.sectionHead}>
-          <h2 id="thick-heading" className={styles.sectionTitle}>Толщина металла</h2>
+          <h2 id="thick-body-heading" className={styles.sectionTitle}>Толщина металла корпуса</h2>
           <p className={styles.sectionDesc}>
-            Надбавка при выборе нестандартной толщины металла. Применяется только при заказе от указанного количества шт.
+            Коэффициенты надбавки за нестандартную толщину металла корпуса для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
           </p>
         </div>
         <div className={styles.minQtyRow}>
@@ -221,20 +300,64 @@ export default function PriceCoefficientsTab({ onNotify }) {
                   <thead>
                     <tr>
                       <th>Толщина</th>
-                      <th>Надбавка</th>
+                      {THICK_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
                     </tr>
                   </thead>
                   <tbody>
                     {THICKNESS_KEYS.map((k) => (
                       <tr key={k}>
                         <td className={styles.rowLabel}>{k} мм</td>
-                        <td>
-                          <PctInput
-                            value={thickness[s]?.[k] ?? ''}
-                            onChange={(v) => update(['thickness', s, k], v)}
-                            ariaLabel={`Толщина ${s.toUpperCase()} ${k}мм`}
-                          />
-                        </td>
+                        {THICK_BRACKETS.map((q) => (
+                          <td key={q}>
+                            <PctInput
+                              value={thickness.body?.[s]?.[k]?.[q] ?? 0}
+                              onChange={(v) => update(['thickness', 'body', s, k, q], v)}
+                              ariaLabel={`Толщина корпуса ${s.toUpperCase()} ${k}мм ${QTY_LABELS[q]}`}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="thick-door-heading">
+        <div className={styles.sectionHead}>
+          <h2 id="thick-door-heading" className={styles.sectionTitle}>Толщина металла двери</h2>
+          <p className={styles.sectionDesc}>
+            Коэффициенты надбавки за нестандартную толщину металла двери для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
+          </p>
+        </div>
+        <div className={styles.splitTables}>
+          {SERIES.map((s) => (
+            <div key={s} className={styles.splitBlock}>
+              <div className={styles.splitLabel}>{s.toUpperCase()}</div>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Толщина</th>
+                      {THICK_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {THICKNESS_KEYS.map((k) => (
+                      <tr key={k}>
+                        <td className={styles.rowLabel}>{k} мм</td>
+                        {THICK_BRACKETS.map((q) => (
+                          <td key={q}>
+                            <PctInput
+                              value={thickness.door?.[s]?.[k]?.[q] ?? 0}
+                              onChange={(v) => update(['thickness', 'door', s, k, q], v)}
+                              ariaLabel={`Толщина двери ${s.toUpperCase()} ${k}мм ${QTY_LABELS[q]}`}
+                            />
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
@@ -249,7 +372,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
         <div className={styles.sectionHead}>
           <h2 id="depth-heading" className={styles.sectionTitle}>Глубина</h2>
           <p className={styles.sectionDesc}>
-            Надбавка при нестандартной глубине шкафа. При заказе менее 10 шт — цена по запросу.
+            Коэффициенты надбавки за нестандартную глубину шкафа для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
           </p>
         </div>
         <div className={styles.splitTables}>
@@ -264,14 +387,14 @@ export default function PriceCoefficientsTab({ onNotify }) {
                     <thead>
                       <tr>
                         <th>Глубина, мм</th>
-                        {DEPTH_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
+                        {THICK_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {depthKeys.map((d) => (
                         <tr key={d}>
                           <td className={styles.rowLabel}>{d}</td>
-                          {DEPTH_BRACKETS.map((q) => (
+                          {THICK_BRACKETS.map((q) => (
                             <td key={q}>
                               <PctInput
                                 value={depth[s][d]?.[q] ?? ''}
@@ -295,7 +418,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
         <div className={styles.sectionHead}>
           <h2 id="height-heading" className={styles.sectionTitle}>Высота</h2>
           <p className={styles.sectionDesc}>
-            Надбавка при нестандартной высоте шкафа. Применяется только при заказе от 100 шт, иначе — цена по запросу.
+            Коэффициенты надбавки за нестандартную высоту шкафа для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
           </p>
         </div>
         <div className={styles.splitTables}>
@@ -310,20 +433,22 @@ export default function PriceCoefficientsTab({ onNotify }) {
                     <thead>
                       <tr>
                         <th>Высота, мм</th>
-                        <th>Надбавка</th>
+                        {THICK_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {heightKeys.map((h) => (
                         <tr key={h}>
                           <td className={styles.rowLabel}>{h}</td>
-                          <td>
-                            <PctInput
-                              value={height[s][h] ?? ''}
-                              onChange={(v) => update(['height', s, h], v)}
-                              ariaLabel={`Высота ${s.toUpperCase()} ${h}мм`}
-                            />
-                          </td>
+                          {THICK_BRACKETS.map((q) => (
+                            <td key={q}>
+                              <PctInput
+                                value={height[s][h]?.[q] ?? ''}
+                                onChange={(v) => update(['height', s, h, q], v)}
+                                ariaLabel={`Высота ${s.toUpperCase()} ${h}мм ${QTY_LABELS[q]}`}
+                              />
+                            </td>
+                          ))}
                         </tr>
                       ))}
                     </tbody>
