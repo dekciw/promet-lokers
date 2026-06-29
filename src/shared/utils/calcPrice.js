@@ -17,16 +17,20 @@ function getDepthRate(series, depth, qty, priceRules) {
   const table = series === 'ls' ? priceRules.depth?.ls : priceRules.depth?.ml;
   const rule = table?.[String(depth)];
   if (!rule) return null;
-  if (qty >= 100) return rule.qty100;
-  if (qty >= 50) return rule.qty50;
-  if (qty >= 10) return rule.qty10;
-  return null;
+  if (qty >= 100) return rule.qty100 ?? null;
+  if (qty >= 50) return rule.qty50 ?? null;
+  if (qty >= 10) return rule.qty10 ?? null;
+  return rule.qty1 ?? null;
 }
 
 function getHeightRate(series, height, qty, priceRules) {
-  if (qty < 100) return null;
   const table = series === 'ls' ? priceRules.height?.ls : priceRules.height?.ml;
-  return table?.[String(height)] ?? null;
+  const rule = table?.[String(height)];
+  if (!rule) return null;
+  if (qty >= 100) return rule.qty100 ?? null;
+  if (qty >= 50) return rule.qty50 ?? null;
+  if (qty >= 10) return rule.qty10 ?? null;
+  return rule.qty1 ?? null;
 }
 
 function getColorRate(colorCat, ruleKey, qty, priceRules) {
