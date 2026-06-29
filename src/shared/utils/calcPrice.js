@@ -46,10 +46,12 @@ function getThicknessRate(part, series, thicknessStr, qty, priceRules) {
 }
 
 function getColorRate(colorCat, ruleKey, qty, priceRules) {
-  const catRule = priceRules.color?.[ruleKey]?.[colorCat];
-  if (!catRule || qty < catRule.minQty) return null;
-  const tiers = [...catRule.tiers].sort((a, b) => b.minQty - a.minQty);
-  return tiers.find(t => qty >= t.minQty)?.rate ?? null;
+  const rule = priceRules.color?.[ruleKey]?.[colorCat];
+  if (!rule) return null;
+  if (qty >= 100) return rule.qty100 ?? null;
+  if (qty >= 50) return rule.qty50 ?? null;
+  if (qty >= 10) return rule.qty10 ?? null;
+  return rule.qty1 ?? null;
 }
 
 export function calcPrice(config, catalog) {
