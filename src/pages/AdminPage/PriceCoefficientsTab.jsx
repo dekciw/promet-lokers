@@ -74,8 +74,8 @@ const THICKNESS_KEYS = ['0.5', '0.6', '0.7'];
 const SERIES = ['ml', 'ls'];
 
 const COLOR_RULE_KEYS = [
-  ['door', 'Цвет двери'],
-  ['full', 'Цвет корпуса'],
+  ['door', 'Цвет Двери'],
+  ['full', 'Цвет Корпуса'],
 ];
 
 const COLOR_CATS = [
@@ -548,7 +548,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
                         {THICK_BRACKETS.map((q) => (
                           <td key={q}>
                             <PctInput
-                              value={color[ruleKey]?.[cat]?.[q] ?? ''}
+                              value={color[ruleKey]?.[cat]?.[q] ?? 0}
                               onChange={(v) => update(['color', ruleKey, cat, q], v)}
                               ariaLabel={`${ruleLabel} ${catLabel} ${QTY_LABELS[q]}`}
                             />
