@@ -566,6 +566,63 @@
   padding-bottom: 18px;
 }
 
+.priceBreakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding-bottom: 18px;
+}
+
+.priceBreakdownCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.priceBreakdownCol:last-child::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, rgba(168, 181, 209, 0.1) 0%, rgba(168, 181, 209, 0.25) 50%, rgba(168, 181, 209, 0.1) 100%);
+}
+
+.priceBreakdownColTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.32);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.priceBreakdownRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.priceBreakdownLabel {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #a8b5d1;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.priceBreakdownValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.3;
+  letter-spacing: -0.2px;
+}
+
 .priceBlockRow {
   display: flex;
   justify-content: space-between;
