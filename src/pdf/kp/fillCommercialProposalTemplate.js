@@ -453,8 +453,9 @@ export async function fillCommercialProposalTemplate({ config, catalog, price })
   const priceY = isMl3 ? Y_PRICE - 90 : isMl2 ? Y_PRICE - 62 : isMl1 ? Y_PRICE - 37 : Y_PRICE - (isLS && nonStandardCount === 0 ? 7 : 0);
   drawInterMixed('Итоговая цена за 1 шт. (включая НДС)', X_PRICE, priceY, 10, GRAY_PRICE);
   if (price) {
-    const priceStr = `${Number(price).toLocaleString('ru-RU')} ₽`;
-    drawInterMixed(priceStr, X_PRICE + 228 + (isLS && nonStandardCount >= 1 ? 2 : 0) + (!isNonStd && !isLS ? 1 : 0), priceY, 10, BLACK);
+    const priceWithVat = Number(price) * 1.22;
+    const priceStr = `${priceWithVat.toLocaleString('ru-RU')} ₽`;
+    drawInterMixed(priceStr, X_PRICE + 213 + (isLS && nonStandardCount >= 1 ? 2 : 0) + (!isNonStd && !isLS ? 1 : 0), priceY, 10, BLACK);
   }
 
   if (config.modelId) {

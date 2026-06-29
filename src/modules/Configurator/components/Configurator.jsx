@@ -481,6 +481,7 @@ export default function Configurator() {
 													: key;
 
 												const surcharge = price?.breakdown?.[breakdownKey]?.amount;
+												const rate = price?.breakdown?.[breakdownKey]?.rate;
 
 												return (
 													<motion.li
@@ -501,6 +502,11 @@ export default function Configurator() {
 																/>
 															)}
 															{value}
+														</span>
+														<span className={styles.diffRate}>
+															{rate !== undefined && rate !== null
+																? `${Math.round(rate * 100)}%`
+																: '—'}
 														</span>
 														<span className={styles.diffSurcharge}>
 															{surcharge !== undefined && surcharge !== null
@@ -552,6 +558,21 @@ export default function Configurator() {
 
 							<motion.div className={styles.priceBlockWrapper} variants={colVariants}>
 								<div className={styles.priceBlock}>
+									{(() => {
+										const basePrice = model?.basePrice;
+										const breakdown = price && !price.manual ? calcPriceBreakdown(price.clientPrice, qty) : null;
+										return (
+											<div className={styles.priceMain}>
+												<div className={styles.priceMainBlock}>
+													<div className={styles.priceMainLabel}>БАЗОВАЯ СТОИМОСТЬ</div>
+													<div className={styles.priceMainValue}>
+														{basePrice ? formatRub(basePrice) : 'По согласованию'}
+													</div>
+												</div>
+												<div className={styles.priceMainTitle}>ИТОГОВАЯ СТОИМОСТЬ</div>
+											</div>
+										);
+									})()}
 									<div className={styles.priceBreakdown}>
 										{(() => {
 											const breakdown = price && !price.manual ? calcPriceBreakdown(price.clientPrice, qty) : null;

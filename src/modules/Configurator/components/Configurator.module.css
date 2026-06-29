@@ -148,7 +148,7 @@
 
 .configGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.95fr) minmax(0, 1.1fr);
   gap: 20px;
 }
 
@@ -413,13 +413,21 @@
   flex: 1;
 }
 
-.specItem,
-.diffItem {
+.specItem {
   display: grid;
-  grid-template-columns: 1fr 1.5fr auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   padding: 9px 0;
   gap: 12px;
+  border-bottom: 1px solid var(--c-border-subtle);
+}
+
+.diffItem {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr 65px 100px;
+  align-items: center;
+  padding: 9px 0;
+  gap: 8px;
   border-bottom: 1px solid var(--c-border-subtle);
 }
 
@@ -466,6 +474,19 @@
 .diffValue {
   justify-content: flex-start;
   padding-left: 30px;
+  padding-right: 20px;
+}
+
+.diffRate {
+  font-size: 12px;
+  font-weight: 700;
+  color: #E69718;
+  line-height: 1.4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  padding-left: 57px;
 }
 
 .diffSurcharge {
@@ -475,6 +496,9 @@
   line-height: 1.4;
   text-align: right;
   white-space: nowrap;
+  justify-self: end;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .colorSwatch {
@@ -566,6 +590,67 @@
   padding-bottom: 18px;
 }
 
+.priceMain {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(168, 181, 209, 0.15);
+  margin-bottom: 20px;
+}
+
+.priceMainBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.priceMainDivider {
+  height: 1px;
+  background: rgba(168, 181, 209, 0.12);
+  margin: 8px 0;
+}
+
+.priceMainTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.priceMainLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.priceMainValue {
+  font-size: 48px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  margin: 4px 0;
+}
+
+.priceMainSummary {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(168, 181, 209, 0.7);
+  line-height: 1.4;
+}
+
+.priceMainQty {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(168, 181, 209, 0.85);
+  line-height: 1;
+}
+
 .priceBreakdown {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -621,6 +706,46 @@
   color: #fff;
   line-height: 1.3;
   letter-spacing: -0.2px;
+}
+
+.priceTotal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px 0 18px;
+  border-top: 1px solid rgba(168, 181, 209, 0.15);
+}
+
+.priceTotalTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.priceTotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.priceTotalLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #a8b5d1;
+  letter-spacing: 0.3px;
+  line-height: 1.3;
+}
+
+.priceTotalValue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.3px;
 }
 
 .priceBlockRow {
@@ -970,9 +1095,68 @@
   }
 }
 
-@media (min-width: 1440px) {
+/* Адаптив для ноутбуков (MacBook и др.) */
+@media (max-width: 1600px) {
   .configGrid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: minmax(0, 0.75fr) minmax(0, 0.75fr) minmax(0, 1.5fr);
+  }
+
+  .diffItem {
+    grid-template-columns: 0.55fr 0.8fr 64px 113px;
+  }
+
+  .diffValue {
+    padding-left: 45px;
+    padding-right: 0;
+  }
+
+  .diffRate {
+    padding-left: 15px;
+  }
+
+  /* Скрыть иконки и точки у ВСЕХ карточек на макбуке */
+  .configColDefault .colIcon,
+  .configColChanged .colIcon,
+  .configColFinal .colIcon {
+    display: none !important;
+  }
+
+  .configColDefault .colHeader::after,
+  .configColChanged .colHeader::after,
+  .configColFinal .colHeader::after {
+    display: none !important;
+  }
+
+  /* Центрировать заголовки только Стандартное + Итоговая */
+  .configColDefault .colHeader,
+  .configColFinal .colHeader {
+    justify-content: center !important;
+  }
+
+  .configColDefault .colHeaderContent {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  .configColDefault .colTitle {
+    text-align: center !important;
+    width: 100%;
+  }
+
+  .configColFinal .colTitle {
+    width: 100%;
+    text-align: center !important;
+  }
+
+  /* Выровнять высоту заголовков ТОЛЬКО для ноутбуков */
+  .colHeader {
+    min-height: 70px !important;
+    align-items: flex-start !important;
+  }
+
+  /* Опустить ТОЛЬКО "Итоговая конфигурация" */
+  .configColFinal .colHeader {
+    padding-top: 20px !important;
   }
 }
 

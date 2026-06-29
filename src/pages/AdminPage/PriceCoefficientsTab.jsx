@@ -18,13 +18,13 @@ function setByPath(obj, path, value) {
 
 function decimalToPct(v) {
   if (v === '' || v === null || v === undefined) return '';
-  const pct = Math.round(Number(v) * 10000) / 100;
+  const pct = Math.round(Number(v) * 100);
   return isNaN(pct) ? '' : String(pct);
 }
 function pctToDecimal(raw) {
   const s = String(raw).replace(',', '.');
   if (s === '') return '';
-  const n = parseFloat(s);
+  const n = Math.round(parseFloat(s));
   return isNaN(n) ? '' : n / 100;
 }
 
@@ -33,9 +33,9 @@ function PctInput({ value, onChange, ariaLabel, disabled = false }) {
     <div className={styles.pctWrap}>
       <input
         type="number"
-        step="0.1"
+        step="1"
         min="0"
-        inputMode="decimal"
+        inputMode="numeric"
         className={cx(styles.rateInput, disabled && styles.rateInputDisabled)}
         value={decimalToPct(value)}
         aria-label={ariaLabel}
@@ -386,8 +386,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
         <div className={styles.sectionHead}>
           <h2 id="thick-body-heading" className={styles.sectionTitle}>Толщина металла корпуса</h2>
           <p className={styles.sectionDesc}>
-            Коэффициенты надбавки за нестандартную толщину металла корпуса для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
-          </p>
+            Коэффициенты надбавки за нестандартную толщину металла корпуса для объёмов 1–9, 10–49, 50–99, от 100 шт.           </p>
         </div>
         <div className={styles.minQtyRow}>
           <label className={styles.minQtyLabel}>
@@ -454,8 +453,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
         <div className={styles.sectionHead}>
           <h2 id="thick-door-heading" className={styles.sectionTitle}>Толщина металла двери</h2>
           <p className={styles.sectionDesc}>
-            Коэффициенты надбавки за нестандартную толщину металла двери для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
-          </p>
+            Коэффициенты надбавки за нестандартную толщину металла двери для объёмов 1–9, 10–49, 50–99, от 100 шт.           </p>
         </div>
         <div className={styles.splitTables}>
           {SERIES.map((s) => (
@@ -500,8 +498,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
         <div className={styles.sectionHead}>
           <h2 id="depth-heading" className={styles.sectionTitle}>Глубина</h2>
           <p className={styles.sectionDesc}>
-            Коэффициенты надбавки за нестандартную глубину шкафа для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
-          </p>
+            Коэффициенты надбавки за нестандартную глубину шкафа для объёмов 1–9, 10–49, 50–99, от 100 шт.           </p>
         </div>
         <div className={styles.splitTables}>
           {SERIES.map((s) => {
@@ -546,8 +543,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
         <div className={styles.sectionHead}>
           <h2 id="height-heading" className={styles.sectionTitle}>Высота</h2>
           <p className={styles.sectionDesc}>
-            Коэффициенты надбавки за нестандартную высоту шкафа для объёмов 1–9, 10–49, 50–99, от 100 шт. Будут применяться в расчёте после настройки логики (Фаза 5).
-          </p>
+            Коэффициенты надбавки за нестандартную высоту шкафа для объёмов 1–9, 10–49, 50–99, от 100 шт.           </p>
         </div>
         <div className={styles.splitTables}>
           {SERIES.map((s) => {
