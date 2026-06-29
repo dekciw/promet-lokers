@@ -98,6 +98,45 @@ function toQtyObj(value) {
   };
 }
 
+function tiersToQtyObj(catRule) {
+  // Handle bare number - expand to all brackets
+  if (typeof catRule === 'number' && Number.isFinite(catRule)) {
+    return toQtyObj(catRule);
+  }
+
+  // Handle legacy {minQty, tiers: [{minQty, rate}]} structure
+  if (catRule && typeof catRule === 'object' && Array.isArray(catRule.tiers)) {
+    const tiers = catRule.tiers || [];
+    const brackets = [
+      { key: 'qty1', upper: 9 },
+      { key: 'qty10', upper: 49 },
+      { key: 'qty50', upper: 99 },
+      { key: 'qty100', upper: Infinity },
+    ];
+
+    const result = {};
+    for (const { key, upper } of brackets) {
+      // Find the largest tier.minQty that is <= upper bound of bracket
+      const validTiers = tiers.filter((t) => t.minQty <= upper);
+      if (validTiers.length > 0) {
+        // Sort descending by minQty and take first (largest)
+        const tier = validTiers.sort((a, b) => b.minQty - a.minQty)[0];
+        result[key] = tier.rate;
+      } else {
+        result[key] = '';
+      }
+    }
+    return result;
+  }
+
+  // Handle already qty-shaped or partial qty objects
+  if (catRule && typeof catRule === 'object' && !Array.isArray(catRule)) {
+    return toQtyObj(catRule);
+  }
+
+  return toQtyObj(null);
+}
+
 export function normalizeRules(priceRules) {
   const result = structuredClone(priceRules);
 
@@ -144,6 +183,17 @@ export function normalizeRules(priceRules) {
         const seriesData = result.height[series];
         for (const key of Object.keys(seriesData)) {
           seriesData[key] = toQtyObj(seriesData[key]);
+        }
+      }
+    }
+  }
+
+  if (result.color) {
+    for (const ruleKey of ['door', 'full']) {
+      if (result.color[ruleKey]) {
+        const ruleData = result.color[ruleKey];
+        for (const cat of Object.keys(ruleData)) {
+          ruleData[cat] = tiersToQtyObj(ruleData[cat]);
         }
       }
     }

@@ -78,7 +78,7 @@ describe('normalizeRules', () => {
     });
   });
 
-  it('should preserve ventilation and color objects unchanged', () => {
+  it('should preserve ventilation unchanged and migrate color', () => {
     const input = {
       ventilation: {
         roof: { qty1: 0.15, qty10: 0.1, qty50: 0.07, qty100: 0.05 },
@@ -92,7 +92,13 @@ describe('normalizeRules', () => {
     };
     const result = normalizeRules(input);
     expect(result.ventilation).toEqual(input.ventilation);
-    expect(result.color).toEqual(input.color);
+    // Color is migrated from legacy shape to qty-bracket shape
+    expect(result.color.door.cat1).toEqual({
+      qty1: '',
+      qty10: 0.05,
+      qty50: 0.05,
+      qty100: 0.05,
+    });
   });
 
   it('should handle empty object without throwing', () => {
