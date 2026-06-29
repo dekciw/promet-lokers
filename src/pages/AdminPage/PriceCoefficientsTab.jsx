@@ -73,6 +73,17 @@ const THICK_BRACKETS = ['qty1', 'qty10', 'qty50', 'qty100'];
 const THICKNESS_KEYS = ['0.5', '0.6', '0.7'];
 const SERIES = ['ml', 'ls'];
 
+const COLOR_RULE_KEYS = [
+  ['door', 'Цвет двери'],
+  ['full', 'Цвет корпуса'],
+];
+
+const COLOR_CATS = [
+  ['cat1', '1 категория'],
+  ['cat2', '2 категория'],
+  ['cat3', '3 категория'],
+];
+
 function toQtyObj(value) {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return {
@@ -267,6 +278,7 @@ export default function PriceCoefficientsTab({ onNotify }) {
   const thickness = local.thickness   ?? { minQty: 1, body: { ml: {}, ls: {} }, door: { ml: {}, ls: {} } };
   const depth     = local.depth       ?? { ml: {}, ls: {} };
   const height    = local.height      ?? { ml: {}, ls: {} };
+  const color     = local.color       ?? { door: {}, full: {} };
 
   const lockEntries = Object.entries(localLocks ?? {})
     .sort((a, b) => (a[1].perSection ?? 0) - (b[1].perSection ?? 0));
@@ -507,6 +519,48 @@ export default function PriceCoefficientsTab({ onNotify }) {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="color-heading">
+        <div className={styles.sectionHead}>
+          <h2 id="color-heading" className={styles.sectionTitle}>Цвет</h2>
+          <p className={styles.sectionDesc}>
+            Надбавка за нестандартный цвет (не RAL 7038) по категории и объёму заказа. Категория цвета задаётся в каталоге.
+          </p>
+        </div>
+        <div className={styles.splitTables}>
+          {COLOR_RULE_KEYS.map(([ruleKey, ruleLabel]) => (
+            <div key={ruleKey} className={styles.splitBlock}>
+              <div className={styles.splitLabel}>{ruleLabel}</div>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Категория</th>
+                      {THICK_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COLOR_CATS.map(([cat, catLabel]) => (
+                      <tr key={cat}>
+                        <td className={styles.rowLabel}>{catLabel}</td>
+                        {THICK_BRACKETS.map((q) => (
+                          <td key={q}>
+                            <PctInput
+                              value={color[ruleKey]?.[cat]?.[q] ?? ''}
+                              onChange={(v) => update(['color', ruleKey, cat, q], v)}
+                              ariaLabel={`${ruleLabel} ${catLabel} ${QTY_LABELS[q]}`}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
