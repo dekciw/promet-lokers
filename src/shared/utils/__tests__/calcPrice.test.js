@@ -80,11 +80,11 @@ const CATALOG_BASE = {
     },
     color: {
       door: {
-        cat1: { minQty: 30, tiers: [{ minQty: 30, rate: 0.05 }, { minQty: 50, rate: 0.03 }] },
-        cat2: { minQty: 50, tiers: [{ minQty: 50, rate: 0.07 }] },
+        cat1: { qty1: 0.04, qty10: 0.05, qty50: 0.03, qty100: 0.03 },
+        cat2: { qty1: 0, qty10: 0, qty50: 0.07, qty100: 0.07 },
       },
       full: {
-        cat1: { minQty: 50, tiers: [{ minQty: 50, rate: 0.12 }] },
+        cat1: { qty1: 0.06, qty10: 0.08, qty50: 0.12, qty100: 0.12 },
       },
     },
   },
@@ -387,5 +387,71 @@ describe('calcPrice', () => {
     expect(rML.clientPrice).toBe(10880);
     // LS: qty10=0.24 × (20/50) = 0.096 → 10000 × 1.096 = 10960
     expect(rLS.clientPrice).toBe(10960);
+  });
+
+  // Цвет двери (CALC-05) - qty-bracket tests
+  it('applies door color surcharge for qty 1-9 (qty1 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorColor: { name: 'RAL 9005', cat: 'cat1' }, quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorColor cat1: qty1=0.04
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.04));
+  });
+
+  it('applies door color surcharge for qty 10-49 (qty10 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorColor: { name: 'RAL 9005', cat: 'cat1' }, quantity: 25 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorColor cat1: qty10=0.05
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.05));
+  });
+
+  it('applies door color surcharge for qty 50-99 (qty50 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorColor: { name: 'RAL 9005', cat: 'cat1' }, quantity: 75 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorColor cat1: qty50=0.03
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.03));
+  });
+
+  it('applies door color surcharge for qty 100+ (qty100 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorColor: { name: 'RAL 9005', cat: 'cat1' }, quantity: 100 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorColor cat1: qty100=0.03
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.03));
+  });
+
+  // Цвет корпуса (CALC-06) - qty-bracket tests
+  it('applies body color surcharge for qty 10-49 (qty10 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, bodyColor: { name: 'RAL 9005', cat: 'cat1' }, quantity: 25 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // bodyColor (full) cat1: qty10=0.08
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.08));
+  });
+
+  it('applies body color surcharge for qty 1-9 (qty1 bracket)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, bodyColor: { name: 'RAL 9005', cat: 'cat1' }, quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // bodyColor (full) cat1: qty1=0.06
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.06));
+  });
+
+  // Цвет cat2 с 0% ставкой - валидная ставка, не manual
+  it('applies door color with 0% rate (valid rate, not manual)', () => {
+    const r = calcPrice({ ...BASE_CONFIG, doorColor: { name: 'RAL 9005', cat: 'cat2' }, quantity: 5 }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorColor cat2: qty1=0 (valid rate, not null)
+    expect(r.clientPrice).toBe(10000); // no surcharge
+  });
+
+  // Оба цвета одновременно
+  it('applies both door and body color surcharges simultaneously', () => {
+    const r = calcPrice({
+      ...BASE_CONFIG,
+      doorColor: { name: 'RAL 9005', cat: 'cat1' },
+      bodyColor: { name: 'RAL 9005', cat: 'cat1' },
+      quantity: 25,
+    }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    // doorColor cat1 qty10=0.05 + bodyColor cat1 qty10=0.08 = 0.13
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.13));
+    expect(r.changeCount).toBe(2);
   });
 });
