@@ -100,10 +100,6 @@ export function calcPrice(config, catalog) {
     return { manual: true, changeCount };
   }
 
-  if (changeCount > 2) {
-    return { manual: true, changeCount };
-  }
-
   let totalRate = 0;
   let anyManual = false;
   const breakdown = {};
