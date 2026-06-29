@@ -13,22 +13,22 @@ const X_NT_ART  = 92;
 const X_NT_NAME = 160;
 const X_NT_QTY   = 279;
 const X_NT_PRICE      = 313;
-const Y_NT_PRICE      = 422;
-const Y_NT_PRICE_RUB  = 412;
-const X_NT_PRICE_PPS  = 305;
-const Y_NT_PRICE_PPS  = 423;
-const Y_NT_PRICE_PPS2 = 413;
+const Y_NT_PRICE      = 397;
+const Y_NT_PRICE_RUB  = 390;
+const X_NT_PRICE_PPS  = 309;
+const Y_NT_PRICE_PPS  = 398;
+const Y_NT_PRICE_PPS2 = 388;
 
 const X_NZ_NUMBER   = 437;
-const Y_NZ_NUMBER   = 599.5;
+const Y_NZ_NUMBER   = 602;
 const X_CALC_NUMBER = 332;
-const Y_CALC_NUMBER = 587;
+const Y_CALC_NUMBER = 588.5;
 
-const Y_ROW1  = 543;
-const Y_ROW2  = 526;
-const Y_NT_ART  = 418;
-const Y_NT_NAME = 430;
-const Y_ROW6  = 220;
+const Y_ROW1  = 540;
+const Y_ROW2  = 504;
+const Y_NT_ART  = 396;
+const Y_NT_NAME = 406;
+const Y_ROW6  = 198;
 const Y_ROW6_STEP = 14;
 
 async function fetchFont(url) {
@@ -84,7 +84,7 @@ function drawMixed(page, text, x, y, size, cyrFont, latFont) {
   flush();
 }
 
-export async function fillNonStandardOrderTemplate({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
+export async function fillNonStandardOrderTemplate({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber }) {
 
   const templateBytes = await fetch('/templates/nz/nz-template.pdf').then(r => {
     if (!r.ok) throw new Error('Не удалось загрузить /templates/nz/nz-template.pdf');
@@ -129,6 +129,9 @@ export async function fillNonStandardOrderTemplate({ config, catalog, managerNam
   if (calcNumber) drawArial(calcNumber, X_CALC_NUMBER, Y_CALC_NUMBER, 10);
 
   draw(managerName, X_VALUE, Y_ROW1);
+  if (branch && phone) {
+    draw(`филиал ${branch}, ${phone}`, X_VALUE, Y_ROW1 - 12);
+  }
 
   draw(clientName, X_VALUE, Y_ROW2);
 
@@ -147,8 +150,7 @@ export async function fillNonStandardOrderTemplate({ config, catalog, managerNam
   }
   draw(qty, X_NT_QTY, Y_NT_ART, 8);
   if (price && !price.manual) {
-    draw(price.clientPrice.toLocaleString('ru-RU'), X_NT_PRICE, Y_NT_PRICE, 8);
-    draw('руб.', X_NT_PRICE, Y_NT_PRICE_RUB, 8);
+    draw(`${price.clientPrice.toLocaleString('ru-RU')} руб.`, X_NT_PRICE, Y_NT_PRICE, 8);
   } else {
     draw('ППС по', X_NT_PRICE_PPS, Y_NT_PRICE_PPS, 8);
     draw('согласованию', X_NT_PRICE_PPS, Y_NT_PRICE_PPS2, 8);

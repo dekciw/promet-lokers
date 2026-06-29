@@ -366,6 +366,44 @@ export default function Parameters() {
 								animate={step3Controls}
 							>
 								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Изменение цвета двери</span>
+									<ColorPicker
+										placeholder='Стандарт (без изменений)'
+										selected={doorColor}
+										onSelect={setDoorColor}
+										isOpen={openSelectId === 'doorColor'}
+										onOpenChange={handleDoorColorOpen}
+										modified={doorColorModified}
+									/>
+								</motion.div>
+
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
+									<ColorPicker
+										placeholder='Стандарт (без изменений)'
+										selected={bodyColor}
+										onSelect={setBodyColor}
+										isOpen={openSelectId === 'bodyColor'}
+										onOpenChange={handleBodyColorOpen}
+										modified={bodyColorModified}
+									/>
+								</motion.div>
+
+								<motion.div variants={resetItem} className={styles.paramGroup}>
+									<span className={styles.groupLabel}>Выбор замка</span>
+									<CustomSelect
+										id='lock'
+										value={lockId}
+										onChange={setLockId}
+										options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name.replace(/^Замок\s+/i, '') }))}
+										isOpen={openSelectId === 'lock'}
+										onOpenChange={handleLockOpen}
+										leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
+										modified={lockModified}
+									/>
+								</motion.div>
+
+								<motion.div variants={resetItem} className={styles.paramGroup}>
 									<span className={styles.groupLabel}>Изменение габаритов</span>
 									<div className={styles.dimFields}>
 										<div className={styles.dimField}>
@@ -452,20 +490,6 @@ export default function Parameters() {
 								</motion.div>
 
 								<motion.div variants={resetItem} className={styles.paramGroup}>
-									<span className={styles.groupLabel}>Выбор замка</span>
-									<CustomSelect
-										id='lock'
-										value={lockId}
-										onChange={setLockId}
-										options={lockEntries.map(([id, lock]) => ({ value: id, label: lock.name.replace(/^Замок\s+/i, '') }))}
-										isOpen={openSelectId === 'lock'}
-										onOpenChange={handleLockOpen}
-										leftIcon={<img src='/img/icons/icon-lock.svg' alt='' width='16' height='16' />}
-										modified={lockModified}
-									/>
-								</motion.div>
-
-								<motion.div variants={resetItem} className={styles.paramGroup}>
 									<span className={styles.groupLabel}>Вентиляция</span>
 									<CustomSelect
 										id='ventilation'
@@ -479,30 +503,6 @@ export default function Parameters() {
 										onOpenChange={handleVentilationOpen}
 										leftIcon={<img src='/img/icons/icon-ventilation.svg' alt='' width='16' height='16' />}
 										modified={ventilationModified}
-									/>
-								</motion.div>
-
-								<motion.div variants={resetItem} className={styles.paramGroup}>
-									<span className={styles.groupLabel}>Изменение цвета двери</span>
-									<ColorPicker
-										placeholder='Стандарт (без изменений)'
-										selected={doorColor}
-										onSelect={setDoorColor}
-										isOpen={openSelectId === 'doorColor'}
-										onOpenChange={handleDoorColorOpen}
-										modified={doorColorModified}
-									/>
-								</motion.div>
-
-								<motion.div variants={resetItem} className={styles.paramGroup}>
-									<span className={styles.groupLabel}>Изменение цвета корпуса полностью</span>
-									<ColorPicker
-										placeholder='Стандарт (без изменений)'
-										selected={bodyColor}
-										onSelect={setBodyColor}
-										isOpen={openSelectId === 'bodyColor'}
-										onOpenChange={handleBodyColorOpen}
-										modified={bodyColorModified}
 									/>
 								</motion.div>
 							</motion.div>

@@ -88,18 +88,33 @@ function buildDefaultSpecsList(defaults, catalog) {
 
 function buildFinalSpecsList(config, defaults, lock, ventilation) {
 	if (!defaults) return [];
+	const doorColor = config.doorColor?.name ?? defaults.doorColorName ?? DEFAULT_COLOR_NAME;
+	const bodyColor = config.bodyColor?.name ?? defaults.bodyColorName ?? DEFAULT_COLOR_NAME;
+	const ventValue = config.ventilationType
+		? (ventilation?.[config.ventilationType]?.name ?? config.ventilationType)
+		: 'Нет';
+
+	// Check if each parameter is changed from default
+	const doorColorChanged = config.doorColor?.name && config.doorColor.name !== (defaults.doorColorName ?? DEFAULT_COLOR_NAME);
+	const bodyColorChanged = config.bodyColor?.name && config.bodyColor.name !== (defaults.bodyColorName ?? DEFAULT_COLOR_NAME);
+	const lockChanged = config.lockId !== defaults.lockId;
+	const widthChanged = config.width !== '' && Number(config.width) !== Number(defaults.width);
+	const heightChanged = config.height !== '' && Number(config.height) !== Number(defaults.height);
+	const depthChanged = config.depth !== '' && Number(config.depth) !== Number(defaults.depth);
+	const bodyThickChanged = Number(config.bodyThickness) !== Number(defaults.bodyThickness || 0.5);
+	const doorThickChanged = Number(config.doorThickness) !== Number(defaults.doorThickness || 0.5);
+	const ventChanged = !!config.ventilationType;
+
 	return [
-		{ label: 'Замок', value: lock?.name ?? config.lockId },
-		{ label: 'Количество', value: `${config.quantity ?? 10} шт.` },
-		{
-			label: 'Габариты',
-			value: `${config.width || defaults.width} × ${config.height || defaults.height} × ${config.depth || defaults.depth} мм`,
-		},
-		{ label: 'Толщина корпуса', value: `${config.bodyThickness} мм` },
-		{ label: 'Толщина двери', value: `${config.doorThickness} мм` },
-		...(config.ventilationType ? [{ label: 'Вентиляция', value: ventilation?.[config.ventilationType]?.name ?? config.ventilationType }] : []),
-		...(config.bodyColor ? [{ label: 'Цвет корпуса', value: config.bodyColor.name, colorHex: config.bodyColor.color }] : []),
-		...(config.doorColor ? [{ label: 'Цвет двери', value: config.doorColor.name, colorHex: config.doorColor.color }] : []),
+		{ label: 'Цвет двери', value: doorColor, colorHex: getColorHex(doorColor), isChanged: doorColorChanged },
+		{ label: 'Цвет корпуса', value: bodyColor, colorHex: getColorHex(bodyColor), isChanged: bodyColorChanged },
+		{ label: 'Замок', value: lock?.name ?? config.lockId, isChanged: lockChanged },
+		{ label: 'Ширина', value: `${config.width || defaults.width} мм`, isChanged: widthChanged },
+		{ label: 'Высота', value: `${config.height || defaults.height} мм`, isChanged: heightChanged },
+		{ label: 'Глубина', value: `${config.depth || defaults.depth} мм`, isChanged: depthChanged },
+		{ label: 'Толщина корпуса', value: `${config.bodyThickness} мм`, isChanged: bodyThickChanged },
+		{ label: 'Толщина двери', value: `${config.doorThickness} мм`, isChanged: doorThickChanged },
+		{ label: 'Вентиляция', value: ventValue, isChanged: ventChanged },
 	];
 }
 
@@ -160,6 +175,12 @@ export default function Configurator() {
 		if (spec.label === 'Цвет двери:') return { ...spec, colorHex: config.doorColor?.color ?? getColorHex(spec.value) };
 		return spec;
 	});
+
+	// Debug: log price breakdown and changedSpecs
+	if (price?.breakdown) {
+		console.log('Price breakdown:', price.breakdown);
+		console.log('Changed specs:', changedSpecs);
+	}
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock, catalog.priceRules?.ventilation);
 
@@ -211,13 +232,13 @@ export default function Configurator() {
 		}
 	}
 
-	async function handleOrderSubmit({ managerName, clientName, nzNumber, calcNumber }) {
+	async function handleOrderSubmit({ managerName, branch, phone, clientName, nzNumber, calcNumber }) {
 		try {
 			const { generateNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
-			await generateNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+			await generateNonStandardOrder({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber });
 			saveToHistory(uid, config, modelName, article, price?.clientPrice ?? 0, {
 				type: 'nz',
-				nzFormData: { managerName, clientName, nzNumber, calcNumber },
+				nzFormData: { managerName, branch, phone, clientName, nzNumber, calcNumber },
 			}).catch((err) => { console.warn('[history] nz save failed:', err?.message ?? err); });
 			setIsOrderOpen(false);
 			setNotify({ visible: true, status: 'ok', title: 'Бланк скачан', message: 'Бланк нестандартного заказа успешно сохранён' });
@@ -227,10 +248,10 @@ export default function Configurator() {
 		}
 	}
 
-	async function handleOrderPrint({ managerName, clientName, nzNumber, calcNumber }) {
+	async function handleOrderPrint({ managerName, branch, phone, clientName, nzNumber, calcNumber }) {
 		try {
 			const { printNonStandardOrder } = await import('@/pdf/nz/generateNonStandardOrder.js');
-			await printNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+			await printNonStandardOrder({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber });
 		} catch (err) {
 			console.error('Ошибка печати НЗ:', err);
 			setNotify({ visible: true, status: 'error', title: 'Не удалось напечатать PDF', message: err?.message ?? String(err) });
@@ -373,11 +394,13 @@ export default function Configurator() {
 									<div className={styles.colHeader}>
 										<span className={styles.colIcon}><IconDefault /></span>
 										<div className={styles.colHeaderContent}>
-											<span className={styles.colTitle}>Стандартное исполнение</span>
+											<div className={styles.colTitleRow}>
+												<span className={styles.colTitle}>Стандартное исполнение</span>
+											</div>
 											{model?.basePrice && (
-												<span className={styles.colSubtitle}>
-													Базовая стоимость: {model.basePrice.toLocaleString('ru-RU')} ₽
-												</span>
+												<div className={styles.colSubtitle}>
+													Базовая стоимость: <span className={styles.colSubtitleValue}>{model.basePrice.toLocaleString('ru-RU')} ₽</span>
+												</div>
 											)}
 										</div>
 									</div>
@@ -407,12 +430,6 @@ export default function Configurator() {
 											</motion.li>
 										))}
 									</motion.ul>
-									<div className={styles.cardInfoBar}>
-										<div className={styles.cardInfoBarItem}>
-											<span className={styles.cardInfoBarLabel}>Базовая цена</span>
-											<span className={styles.cardInfoBarValue}>{model.basePrice?.toLocaleString('ru-RU')} ₽</span>
-										</div>
-									</div>
 								</div>
 							</motion.div>
 
@@ -437,11 +454,11 @@ export default function Configurator() {
 													)}
 												</AnimatePresence>
 											</div>
-											<span className={styles.colSubtitle}>
+											<div className={styles.colSubtitle}>
 												{changedSpecs.length === 0
 													? 'Все параметры стандартные'
 													: `Изменено ${changedSpecs.length} из 9 параметров`}
-											</span>
+											</div>
 										</div>
 									</div>
 									<motion.ul className={styles.diffList}>
@@ -459,40 +476,46 @@ export default function Configurator() {
 													Изменений нет — параметры стандартные
 												</motion.li>
 											)}
-											{changedSpecs.map(({ label, value, colorHex }) => (
-												<motion.li
-													key={label}
-													layout
-													className={styles.diffItem}
-													variants={diffItemVariants}
-													initial='hidden'
-													animate='visible'
-													exit='exit'
-												>
-													<span className={styles.diffLabel}>{label}</span>
-													<span className={styles.diffValue}>
-														{colorHex && (
-															<span
-																className={cx(styles.colorSwatch, colorHex === '#ffffff' && styles.colorSwatchLight)}
-																style={{ '--swatch-bg': colorHex }}
-															/>
-														)}
-														{value}
-													</span>
-													<span className={styles.diffSurcharge}>—</span>
-												</motion.li>
-											))}
+											{changedSpecs.map(({ label, value, colorHex, key }) => {
+												// Map calcDiff key to breakdown key
+												const breakdownKey = key === 'lockName' ? 'lock'
+													: key === 'bodyColorName' ? 'bodyColor'
+													: key === 'doorColorName' ? 'doorColor'
+													: key === 'ventilationType' ? 'ventilation'
+													: key;
+
+												const surcharge = price?.breakdown?.[breakdownKey]?.amount;
+
+												return (
+													<motion.li
+														key={label}
+														layout
+														className={styles.diffItem}
+														variants={diffItemVariants}
+														initial='hidden'
+														animate='visible'
+														exit='exit'
+													>
+														<span className={styles.diffLabel}>{label}</span>
+														<span className={styles.diffValue}>
+															{colorHex && (
+																<span
+																	className={cx(styles.colorSwatch, colorHex === '#ffffff' && styles.colorSwatchLight)}
+																	style={{ '--swatch-bg': colorHex }}
+																/>
+															)}
+															{value}
+														</span>
+														<span className={styles.diffSurcharge}>
+															{surcharge !== undefined && surcharge !== null
+																? `+${surcharge.toLocaleString('ru-RU')} ₽`
+																: '—'}
+														</span>
+													</motion.li>
+												);
+											})}
 										</AnimatePresence>
 									</motion.ul>
-									<div className={styles.cardInfoBar}>
-										<div className={styles.cardInfoBarItem}>
-											<span className={styles.cardInfoBarLabel}>
-												{changedSpecs.length === 0
-													? 'Все параметры стандартные'
-													: `Изменено ${changedSpecs.length} из 9 параметров`}
-											</span>
-										</div>
-									</div>
 								</div>
 							</motion.div>
 
@@ -508,7 +531,7 @@ export default function Configurator() {
 										initial='hidden'
 										animate='visible'
 									>
-										{finalSpecsList.map(({ label, value, colorHex }, i) => (
+										{finalSpecsList.map(({ label, value, colorHex, isChanged }, i) => (
 											<motion.li
 												key={label}
 												className={styles.finalItem}
@@ -516,7 +539,7 @@ export default function Configurator() {
 												variants={specItemVariants}
 											>
 												<span className={styles.finalLabel}>{label}</span>
-												<span className={styles.finalValue}>
+												<span className={cx(styles.finalValue, isChanged && styles.finalValueChanged)}>
 													{colorHex && (
 														<span
 															className={cx(styles.colorSwatch, colorHex === '#ffffff' ? styles.colorSwatchFinalLight : styles.colorSwatchFinal)}
@@ -533,41 +556,32 @@ export default function Configurator() {
 
 							<motion.div className={styles.priceBlockWrapper} variants={colVariants}>
 								<div className={styles.priceBlock}>
-									<div className={styles.priceBlockTop}>
-										<div className={styles.priceSummaryHeader}>
-											<span className={styles.priceSummaryTitle}>Промежуточный итог:</span>
-											<span className={styles.priceSummarySubtitle}>Общая стоимость + нестандартные заказы</span>
+									<div className={styles.priceBlockInfo}>
+										<div className={styles.priceBlockRow}>
+											<span className={styles.priceBlockLabel}>Промежуточный итог</span>
+											<span className={styles.priceBlockValue}>
+												{price && !price.manual && model?.basePrice ? (
+													<>
+														{model.basePrice.toLocaleString('ru-RU')}
+														{price.lockSurcharge > 0 && ` + ${price.lockSurcharge.toLocaleString('ru-RU')}`}
+														{(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)) > 0 &&
+															` + ${(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)).toLocaleString('ru-RU')}`
+														}
+													</>
+												) : 'По согласованию'}
+											</span>
 										</div>
-
-										{price && !price.manual && model?.basePrice && (
-											<div className={styles.priceFormulaWrapper}>
-												<span className={styles.priceFormulaLabel}>Итого =</span>
-												<span className={styles.priceFormula}>
-													{model.basePrice.toLocaleString('ru-RU')}
-													{price.lockSurcharge > 0 && ` + ${price.lockSurcharge.toLocaleString('ru-RU')}`}
-													{(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)) > 0 &&
-														` + ${(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)).toLocaleString('ru-RU')}`
-													}
-												</span>
-											</div>
-										)}
-
-										<div className={styles.priceTotalsWrapper}>
-											<span className={styles.priceTotalsLabel}>Итог:</span>
-											{price && !price.manual ? (
-												<>
-													<div className={styles.priceTotalRow}>
-														<span className={styles.priceTotalLabel}>Без НДС</span>
-														<span className={styles.priceTotalValue}>{price.clientPrice.toLocaleString('ru-RU')} ₽</span>
-													</div>
-													<div className={styles.priceTotalRow}>
-														<span className={styles.priceTotalLabel}>С НДС (22%)</span>
-														<span className={styles.priceTotalValue}>{Math.round(price.clientPrice * 1.22).toLocaleString('ru-RU')} ₽</span>
-													</div>
-												</>
-											) : (
-												<span className={styles.priceManual}>По согласованию</span>
-											)}
+										<div className={styles.priceBlockRow}>
+											<span className={styles.priceBlockLabel}>Без НДС</span>
+											<span className={styles.priceBlockValue}>
+												{price && !price.manual ? `${price.clientPrice.toLocaleString('ru-RU')} ₽` : '—'}
+											</span>
+										</div>
+										<div className={styles.priceBlockRow}>
+											<span className={styles.priceBlockLabel}>С НДС (22%)</span>
+											<span className={styles.priceBlockValue}>
+												{price && !price.manual ? `${Math.round(price.clientPrice * 1.22).toLocaleString('ru-RU')} ₽` : '—'}
+											</span>
 										</div>
 									</div>
 									<div className={styles.priceBlockActions}>

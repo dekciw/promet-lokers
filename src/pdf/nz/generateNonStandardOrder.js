@@ -9,17 +9,17 @@ export function getNonStandardOrderFilename(model, date = new Date()) {
   return `${article}_${yyyy}-${mm}-${dd}.pdf`;
 }
 
-async function buildBlob({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
-  const doc = await fillNonStandardOrderTemplate({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+async function buildBlob({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber }) {
+  const doc = await fillNonStandardOrderTemplate({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber });
   const bytes = await doc.save();
   return new Blob([bytes], { type: 'application/pdf' });
 }
 
-export async function generateNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
+export async function generateNonStandardOrder({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber }) {
   const model = config.modelId ? catalog.models?.[config.modelId] : null;
   const filename = getNonStandardOrderFilename(model, new Date());
 
-  const blob = await buildBlob({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+  const blob = await buildBlob({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -30,7 +30,7 @@ export async function generateNonStandardOrder({ config, catalog, managerName, c
   setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
-export async function printNonStandardOrder({ config, catalog, managerName, clientName, price, nzNumber, calcNumber }) {
-  const blob = await buildBlob({ config, catalog, managerName, clientName, price, nzNumber, calcNumber });
+export async function printNonStandardOrder({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber }) {
+  const blob = await buildBlob({ config, catalog, managerName, branch, phone, clientName, price, nzNumber, calcNumber });
   printPdfBlob(blob);
 }

@@ -30,8 +30,8 @@
 
 .colorPickerOpen .trigger {
 	border-color: var(--c-border);
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
 	box-shadow: none;
 }
 
@@ -84,15 +84,15 @@
 
 .dropdown {
 	position: absolute;
-	bottom: 100%;
-	top: auto;
+	top: 100%;
+	bottom: auto;
 	left: 0;
 	right: 0;
 	background: var(--c-white);
-	border: 1px solid var(--c-border);
-	border-bottom: none;
-	border-top-left-radius: var(--r-sm);
-	border-top-right-radius: var(--r-sm);
+	border: 1.5px solid var(--c-border);
+	border-top: none;
+	border-bottom-left-radius: var(--r-sm);
+	border-bottom-right-radius: var(--r-sm);
 	list-style: none;
 	max-height: 240px;
 	overflow-y: auto;

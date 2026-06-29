@@ -6,7 +6,7 @@ import { cx } from '../../../../shared/utils/cx';
 import styles from './ColorPicker.module.css';
 
 const dropdownVariants = {
-	hidden: { clipPath: 'inset(100% 0 0 0)', opacity: 0 },
+	hidden: { clipPath: 'inset(0 0 100% 0)', opacity: 0 },
 	visible: {
 		clipPath: 'inset(0% 0 0 0)',
 		opacity: 1,

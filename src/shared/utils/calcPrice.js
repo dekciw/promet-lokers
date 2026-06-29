@@ -88,10 +88,17 @@ export function calcPrice(config, catalog) {
 
   let totalRate = 0;
   let anyManual = false;
+  const breakdown = {};
 
-  function addRate(rate) {
-    if (rate === null || rate === undefined) anyManual = true;
-    else totalRate += rate;
+  function addRate(rate, paramKey = null) {
+    if (rate === null || rate === undefined) {
+      anyManual = true;
+    } else {
+      totalRate += rate;
+      if (paramKey && rate !== 0) {
+        breakdown[paramKey] = { rate, amount: 0 };
+      }
+    }
   }
 
   if (thicknessChanged) {
@@ -102,40 +109,45 @@ export function calcPrice(config, catalog) {
         ? priceRules.thickness?.ls ?? {}
         : priceRules.thickness?.ml ?? {};
       if (bodyThickChanged && doorThickChanged && config.bodyThickness === config.doorThickness) {
-
-        addRate(rates[config.bodyThickness] ?? null);
+        // Обе толщины одинаковы - распределяем наценку пропорционально весу
+        const rate = rates[config.bodyThickness] ?? null;
+        if (rate !== null && totalW > 0) {
+          addRate(rate * (doorW / totalW), 'doorThickness');
+          addRate(rate * (bodyW / totalW), 'bodyThickness');
+        } else {
+          anyManual = true;
+        }
       } else {
-
         if (doorThickChanged && totalW > 0) {
           const r = rates[config.doorThickness] ?? null;
-          addRate(r !== null ? r * (doorW / totalW) : null);
+          addRate(r !== null ? r * (doorW / totalW) : null, 'doorThickness');
         }
         if (bodyThickChanged && totalW > 0) {
           const r = rates[config.bodyThickness] ?? null;
-          addRate(r !== null ? r * (bodyW / totalW) : null);
+          addRate(r !== null ? r * (bodyW / totalW) : null, 'bodyThickness');
         }
       }
     }
   }
 
   if (depthChanged) {
-    addRate(getDepthRate(series, depthVal, qty, priceRules));
+    addRate(getDepthRate(series, depthVal, qty, priceRules), 'depth');
   }
 
   if (heightChanged) {
-    addRate(getHeightRate(series, heightVal, qty, priceRules));
+    addRate(getHeightRate(series, heightVal, qty, priceRules), 'height');
   }
 
   if (ventChanged) {
-    addRate(getVentRate(config.ventilationType, qty, priceRules));
+    addRate(getVentRate(config.ventilationType, qty, priceRules), 'ventilation');
   }
 
   if (doorColorChanged) {
-    addRate(getColorRate(config.doorColor.cat, 'door', qty, priceRules));
+    addRate(getColorRate(config.doorColor.cat, 'door', qty, priceRules), 'doorColor');
   }
 
   if (bodyColorChanged) {
-    addRate(getColorRate(config.bodyColor.cat, 'full', qty, priceRules));
+    addRate(getColorRate(config.bodyColor.cat, 'full', qty, priceRules), 'bodyColor');
   }
 
   if (anyManual) {
@@ -152,6 +164,16 @@ export function calcPrice(config, catalog) {
   }
 
   const priceMin = model.basePrice ?? 0;
+
+  // Calculate amounts for each parameter
+  Object.keys(breakdown).forEach(key => {
+    breakdown[key].amount = Math.round(priceMin * breakdown[key].rate);
+  });
+
+  // Add lock surcharge to breakdown
+  if (lockSurcharge > 0) {
+    breakdown.lock = { amount: lockSurcharge };
+  }
 
   const clientPrice = Math.round(priceMin * (1 + totalRate) + lockSurcharge);
 
@@ -176,5 +198,6 @@ export function calcPrice(config, catalog) {
     weight,
     leadTime,
     lockSurcharge,
+    breakdown,
   };
 }

@@ -82,7 +82,6 @@ export function useConfig(catalog) {
     setVentilationType(null);
     setBodyColor(null);
     setDoorColor(null);
-    setQuantity(10);
     setResetKey(k => k + 1);
   }
 

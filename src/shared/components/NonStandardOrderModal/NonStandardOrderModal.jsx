@@ -5,6 +5,15 @@ import { useForm } from 'react-hook-form';
 import { cx } from '../../utils/cx.js';
 import styles from './NonStandardOrderModal.module.css';
 
+const BRANCHES = [
+	'Архангельск', 'Белгород', 'Владивосток', 'Владимир', 'Волгоград', 'Воронеж',
+	'Донецк', 'Екатеринбург', 'Иркутск', 'Казань', 'Калининград', 'Калуга',
+	'Красноярск', 'Кубань', 'Кусбасс', 'Нижний-Новгород', 'Новосибирск', 'Омск',
+	'Оренбург', 'Пермь', 'Ростов', 'Самара', 'Санкт-Петербург', 'Саратов',
+	'Смоленск', 'Ставрополь', 'Сургут', 'Сыктывкар', 'Тула', 'Тюмень',
+	'Уфа', 'Хабаровск', 'Челябинск', 'Ярославль'
+];
+
 const overlayVariants = {
 	hidden: { opacity: 0 },
 	visible: { opacity: 1 },
@@ -69,11 +78,14 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 		reset,
 		trigger,
 		getValues,
+		watch,
 		formState: { errors, isSubmitting, isValid },
 	} = useForm({
 		mode: 'onChange',
-		defaultValues: { managerName: '', clientName: '', nzNumber: '', calcNumber: '' },
+		defaultValues: { managerName: '', branch: '', phone: '', clientName: '', nzNumber: '', calcNumber: '' },
 	});
+
+	const branchValue = watch('branch');
 
 	useEffect(() => {
 		if (!isOpen) {
@@ -83,6 +95,8 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 		} else if (initialValues) {
 			reset({
 				managerName: initialValues.managerName ?? '',
+				branch: initialValues.branch ?? '',
+				phone: initialValues.phone ?? '',
 				clientName: initialValues.clientName ?? '',
 				nzNumber: initialValues.nzNumber ?? '',
 				calcNumber: initialValues.calcNumber ?? '',
@@ -111,6 +125,8 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 	async function handleFormSubmit(data) {
 		await onSubmit({
 			managerName: data.managerName.trim(),
+			branch: data.branch.trim(),
+			phone: data.phone.trim(),
 			clientName: data.clientName.trim(),
 			nzNumber: data.nzNumber.trim(),
 			calcNumber: data.calcNumber.trim(),
@@ -125,6 +141,8 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 		try {
 			await onPrint?.({
 				managerName: data.managerName.trim(),
+				branch: data.branch.trim(),
+				phone: data.phone.trim(),
 				clientName: data.clientName.trim(),
 				nzNumber: data.nzNumber.trim(),
 				calcNumber: data.calcNumber.trim(),
@@ -249,6 +267,71 @@ export default function NonStandardOrderModal({ isOpen, onClose, onSubmit, onPri
 									})}
 								/>
 								<span id='nz-manager-err' className={styles.errorMsg}>{errors.managerName?.message ?? ''}</span>
+							</div>
+
+							<div className={styles.field}>
+								<label className={styles.fieldLabel} htmlFor='nz-branch'>
+									Филиал
+									<span className={styles.required} aria-hidden='true'> *</span>
+								</label>
+								<select
+									id='nz-branch'
+									disabled={busy}
+									className={cx(styles.input, styles.select, !branchValue && styles.selectPlaceholder, errors.branch && styles.inputError)}
+									aria-invalid={errors.branch ? 'true' : 'false'}
+									aria-describedby='nz-branch-err'
+									{...register('branch', {
+										required: 'Выберите филиал',
+									})}
+								>
+									<option value=''>Выберите филиал</option>
+									{BRANCHES.map(city => (
+										<option key={city} value={`ООО «НПО ПРОМЕТ» ${city}`}>
+											ООО «НПО ПРОМЕТ» {city}
+										</option>
+									))}
+								</select>
+								<span id='nz-branch-err' className={styles.errorMsg}>{errors.branch?.message ?? ''}</span>
+							</div>
+
+							<div className={styles.field}>
+								<label className={styles.fieldLabel} htmlFor='nz-phone'>
+									Телефон
+									<span className={styles.required} aria-hidden='true'> *</span>
+								</label>
+								<input
+									id='nz-phone'
+									type='tel'
+									placeholder='8-___-___-__-__'
+									autoComplete='tel'
+									disabled={busy}
+									className={cx(styles.input, errors.phone && styles.inputError)}
+									aria-invalid={errors.phone ? 'true' : 'false'}
+									aria-describedby='nz-phone-err'
+									maxLength={15}
+									{...register('phone', {
+										required: 'Введите номер телефона',
+										pattern: {
+											value: /^8-\d{3}-\d{3}-\d{2}-\d{2}$/,
+											message: 'Формат: 8-XXX-XXX-XX-XX'
+										},
+										onChange: (e) => {
+											let value = e.target.value.replace(/\D/g, '');
+											if (value.length > 0 && value[0] !== '8') value = '8' + value;
+											if (value.length > 11) value = value.slice(0, 11);
+
+											let formatted = '';
+											if (value.length > 0) formatted = value[0];
+											if (value.length > 1) formatted += '-' + value.slice(1, 4);
+											if (value.length > 4) formatted += '-' + value.slice(4, 7);
+											if (value.length > 7) formatted += '-' + value.slice(7, 9);
+											if (value.length > 9) formatted += '-' + value.slice(9, 11);
+
+											e.target.value = formatted;
+										}
+									})}
+								/>
+								<span id='nz-phone-err' className={styles.errorMsg}>{errors.phone?.message ?? ''}</span>
 							</div>
 
 							<div className={styles.field}>
