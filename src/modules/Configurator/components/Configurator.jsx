@@ -177,11 +177,6 @@ export default function Configurator() {
 		return spec;
 	});
 
-	// Debug: log price breakdown and changedSpecs
-	if (price?.breakdown) {
-		console.log('Price breakdown:', price.breakdown);
-		console.log('Changed specs:', changedSpecs);
-	}
 	const defaultSpecsList = buildDefaultSpecsList(defaults, catalog);
 	const finalSpecsList = buildFinalSpecsList(config, defaults, lock, catalog.priceRules?.ventilation);
 

@@ -53,6 +53,21 @@
   line-height: 1.5;
 }
 
+.subSection {
+  margin-bottom: 24px;
+}
+
+.subSection:last-child {
+  margin-bottom: 0;
+}
+
+.subSectionTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 12px 0;
+}
+
 .minQtyRow {
   margin-bottom: 16px;
 }
@@ -153,6 +168,13 @@
   outline: none;
   border-color: #0c53b3;
   box-shadow: 0 0 0 3px rgba(12, 83, 179, 0.15);
+}
+
+.rateInputDisabled {
+  background: #f7fafc !important;
+  color: #a0aec0 !important;
+  cursor: not-allowed !important;
+  border-color: #e2e8f0 !important;
 }
 
 .pctSign {

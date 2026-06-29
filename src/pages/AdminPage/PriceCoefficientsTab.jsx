@@ -6,7 +6,12 @@ import styles from './PriceCoefficientsTab.module.css';
 function setByPath(obj, path, value) {
   const next = structuredClone(obj);
   let cur = next;
-  for (let i = 0; i < path.length - 1; i++) cur = cur[path[i]];
+  for (let i = 0; i < path.length - 1; i++) {
+    if (cur[path[i]] === undefined || cur[path[i]] === null) {
+      cur[path[i]] = {};
+    }
+    cur = cur[path[i]];
+  }
   cur[path[path.length - 1]] = value;
   return next;
 }
@@ -23,7 +28,7 @@ function pctToDecimal(raw) {
   return isNaN(n) ? '' : n / 100;
 }
 
-function PctInput({ value, onChange, ariaLabel }) {
+function PctInput({ value, onChange, ariaLabel, disabled = false }) {
   return (
     <div className={styles.pctWrap}>
       <input
@@ -31,11 +36,13 @@ function PctInput({ value, onChange, ariaLabel }) {
         step="0.1"
         min="0"
         inputMode="decimal"
-        className={styles.rateInput}
+        className={cx(styles.rateInput, disabled && styles.rateInputDisabled)}
         value={decimalToPct(value)}
         aria-label={ariaLabel}
-        onChange={(e) => onChange(pctToDecimal(e.target.value))}
+        onChange={disabled ? undefined : (e) => onChange(pctToDecimal(e.target.value))}
         onWheel={(e) => e.currentTarget.blur()}
+        disabled={disabled}
+        readOnly={disabled}
       />
       <span className={styles.pctSign}>%</span>
     </div>
@@ -70,8 +77,26 @@ const QTY_LABELS = {
 
 const QTY_BRACKETS   = ['qty1', 'qty10', 'qty50', 'qty100'];
 const THICK_BRACKETS = ['qty1', 'qty10', 'qty50', 'qty100'];
-const THICKNESS_KEYS = ['0.5', '0.6', '0.7'];
+const THICKNESS_KEYS = ['0.45', '0.5', '0.6', '0.7'];
 const SERIES = ['ml', 'ls'];
+
+// Базовые (стандартные) толщины — всегда 0%, нельзя редактировать
+const BASE_THICKNESS = {
+  body: { ml: '0.45', ls: '0.5' },
+  door: { ml: '0.45', ls: '0.5' }  // LS дверь база = 0.5 (как корпус)
+};
+
+// Доступные толщины для каждой комбинации серия/часть
+const AVAILABLE_THICKNESS = {
+  body: {
+    ml: ['0.45', '0.5', '0.6', '0.7'],
+    ls: ['0.5', '0.6', '0.7']  // БЕЗ 0.45!
+  },
+  door: {
+    ml: ['0.45', '0.5', '0.6', '0.7'],  // 0.45 базовая
+    ls: ['0.5', '0.6', '0.7']           // 0.5 базовая, БЕЗ 0.45!
+  }
+};
 
 const COLOR_RULE_KEYS = [
   ['door', 'Цвет Двери'],
@@ -162,6 +187,14 @@ export function normalizeRules(priceRules) {
       delete result.thickness.ls;
     }
 
+    // Ensure body/door structure exists (for fresh/empty thickness object)
+    if (!result.thickness.body) {
+      result.thickness.body = { ml: {}, ls: {} };
+    }
+    if (!result.thickness.door) {
+      result.thickness.door = { ml: {}, ls: {} };
+    }
+
     // Normalize body and door to qty-tiered structure
     for (const part of ['body', 'door']) {
       if (result.thickness[part]) {
@@ -203,8 +236,33 @@ export function normalizeRules(priceRules) {
     for (const ruleKey of ['door', 'full']) {
       if (result.color[ruleKey]) {
         const ruleData = result.color[ruleKey];
-        for (const cat of Object.keys(ruleData)) {
-          ruleData[cat] = tiersToQtyObj(ruleData[cat]);
+
+        // Миграция: если есть старая структура (без series), скопировать в ml и ls
+        const hasOldStructure = Object.keys(ruleData).some(key =>
+          key.startsWith('cat') && typeof ruleData[key] === 'object'
+        );
+
+        if (hasOldStructure) {
+          // Старая структура: color[ruleKey][cat] → новая: color[ruleKey][series][cat]
+          const oldData = { ...ruleData };
+          result.color[ruleKey] = { ml: {}, ls: {} };
+
+          for (const cat of Object.keys(oldData)) {
+            if (cat.startsWith('cat')) {
+              // Копируем в обе серии
+              result.color[ruleKey].ml[cat] = tiersToQtyObj(oldData[cat]);
+              result.color[ruleKey].ls[cat] = tiersToQtyObj(oldData[cat]);
+            }
+          }
+        } else {
+          // Новая структура: color[ruleKey][series][cat] — просто нормализуем
+          for (const series of ['ml', 'ls']) {
+            if (ruleData[series]) {
+              for (const cat of Object.keys(ruleData[series])) {
+                ruleData[series][cat] = tiersToQtyObj(ruleData[series][cat]);
+              }
+            }
+          }
         }
       }
     }
@@ -366,20 +424,24 @@ export default function PriceCoefficientsTab({ onNotify }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {THICKNESS_KEYS.map((k) => (
-                      <tr key={k}>
-                        <td className={styles.rowLabel}>{k} мм</td>
-                        {THICK_BRACKETS.map((q) => (
-                          <td key={q}>
-                            <PctInput
-                              value={thickness.body?.[s]?.[k]?.[q] ?? 0}
-                              onChange={(v) => update(['thickness', 'body', s, k, q], v)}
-                              ariaLabel={`Толщина корпуса ${s.toUpperCase()} ${k}мм ${QTY_LABELS[q]}`}
-                            />
-                          </td>
-                        ))}
-                      </tr>
-                    ))}
+                    {AVAILABLE_THICKNESS.body[s].map((k) => {
+                      const isBase = BASE_THICKNESS.body[s] === k;
+                      return (
+                        <tr key={k}>
+                          <td className={styles.rowLabel}>{k} мм{isBase ? ' (базовая)' : ''}</td>
+                          {THICK_BRACKETS.map((q) => (
+                            <td key={q}>
+                              <PctInput
+                                value={isBase ? 0 : (thickness.body?.[s]?.[k]?.[q] ?? 0)}
+                                onChange={isBase ? undefined : (v) => update(['thickness', 'body', s, k, q], v)}
+                                ariaLabel={`Толщина корпуса ${s.toUpperCase()} ${k}мм ${QTY_LABELS[q]}`}
+                                disabled={isBase}
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -408,20 +470,24 @@ export default function PriceCoefficientsTab({ onNotify }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {THICKNESS_KEYS.map((k) => (
-                      <tr key={k}>
-                        <td className={styles.rowLabel}>{k} мм</td>
-                        {THICK_BRACKETS.map((q) => (
-                          <td key={q}>
-                            <PctInput
-                              value={thickness.door?.[s]?.[k]?.[q] ?? 0}
-                              onChange={(v) => update(['thickness', 'door', s, k, q], v)}
-                              ariaLabel={`Толщина двери ${s.toUpperCase()} ${k}мм ${QTY_LABELS[q]}`}
-                            />
+                    {AVAILABLE_THICKNESS.door[s].map((k) => {
+                      const isBase = BASE_THICKNESS.door[s] === k;
+                      return (
+                        <tr key={k}>
+                          <td className={styles.rowLabel}>{k} мм{isBase ? ' (базовая)' : ''}</td>
+                          {THICK_BRACKETS.map((q) => (
+                            <td key={q}>
+                              <PctInput
+                                value={isBase ? 0 : (thickness.door?.[s]?.[k]?.[q] ?? 0)}
+                                onChange={isBase ? undefined : (v) => update(['thickness', 'door', s, k, q], v)}
+                                ariaLabel={`Толщина двери ${s.toUpperCase()} ${k}мм ${QTY_LABELS[q]}`}
+                                disabled={isBase}
+                              />
                           </td>
                         ))}
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -522,35 +588,77 @@ export default function PriceCoefficientsTab({ onNotify }) {
         </div>
       </section>
 
-      <section className={styles.section} aria-labelledby="color-heading">
+      <section className={styles.section} aria-labelledby="color-door-heading">
         <div className={styles.sectionHead}>
-          <h2 id="color-heading" className={styles.sectionTitle}>Цвет</h2>
+          <h2 id="color-door-heading" className={styles.sectionTitle}>Цвет двери</h2>
           <p className={styles.sectionDesc}>
-            Надбавка за нестандартный цвет (не RAL 7038) по категории и объёму заказа. Категория цвета задаётся в каталоге.
+            Надбавка за нестандартный цвет двери (не RAL 7038) по категории и объёму заказа. Категория цвета задаётся в каталоге.
           </p>
         </div>
         <div className={styles.splitTables}>
-          {COLOR_RULE_KEYS.map(([ruleKey, ruleLabel]) => (
-            <div key={ruleKey} className={styles.splitBlock}>
-              <div className={styles.splitLabel}>{ruleLabel}</div>
+          {SERIES.map((s) => (
+            <div key={s} className={styles.splitBlock}>
+              <div className={styles.splitLabel}>{s.toUpperCase()}</div>
               <div className={styles.tableWrap}>
                 <table className={styles.table}>
                   <thead>
                     <tr>
                       <th>Категория</th>
-                      {THICK_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
+                      {QTY_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
                     </tr>
                   </thead>
                   <tbody>
                     {COLOR_CATS.map(([cat, catLabel]) => (
                       <tr key={cat}>
                         <td className={styles.rowLabel}>{catLabel}</td>
-                        {THICK_BRACKETS.map((q) => (
+                        {QTY_BRACKETS.map((q) => (
                           <td key={q}>
                             <PctInput
-                              value={color[ruleKey]?.[cat]?.[q] ?? 0}
-                              onChange={(v) => update(['color', ruleKey, cat, q], v)}
-                              ariaLabel={`${ruleLabel} ${catLabel} ${QTY_LABELS[q]}`}
+                              value={color.door?.[s]?.[cat]?.[q] ?? 0}
+                              onChange={(v) => update(['color', 'door', s, cat, q], v)}
+                              ariaLabel={`Цвет двери ${s.toUpperCase()} ${catLabel} ${QTY_LABELS[q]}`}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="color-body-heading">
+        <div className={styles.sectionHead}>
+          <h2 id="color-body-heading" className={styles.sectionTitle}>Цвет корпуса</h2>
+          <p className={styles.sectionDesc}>
+            Надбавка за нестандартный цвет корпуса (не RAL 7038) по категории и объёму заказа. Категория цвета задаётся в каталоге.
+          </p>
+        </div>
+        <div className={styles.splitTables}>
+          {SERIES.map((s) => (
+            <div key={s} className={styles.splitBlock}>
+              <div className={styles.splitLabel}>{s.toUpperCase()}</div>
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Категория</th>
+                      {QTY_BRACKETS.map((q) => <th key={q}>{QTY_LABELS[q]}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COLOR_CATS.map(([cat, catLabel]) => (
+                      <tr key={cat}>
+                        <td className={styles.rowLabel}>{catLabel}</td>
+                        {QTY_BRACKETS.map((q) => (
+                          <td key={q}>
+                            <PctInput
+                              value={color.full?.[s]?.[cat]?.[q] ?? 0}
+                              onChange={(v) => update(['color', 'full', s, cat, q], v)}
+                              ariaLabel={`Цвет корпуса ${s.toUpperCase()} ${catLabel} ${QTY_LABELS[q]}`}
                             />
                           </td>
                         ))}

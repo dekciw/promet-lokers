@@ -45,8 +45,8 @@ function getThicknessRate(part, series, thicknessStr, qty, priceRules) {
   return rule.qty1 ?? null;
 }
 
-function getColorRate(colorCat, ruleKey, qty, priceRules) {
-  const rule = priceRules.color?.[ruleKey]?.[colorCat];
+function getColorRate(colorCat, ruleKey, series, qty, priceRules) {
+  const rule = priceRules.color?.[ruleKey]?.[series]?.[colorCat];
   if (!rule) return null;
   if (qty >= 100) return rule.qty100 ?? null;
   if (qty >= 50) return rule.qty50 ?? null;
@@ -155,11 +155,11 @@ export function calcPrice(config, catalog) {
   }
 
   if (doorColorChanged) {
-    addRate(getColorRate(config.doorColor.cat, 'door', qty, priceRules), 'doorColor');
+    addRate(getColorRate(config.doorColor.cat, 'door', series, qty, priceRules), 'doorColor');
   }
 
   if (bodyColorChanged) {
-    addRate(getColorRate(config.bodyColor.cat, 'full', qty, priceRules), 'bodyColor');
+    addRate(getColorRate(config.bodyColor.cat, 'full', series, qty, priceRules), 'bodyColor');
   }
 
   if (anyManual) {

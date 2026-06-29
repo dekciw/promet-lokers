@@ -51,9 +51,16 @@ const resetItem = {
 	},
 };
 
-function buildThicknessOptions(baseVal) {
+function buildThicknessOptions(baseVal, series) {
 	const base = String(Number(baseVal) || 0.5);
-	return [base, ...THICKNESS_UPGRADES.filter(t => t !== base)];
+	let options = [base, ...THICKNESS_UPGRADES.filter(t => t !== base)];
+
+	// LS серия: убрать 0.45 мм (недоступна)
+	if (series === 'ls') {
+		options = options.filter(t => t !== '0.45');
+	}
+
+	return options;
 }
 
 export default function Parameters() {
@@ -176,8 +183,9 @@ export default function Parameters() {
 		: [];
 	const lockEntries = Object.entries(catalog.locks).sort((a, b) => (Number(a[1].perSection) ?? 0) - (Number(b[1].perSection) ?? 0));
 	const currentModel = modelId ? catalog.models[modelId] : null;
-	const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness);
-	const doorThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.doorThickness);
+	const seriesCode = currentModel?.seriesId?.substring(0, 2).toLowerCase(); // "ml" или "ls"
+	const bodyThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.bodyThickness, seriesCode);
+	const doorThicknessOptions = buildThicknessOptions(currentModel?.defaultSpecs?.doorThickness, seriesCode);
 
 	const defaultWidth = currentModel?.defaultSpecs?.width ?? null;
 	const minWidth = defaultWidth !== null ? defaultWidth - WIDTH_RANGE : undefined;
