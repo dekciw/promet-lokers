@@ -8,6 +8,7 @@ import { useAppContext } from '@/shared/context/AppContext';
 import { useHistory } from '@/shared/hooks/useHistory';
 import NonStandardOrderModal from '@/shared/components/NonStandardOrderModal/NonStandardOrderModal.jsx';
 import CommercialProposalModal from '@/shared/components/CommercialProposalModal/CommercialProposalModal.jsx';
+import { formatRub, calcPriceBreakdown } from '@/shared/utils/formatPrice.js';
 import styles from './Configurator.module.css';
 
 const specItemVariants = {
@@ -556,33 +557,44 @@ export default function Configurator() {
 
 							<motion.div className={styles.priceBlockWrapper} variants={colVariants}>
 								<div className={styles.priceBlock}>
-									<div className={styles.priceBlockInfo}>
-										<div className={styles.priceBlockRow}>
-											<span className={styles.priceBlockLabel}>Промежуточный итог</span>
-											<span className={styles.priceBlockValue}>
-												{price && !price.manual && model?.basePrice ? (
-													<>
-														{model.basePrice.toLocaleString('ru-RU')}
-														{price.lockSurcharge > 0 && ` + ${price.lockSurcharge.toLocaleString('ru-RU')}`}
-														{(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)) > 0 &&
-															` + ${(price.clientPrice - model.basePrice - (price.lockSurcharge || 0)).toLocaleString('ru-RU')}`
-														}
-													</>
-												) : 'По согласованию'}
-											</span>
-										</div>
-										<div className={styles.priceBlockRow}>
-											<span className={styles.priceBlockLabel}>Без НДС</span>
-											<span className={styles.priceBlockValue}>
-												{price && !price.manual ? `${price.clientPrice.toLocaleString('ru-RU')} ₽` : '—'}
-											</span>
-										</div>
-										<div className={styles.priceBlockRow}>
-											<span className={styles.priceBlockLabel}>С НДС (22%)</span>
-											<span className={styles.priceBlockValue}>
-												{price && !price.manual ? `${Math.round(price.clientPrice * 1.22).toLocaleString('ru-RU')} ₽` : '—'}
-											</span>
-										</div>
+									<div className={styles.priceBreakdown}>
+										{(() => {
+											const breakdown = price && !price.manual ? calcPriceBreakdown(price.clientPrice, qty) : null;
+											return (
+												<>
+													<div className={styles.priceBreakdownCol}>
+														<div className={styles.priceBreakdownColTitle}>За 1 шт</div>
+														<div className={styles.priceBreakdownRow}>
+															<span className={styles.priceBreakdownLabel}>Без НДС</span>
+															<span className={styles.priceBreakdownValue}>
+																{breakdown ? formatRub(breakdown.unitNoVat) : 'По согласованию'}
+															</span>
+														</div>
+														<div className={styles.priceBreakdownRow}>
+															<span className={styles.priceBreakdownLabel}>С НДС (22%)</span>
+															<span className={styles.priceBreakdownValue}>
+																{breakdown ? formatRub(breakdown.unitWithVat) : 'По согласованию'}
+															</span>
+														</div>
+													</div>
+													<div className={styles.priceBreakdownCol}>
+														<div className={styles.priceBreakdownColTitle}>За {qty} шт</div>
+														<div className={styles.priceBreakdownRow}>
+															<span className={styles.priceBreakdownLabel}>Без НДС</span>
+															<span className={styles.priceBreakdownValue}>
+																{breakdown ? formatRub(breakdown.totalNoVat) : 'По согласованию'}
+															</span>
+														</div>
+														<div className={styles.priceBreakdownRow}>
+															<span className={styles.priceBreakdownLabel}>С НДС (22%)</span>
+															<span className={styles.priceBreakdownValue}>
+																{breakdown ? formatRub(breakdown.totalWithVat) : 'По согласованию'}
+															</span>
+														</div>
+													</div>
+												</>
+											);
+										})()}
 									</div>
 									<div className={styles.priceBlockActions}>
 										<div data-tooltip={!config.seriesId ? 'Не выбрана серия шкафа' : !model ? 'Не выбрана модель шкафа' : !parametersUnlocked ? 'Перейдите к параметрам' : undefined}>
