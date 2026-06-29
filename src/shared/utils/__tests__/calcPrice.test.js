@@ -156,17 +156,6 @@ describe('calcPrice', () => {
     expect(r.manual).toBe(true);
   });
 
-  it('returns manual:true when changeCount > 2', () => {
-    const r = calcPrice({
-      ...BASE_CONFIG,
-      height:          '2000',
-      depth:           '450',
-      ventilationType: 'roof',
-    }, CATALOG_BASE);
-    expect(r.manual).toBe(true);
-    expect(r.changeCount).toBe(3);
-  });
-
   it('applies height surcharge at 100+ qty', () => {
     const r = calcPrice({ ...BASE_CONFIG, height: '2000' }, CATALOG_BASE);
     expect(r.manual).toBe(false);
@@ -453,5 +442,58 @@ describe('calcPrice', () => {
     // doorColor cat1 qty10=0.05 + bodyColor cat1 qty10=0.08 = 0.13
     expect(r.clientPrice).toBe(Math.round(10000 * 1.13));
     expect(r.changeCount).toBe(2);
+  });
+
+  // Снятие ограничения changeCount > 2 (CALC-07)
+  it('calculates automatically with 3 changes (no width)', () => {
+    const r = calcPrice({
+      ...BASE_CONFIG,
+      height: '2000',
+      depth: '450',
+      doorColor: { name: 'RAL 9005', cat: 'cat1' },
+      quantity: 10,
+    }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.changeCount).toBe(3);
+    // height qty10=0.07 + depth qty10=0.05 + doorColor qty10=0.05 = 0.17
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.17));
+  });
+
+  it('calculates automatically with 4 changes (no width)', () => {
+    const r = calcPrice({
+      ...BASE_CONFIG,
+      height: '2000',
+      depth: '450',
+      doorColor: { name: 'RAL 9005', cat: 'cat1' },
+      bodyColor: { name: 'RAL 9005', cat: 'cat1' },
+      quantity: 10,
+    }, CATALOG_BASE);
+    expect(r.manual).toBe(false);
+    expect(r.changeCount).toBe(4);
+    // height 0.07 + depth 0.05 + doorColor 0.05 + bodyColor 0.08 = 0.25
+    expect(r.clientPrice).toBe(Math.round(10000 * 1.25));
+  });
+
+  it('returns manual:true when width is changed (regardless of other params)', () => {
+    const r = calcPrice({
+      ...BASE_CONFIG,
+      width: '700',
+      height: '2000',
+      depth: '450',
+    }, CATALOG_BASE);
+    expect(r.manual).toBe(true);
+    expect(r.changeCount).toBe(3);
+  });
+
+  it('returns manual:true when width changed with 3 other params', () => {
+    const r = calcPrice({
+      ...BASE_CONFIG,
+      width: '700',
+      height: '2000',
+      depth: '450',
+      doorColor: { name: 'RAL 9005', cat: 'cat1' },
+    }, CATALOG_BASE);
+    expect(r.manual).toBe(true);
+    expect(r.changeCount).toBe(4);
   });
 });
