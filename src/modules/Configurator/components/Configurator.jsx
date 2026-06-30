@@ -395,7 +395,7 @@ export default function Configurator() {
 											</div>
 											{model?.basePrice && (
 												<div className={styles.colSubtitle}>
-													Базовая стоимость: <span className={styles.colSubtitleValue}>{model.basePrice.toLocaleString('ru-RU')} ₽</span>
+													Базовая стоимость: <span className={styles.colSubtitleValue}>{model.basePrice.toLocaleString('ru-RU')} ₽</span> <span className={styles.colSubtitleNote}>без НДС</span>
 												</div>
 											)}
 										</div>
@@ -525,7 +525,17 @@ export default function Configurator() {
 								<div className={`${styles.configCol} ${styles.configColFinal}`}>
 									<div className={styles.colHeader}>
 										<span className={styles.colIcon}><IconFinal /></span>
-										<span className={styles.colTitle}>Итоговая конфигурация</span>
+										<div className={styles.colHeaderContent}>
+											<span className={styles.colTitle}>Итоговая конфигурация</span>
+											{(() => {
+												const breakdown = price && !price.manual ? calcPriceBreakdown(price.clientPrice, qty) : null;
+												return breakdown && (
+													<div className={styles.colSubtitle}>
+														Цена с НДС за 1 шт: <span className={styles.colSubtitleValue}>{formatRub(breakdown.unitWithVat)}</span>
+													</div>
+												);
+											})()}
+										</div>
 									</div>
 									<motion.ul
 										className={styles.finalSpec}
