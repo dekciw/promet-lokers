@@ -215,6 +215,10 @@
   padding: 17px 20px;
 }
 
+.configColFinal .colSubtitle {
+  text-align: center;
+}
+
 .cardInfoBar {
   display: flex;
   align-items: center;
