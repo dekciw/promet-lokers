@@ -22,7 +22,6 @@ import { cx } from '../../shared/utils/cx.js';
 import styles from './AdminPage.module.css';
 
 const SERIES_TABS = [
-  { key: 'all', label: 'Все' },
   { key: 'ML',  label: 'ML' },
   { key: 'LS',  label: 'LS' },
 ];
@@ -117,7 +116,7 @@ export default function AdminPage({ onLogout, username = '' }) {
   const { models, isLoading, error, loadModels, saveModel, addModel, deleteModel, reorderModels } = useCatalogAdmin();
 
   const [activeTab, setActiveTab] = useState('catalog');
-  const [activeSeries, setActiveSeries] = useState('all');
+  const [activeSeries, setActiveSeries] = useState('ML');
   const [searchQuery, setSearchQuery] = useState('');
 
   const [addOpen, setAddOpen] = useState(false);
@@ -130,7 +129,7 @@ export default function AdminPage({ onLogout, username = '' }) {
   function showError(title) { setNotif({ visible: true, status: 'error', title }); }
 
   const visibleModels = useMemo(() => models
-    .filter((m) => activeSeries === 'all' || m.series === activeSeries)
+    .filter((m) => m.series === activeSeries)
     .filter((m) => !searchQuery || (m.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()))
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)),
@@ -147,7 +146,7 @@ export default function AdminPage({ onLogout, username = '' }) {
     return await uploadToCloudinary(blob);
   }
 
-  const isDragDisabled = activeSeries === 'all' || searchQuery.trim() !== '';
+  const isDragDisabled = searchQuery.trim() !== '';
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

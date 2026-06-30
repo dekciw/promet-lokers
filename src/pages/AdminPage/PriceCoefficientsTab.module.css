@@ -37,6 +37,7 @@
 
 .sectionHead {
   margin-bottom: 20px;
+  overflow: visible;
 }
 
 .sectionTitle {

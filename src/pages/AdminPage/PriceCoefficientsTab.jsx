@@ -388,28 +388,6 @@ export default function PriceCoefficientsTab({ onNotify }) {
           <p className={styles.sectionDesc}>
             Коэффициенты надбавки за нестандартную толщину металла корпуса для объёмов 1–9, 10–49, 50–99, от 100 шт.           </p>
         </div>
-        <div className={styles.minQtyRow}>
-          <label className={styles.minQtyLabel}>
-            Минимальный заказ для надбавки:
-            <div className={styles.minQtyInputWrap}>
-              <input
-                type="number"
-                min="1"
-                step="1"
-                inputMode="numeric"
-                className={styles.minQtyInput}
-                value={thickness.minQty ?? ''}
-                aria-label="Минимальное количество для толщины"
-                onChange={(e) => {
-                  const v = e.target.value;
-                  update(['thickness', 'minQty'], v === '' ? '' : Number(v));
-                }}
-                onWheel={(e) => e.currentTarget.blur()}
-              />
-              <span className={styles.pctSign}>шт</span>
-            </div>
-          </label>
-        </div>
         <div className={styles.splitTables}>
           {SERIES.map((s) => (
             <div key={s} className={styles.splitBlock}>

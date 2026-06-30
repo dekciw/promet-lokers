@@ -64,7 +64,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 			setSummaryOpen(true);
 			setIsPrinting(false);
 		} else {
-			reset({ price: initialPrice != null ? String(initialPrice) : '' });
+			reset({ price: '' });
 		}
 	}, [isOpen, reset, initialPrice]);
 
@@ -215,7 +215,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 											id='proposal-price'
 											type='text'
 											inputMode='numeric'
-											placeholder='Цена от экономиста'
+											placeholder='Укажите цену за 1 шт'
 											disabled={busy}
 											value={field.value ? parseInt(field.value.replace(/\D/g, '') || '0', 10).toLocaleString('ru-RU') : ''}
 											onChange={e => {
