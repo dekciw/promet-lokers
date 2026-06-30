@@ -395,7 +395,7 @@ export default function Configurator() {
 											</div>
 											{model?.basePrice && (
 												<div className={styles.colSubtitle}>
-													Базовая стоимость: <span className={styles.colSubtitleValue}>{model.basePrice.toLocaleString('ru-RU')} ₽</span> <span className={styles.colSubtitleNote}>без НДС</span>
+													Базовая стоимость: <span className={styles.colSubtitleValue}>{model.basePrice.toLocaleString('ru-RU')} ₽</span> <span className={styles.colSubtitleNote}>БЕЗ НДС</span>
 												</div>
 											)}
 										</div>
