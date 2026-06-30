@@ -1143,13 +1143,20 @@
   }
 
   .configColDefault .colHeaderContent {
-    align-items: flex-start !important;
-    text-align: left !important;
+    align-items: center !important;
   }
 
   .configColDefault .colTitle {
     text-align: center !important;
     width: 100%;
+  }
+
+  .configColDefault .colSubtitle {
+    text-align: center;
+  }
+
+  .configColFinal .colHeaderContent {
+    align-items: center !important;
   }
 
   .configColFinal .colTitle {
