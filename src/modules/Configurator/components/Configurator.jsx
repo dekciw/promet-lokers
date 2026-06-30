@@ -526,7 +526,9 @@ export default function Configurator() {
 									<div className={styles.colHeader}>
 										<span className={styles.colIcon}><IconFinal /></span>
 										<div className={styles.colHeaderContent}>
-											<span className={styles.colTitle}>Итоговая конфигурация</span>
+											<div className={styles.colTitleRow}>
+												<span className={styles.colTitle}>Итоговая конфигурация</span>
+											</div>
 											{(() => {
 												const breakdown = price && !price.manual ? calcPriceBreakdown(price.clientPrice, qty) : null;
 												return breakdown && (
