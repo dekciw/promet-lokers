@@ -1156,6 +1156,10 @@
     text-align: center !important;
   }
 
+  .configColFinal .colSubtitle {
+    text-align: center;
+  }
+
   /* Выровнять высоту заголовков ТОЛЬКО для ноутбуков */
   .colHeader {
     min-height: 70px !important;
