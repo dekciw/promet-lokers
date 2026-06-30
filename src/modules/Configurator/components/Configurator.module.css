@@ -212,7 +212,8 @@
 }
 
 .configColFinal .colHeader {
-  padding: 7px 20px 17px;
+  padding: 17px 20px;
+  padding-top: 27px;
 }
 
 .cardInfoBar {
