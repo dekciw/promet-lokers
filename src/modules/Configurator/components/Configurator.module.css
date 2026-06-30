@@ -309,7 +309,8 @@
 }
 
 .configColDefault .colHeaderContent,
-.configColChanged .colHeaderContent {
+.configColChanged .colHeaderContent,
+.configColFinal .colHeaderContent {
   align-self: flex-start;
 }
 
