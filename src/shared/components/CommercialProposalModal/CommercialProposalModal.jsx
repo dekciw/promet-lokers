@@ -200,7 +200,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 						<form id='proposal-form' className={styles.form} onSubmit={handleSubmit(handleFormSubmit)} noValidate>
 							<div className={styles.field}>
 								<label className={styles.fieldLabel} htmlFor='proposal-price'>
-									Цена за 1 шт.
+									Цена за 1 шт. (включая НДС)
 									<span className={styles.required} aria-hidden='true'> *</span>
 								</label>
 								<Controller
@@ -215,7 +215,7 @@ export default function CommercialProposalModal({ isOpen, onClose, onSubmit, onP
 											id='proposal-price'
 											type='text'
 											inputMode='numeric'
-											placeholder='Укажите цену за 1 шт'
+											placeholder='Укажите цену за 1 шт (включая НДС)'
 											disabled={busy}
 											value={field.value ? parseInt(field.value.replace(/\D/g, '') || '0', 10).toLocaleString('ru-RU') : ''}
 											onChange={e => {
